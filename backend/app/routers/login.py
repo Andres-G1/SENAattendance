@@ -1,84 +1,99 @@
-from fastapi import APIRouter, HTTPException, status, Depends
-from sqlmodel import select, Session
-from pydantic import BaseModel
-
-from security import verificar_contraseña, crear_token
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlmodel import Session, select
 from database import get_session
 from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
-
-login = APIRouter()
-
+from pydantic import BaseModel
+from security import create_access_token
+from security import check_password_hash
 
 class LoginRequest(BaseModel):
-    tipo_identificacion: TipoIdentificacion
-    num_identificacion: int
-    contraseña: str
-
-
-class LoginResponse(BaseModel):
+    typeid: TipoIdentificacion
     id: int
-    nombre: str
-    apellido: str
-    rol: str
-    token: str
+    password: str
+ 
+class LoginResponse(BaseModel):
+    access_token: str
     token_type: str = "bearer"
+    role: str
+    user_id: int
+    redirect: str
+    
+login = APIRouter(prefix="/users", tags=["Inicio sesion"])
 
-
-@login.post("/inicio_sesion", response_model=LoginResponse)
-async def iniciar_sesion(datos: LoginRequest, session: Session = Depends(get_session)):
-
+@login.post("/login", response_model=LoginResponse)
+async def login(data: LoginRequest, session: Session = Depends(get_session)):
+        
     aprendiz = session.exec(
         select(Aprendiz).where(
-            Aprendiz.Tip_ide_Apr == datos.tipo_identificacion,
-            Aprendiz.Num_ide_Apr == datos.num_identificacion,
+            Aprendiz.Tip_ide_Apr == data.typeid,
+            Aprendiz.Num_ide_Apr == data.id,
         )
     ).first()
-    if aprendiz and verificar_contraseña(datos.contraseña, aprendiz.Con_Apr):
-        if not aprendiz.Es_Apr:
-            raise HTTPException(status_code=401, detail="Cuenta inactiva")
-        token = crear_token({"sub": str(aprendiz.Id_Apr), "rol": "aprendiz"})
-        return LoginResponse(
-            id=aprendiz.Id_Apr,
-            nombre=aprendiz.Nom_Apr,
-            apellido=aprendiz.Ape_Apr,
-            rol="aprendiz",
-            token=token,
-        )
-
+    
+    if aprendiz and check_password_hash(aprendiz.Con_Apr, data.password):
+        
+        if aprendiz.Es_Apr == True:
+            token = create_access_token({"sub": str(aprendiz.Id_Apr), "role": "Aprendiz"})
+            return LoginResponse(
+                access_token=token,
+                role="Aprendiz",
+                user_id=aprendiz.Id_Apr,
+                redirect="/aprendiz",
+            )
+            
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Cuenta inactiva",
+        )   
+    
     instructor = session.exec(
         select(Instructor).where(
-            Instructor.Tip_ide_Ins == datos.tipo_identificacion,
-            Instructor.Num_ide_Ins == datos.num_identificacion,
+            Instructor.Tip_ide_Ins == data.typeid,
+            Instructor.Num_ide_Ins == data.id,
         )
     ).first()
-    if instructor and verificar_contraseña(datos.contraseña, instructor.Con_Ins):
-        if not instructor.Es_Ins:
-            raise HTTPException(status_code=401, detail="Cuenta inactiva")
-        token = crear_token({"sub": str(instructor.Id_Ins), "rol": "instructor"})
-        return LoginResponse(
-            id=instructor.Id_Ins,
-            nombre=instructor.Nom_Ins,
-            apellido=instructor.Ape_Ins,
-            rol="instructor",
-            token=token,
-        )
+    
+    if aprendiz and check_password_hash(instructor.Con_Ins, data.password):
 
+        if instructor.Es_Ins == True:
+            token = create_access_token({"sub": str(instructor.Id_Ins), "role": "Instructor"})
+            return LoginResponse(
+                access_token=token,
+                role="Instructor",
+                user_id=instructor.Id_Ins,
+                redirect="/instructor",
+            )
+            
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Cuenta inactiva",
+        )   
+    
     administrador = session.exec(
         select(Administrador).where(
-            Administrador.Tip_ide_Adm == datos.tipo_identificacion,
-            Administrador.Num_ide_Adm == datos.num_identificacion,
+            Administrador.Tip_ide_Adm == data.typeid,
+            Administrador.Num_ide_Adm == data.id,
         )
     ).first()
-    if administrador and verificar_contraseña(datos.contraseña, administrador.Con_Adm):
-        if not administrador.Es_Adm:
-            raise HTTPException(status_code=401, detail="Cuenta inactiva")
-        token = crear_token({"sub": str(administrador.Id_Adm), "rol": "administrador"})
-        return LoginResponse(
-            id=administrador.Id_Adm,
-            nombre=administrador.Nom_Adm,
-            apellido=administrador.Ape_Adm,
-            rol="administrador",
-            token=token,
-        )
-
-    raise HTTPException(status_code=401, detail="Credenciales incorrectas")
+    
+    if aprendiz and check_password_hash(administrador.Con_Adm, data.password):
+        
+        if administrador.Es_Adm == True:
+            token = create_access_token({"sub": str(administrador.Id_Adm), "role": "Coordinador"})
+            return LoginResponse(
+                access_token=token,
+                role="Coordinador",
+                user_id=administrador.Id_Adm,
+                redirect="/administrador",
+            )
+            
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Cuenta inactiva",
+        )   
+        
+    raise HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Credenciales inválidas",
+    )   
+    
