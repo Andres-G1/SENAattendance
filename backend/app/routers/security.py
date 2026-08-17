@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+import os
+from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 import jwt
 
@@ -13,15 +14,16 @@ def verificar_contraseña(contraseña_plana: str, contraseña_hash: str) -> bool
     return pwd_context.verify(contraseña_plana, contraseña_hash)
 
 
-# --- Tokens (reemplazan las sesiones de Flask) ---
-SECRET_KEY = "cambia-esto-por-una-clave-larga-y-secreta"  # ideal: cargarla desde variable de entorno
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("Falta la variable SECRET_KEY en el archivo .env")
 ALGORITHM = "HS256"
-EXPIRACION_MINUTOS = 60 * 8  # 8 horas
+EXPIRACION_MINUTOS = 60 * 8
 
 
 def crear_token(datos: dict) -> str:
     datos_copia = datos.copy()
-    expiracion = datetime.utcnow() + timedelta(minutes=EXPIRACION_MINUTOS)
+    expiracion = datetime.now(timezone.utc) + timedelta(minutes=EXPIRACION_MINUTOS)
     datos_copia.update({"exp": expiracion})
     return jwt.encode(datos_copia, SECRET_KEY, algorithm=ALGORITHM)
 
