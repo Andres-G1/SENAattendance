@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from sqlmodel import select, Session
+from database import select, Session
 from pydantic import BaseModel
 
 from security import verificar_contraseña, crear_token
