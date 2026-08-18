@@ -5,7 +5,7 @@ load_dotenv()
 from sqlmodel import Session
 from database import engine, crear_tablas
 from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
-from backend.app.security import hash_contraseña
+from security import hash_contraseña
 
 
 def seed():
