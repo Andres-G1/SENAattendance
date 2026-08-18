@@ -5,7 +5,7 @@ load_dotenv()
 from sqlmodel import Session
 from database import engine, crear_tablas
 from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
-from routers.security import hash_contraseña
+from backend.app.security import hash_contraseña
 
 
 def seed():
@@ -40,7 +40,7 @@ def seed():
             Num_ide_Adm=3001,
             Cor_Adm="admin.prueba@sena.edu.co",
             Con_Adm=hash_contraseña("admin123"),
-            Es_Adm=True,
+            Es_Adm=False,
         )
 
         session.add(aprendiz)
@@ -53,3 +53,7 @@ def seed():
 
 if __name__ == "__main__":
     seed()
+    
+'''
+uv run python app/seed.py
+'''
