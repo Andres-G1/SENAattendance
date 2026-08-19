@@ -17,9 +17,9 @@ class TipoIdentificacion(str, Enum):
 
 
 class Jornada(str, Enum):
-    manana = "Mañana"
-    tarde = "Tarde"
-    noche = "Noche"
+    Mañana = "Mañana"
+    Tarde = "Tarde"
+    Noche = "Noche"
 
 
 class EstadoAsistencia(str, Enum):
