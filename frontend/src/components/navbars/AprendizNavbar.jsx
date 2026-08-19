@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import '../../styles/navbar.css'
 
 /**
  * Navbar del rol Aprendiz.
@@ -10,7 +11,7 @@ export default function AprendizNavbar({ user }) {
       <div className="container-fluid">
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/aprendiz">
           <img
-            src="/Senalogo.png"
+            src="/Logoblanco.png"
             width="50"
             height="50"
             alt="SENA"

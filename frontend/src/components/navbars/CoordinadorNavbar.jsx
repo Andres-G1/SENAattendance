@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-
+import '../../styles/navbar.css'
 /**
  * Navbar del rol Coordinador.
  * @param {{ user: { Nom_Adm: string } }} props
@@ -10,7 +10,7 @@ export default function CoordinadorNavbar({ user }) {
       <div className="container-fluid">
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/coordinador">
           <img
-            src="/Senalogo.png"
+            src="/Logoblanco.png"
             width="50"
             height="50"
             alt="SENA"
