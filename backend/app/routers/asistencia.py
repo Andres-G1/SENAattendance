@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from database import get_session
-from models.model import Asistencia, FichaInstructor, Aprendiz
+from app.database import get_session
+from app.models.model import Asistencia, FichaInstructor, Aprendiz
 
 Router_asistencia = APIRouter(prefix="/users", tags=["Asistencia"])
 
