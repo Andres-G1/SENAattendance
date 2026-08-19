@@ -1,0 +1,10 @@
+.navbar-sena { background-color: #00851d; }
+.navbar-sena .nav-link { color: rgba(255,255,255,0.85) !important; font-size: 0.9rem; }
+.navbar-sena .nav-link:hover,
+.navbar-sena .nav-link.active { color: #fff !important; background: rgba(255,255,255,0.15); border-radius: 6px; }
+.navbar-sena .navbar-brand { color: white !important; font-weight: 700; font-size: 0.95rem; }
+.navbar-sena .navbar-toggler { border-color: rgba(255,255,255,0.4); }
+.navbar-sena .navbar-toggler-icon { filter: invert(1); }
+.user-pill { display: flex; align-items: center; gap: 8px; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: white; border: 1.5px solid rgba(255,255,255,0.5); }
+.badge-aprendiz { background: #e8f5e9; color: #2e7d32; font-size: 0.72rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; }

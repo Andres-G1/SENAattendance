@@ -24,9 +24,10 @@ export default function Login({ onLoginSuccess }) {
     try {
       const data = await login(typeid, Number(id), password);
 
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("firstName", data.firstName);
 
       if (onLoginSuccess) onLoginSuccess(data);
 
@@ -51,8 +52,8 @@ export default function Login({ onLoginSuccess }) {
           <img
             src="/Senalogo.png"
             alt="Logo SENA"
-            width="40"
-            height="40"
+            width="50"
+            height="50"
           />
         </div>
       </nav>

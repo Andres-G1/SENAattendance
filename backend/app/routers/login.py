@@ -18,6 +18,7 @@ class LoginResponse(BaseModel):
     role: str
     user_id: int
     redirect: str
+    firstName: str
 
 
 Router_login = APIRouter(prefix="/users", tags=["Inicio sesion"])
@@ -37,6 +38,7 @@ async def login(data: LoginRequest, session: Session = Depends(get_session)):
         if aprendiz.Es_Apr:
             token = crear_token({"sub": str(aprendiz.Id_Apr), "role": "Aprendiz"})
             return LoginResponse(
+                firstName = aprendiz.Nom_Apr,
                 access_token=token,
                 role="Aprendiz",
                 user_id=aprendiz.Id_Apr,
@@ -58,6 +60,7 @@ async def login(data: LoginRequest, session: Session = Depends(get_session)):
         if instructor.Es_Ins:
             token = crear_token({"sub": str(instructor.Id_Ins), "role": "Instructor"})
             return LoginResponse(
+                firstName = instructor.Nom_Ins,
                 access_token=token,
                 role="Instructor",
                 user_id=instructor.Id_Ins,
@@ -79,6 +82,7 @@ async def login(data: LoginRequest, session: Session = Depends(get_session)):
         if administrador.Es_Adm:
             token = crear_token({"sub": str(administrador.Id_Adm), "role": "Coordinador"})
             return LoginResponse(
+                firstName = administrador.Nom_Adm,
                 access_token=token,
                 role="Coordinador",
                 user_id=administrador.Id_Adm,

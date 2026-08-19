@@ -1,0 +1,14 @@
+.page-card { max-width: 900px; margin: auto; border: none; border-radius: 18px; overflow: hidden; }
+.page-card .card-header { border-radius: 0; }
+.form-label { font-weight: 600; }
+.form-control, .form-select { border-radius: 10px; }
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.btn { min-width: 130px; }
+.btn-secondary { background-color: #6c757d; border-color: #6c757d; }
+.btn-secondary:hover { background-color: #5a6268; }
+.card-body p.lead { font-size: 1rem; line-height: 1.6; }
+.text-muted { color: #6c757d !important; }
+@media (max-width: 575px) {
+  .form-actions { flex-direction: column; align-items: stretch; }
+  .btn { width: 100%; }
+}

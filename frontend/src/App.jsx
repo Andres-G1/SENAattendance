@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
-import AprendizMenu from "./pages/AprendizMenu";
-import InstructorMenu from "./pages/InstructorMenu";
-import AdministradorMenu from "./pages/AdministradorMenu";
 import RutaProtegida from "./components/RutaProtegida";
+import "./hooks/useCurrentDate"
+import AprendizDashboard from "./pages/AprendizDashboard";
+import InstructorDashboard from "./pages/InstructorDashboard";
+import AdministradorDashboard from "./pages/AdministradorDashboard";
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
           path="/aprendiz"
           element={
             <RutaProtegida rolPermitido="Aprendiz">
-              <AprendizMenu />
+              <AprendizDashboard />
             </RutaProtegida>
           }
         />
@@ -24,7 +25,7 @@ function App() {
           path="/instructor"
           element={
             <RutaProtegida rolPermitido="Instructor">
-              <InstructorMenu />
+              <InstructorDashboard />
             </RutaProtegida>
           }
         />
@@ -33,7 +34,7 @@ function App() {
           path="/administrador"
           element={
             <RutaProtegida rolPermitido="Coordinador">
-              <AdministradorMenu />
+              <AdministradorDashboard />
             </RutaProtegida>
           }
         />

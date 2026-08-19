@@ -1,0 +1,15 @@
+/* Efecto de elevación suave moderno */
+.card-hover-premium {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent !important;
+}
+.card-hover-premium:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(57, 169, 0, 0.2) !important; /* Destello verde SENA sutil */
+}
+
+/* Corrección del fondo para que cubra bien */
+.bg-light {
+  background-color: #f8f9fa !important;
+}
