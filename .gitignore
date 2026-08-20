@@ -16,4 +16,5 @@ frontend/.env.local
 Thumbs.db
 
 *.log
-npm-debug.log*
+npm-debug.log***/__pycache__/
+*.pyc
