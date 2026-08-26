@@ -53,7 +53,7 @@ export default function Login() {
           <Link to="/" style={{ color: "rgb(0, 201, 90)" }}>
             Inicio
           </Link>
-          <Link to="/users/password">Recuperar contraseña</Link>
+          <Link to="/config/contrasena">Recuperar contraseña</Link>
         </div>
         <div className="titulo">
           <img

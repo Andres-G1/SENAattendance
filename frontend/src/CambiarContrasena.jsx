@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-export default function PasswordChange() {
+export default function CambiarContrasena() {
   const storedRole = (localStorage.getItem("role") || "").toLowerCase();
   const storedUserId = localStorage.getItem("user_id") || "";
 
