@@ -1,9 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from database import get_session
-from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
 from pydantic import BaseModel
-from security import crear_token, verificar_contraseña
+
+try:
+    from app.database import get_session
+    from app.models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
+    from app.security import crear_token, verificar_contraseña
+except ImportError:
+    from database import get_session
+    from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
+    from security import crear_token, verificar_contraseña
 
 
 class LoginRequest(BaseModel):

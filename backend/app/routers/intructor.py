@@ -1,5 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from database import get_session
+
+try:
+    from app.database import get_session
+except ImportError:
+    from database import get_session
 
 Router_instructor = APIRouter(prefix="/users", tags=["Inicio sesion"])

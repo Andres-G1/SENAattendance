@@ -28,12 +28,16 @@ export default function Login() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.detail || "Credenciales inválidas");
+        const detail = Array.isArray(data.detail)
+          ? "Error de validación en datos"
+          : data.detail;
+        throw new Error(detail || "Credenciales inválidas");
       }
 
       const data = await res.json();
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("role", data.role);
+      localStorage.setItem("user_id", String(data.user_id));
       navigate(data.redirect);
     } catch (err) {
       setError(err.message);
