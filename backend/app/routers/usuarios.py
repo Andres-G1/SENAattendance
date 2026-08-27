@@ -3,17 +3,17 @@ from typing import Optional, Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlmodel import Session, select
-from app.database import get_session
 
 from app.database import get_session
 from app.models.model import (
     Aprendiz,
     Instructor,
     Administrador,
+    Fichas,
+    Carrera,
     TipoIdentificacion
 )
 from app.security import hash_contraseña
-from app.dependencias import verificar_administrador
 
 
 Router_usuarios = APIRouter(
@@ -60,9 +60,10 @@ class UsuarioActualizar(BaseModel):
 @Router_usuarios.post("/crear")
 def crear_usuario(
     datos: UsuarioCrear,
-    administrador=Depends(verificar_administrador),
     session: Session = Depends(get_session)
 ):
+
+
 
     # -----------------------------------------------------
     # APRENDIZ
@@ -169,6 +170,134 @@ def crear_usuario(
         else usuario.Id_Adm
     }
 
+# =========================================================
+# LISTAR APRENDICES
+# =========================================================
+
+@Router_usuarios.get("/aprendices")
+def listar_aprendices(
+    session: Session = Depends(get_session)
+):
+    aprendices = session.exec(
+        select(Aprendiz)
+    ).all()
+
+    resultado = []
+
+    for aprendiz in aprendices:
+        resultado.append({
+            "Id_Apr": aprendiz.Id_Apr,
+            "Nom_Apr": aprendiz.Nom_Apr,
+            "Ape_Apr": aprendiz.Ape_Apr,
+            "Tip_ide_Apr": aprendiz.Tip_ide_Apr,
+            "Num_ide_Apr": aprendiz.Num_ide_Apr,
+            "Cor_Apr": aprendiz.Cor_Apr,
+            "Es_Apr": aprendiz.Es_Apr,
+            "Id_Fic": aprendiz.Id_Fic,
+            "Num_Fic": (
+                aprendiz.ficha.Num_Fic
+                if aprendiz.ficha
+                else None
+            ),
+            "Nom_Car": (
+                aprendiz.ficha.carrera.Nom_Car
+                if aprendiz.ficha and aprendiz.ficha.carrera
+                else None
+            )
+        })
+
+    return resultado
+
+# =========================================================
+# OBTENER APRENDIZ
+# =========================================================
+
+@Router_usuarios.get("/aprendiz/{id_aprendiz}")
+def obtener_aprendiz(
+    id_aprendiz: int,
+    session: Session = Depends(get_session)
+):
+    aprendiz = session.get(Aprendiz, id_aprendiz)
+
+    if not aprendiz:
+        raise HTTPException(
+            status_code=404,
+            detail="Aprendiz no encontrado"
+        )
+
+    return {
+        "Id_Apr": aprendiz.Id_Apr,
+        "Nom_Apr": aprendiz.Nom_Apr,
+        "Ape_Apr": aprendiz.Ape_Apr,
+        "Tip_ide_Apr": aprendiz.Tip_ide_Apr,
+        "Num_ide_Apr": aprendiz.Num_ide_Apr,
+        "Cor_Apr": aprendiz.Cor_Apr,
+        "Es_Apr": aprendiz.Es_Apr,
+        "Id_Fic": aprendiz.Id_Fic,
+        "Num_Fic": (
+            aprendiz.ficha.Num_Fic
+            if aprendiz.ficha
+            else None
+        ),
+        "Nom_Car": (
+            aprendiz.ficha.carrera.Nom_Car
+            if aprendiz.ficha and aprendiz.ficha.carrera
+            else None
+        )
+    }
+
+# =========================================================
+# LISTAR CARRERAS
+# =========================================================
+
+@Router_usuarios.get("/carreras")
+def listar_carreras(
+    session: Session = Depends(get_session)
+):
+    carreras = session.exec(
+        select(Carrera).order_by(Carrera.Nom_Car)
+    ).all()
+
+    return [
+        {
+            "Id_Car": carrera.Id_Car,
+            "Nom_Car": carrera.Nom_Car,
+            "Des_Car": carrera.Des_Car
+        }
+        for carrera in carreras
+    ]
+
+# =========================================================
+# LISTAR FICHAS
+# =========================================================
+
+@Router_usuarios.get("/fichas")
+def listar_fichas(
+    Id_Car: Optional[int] = None,
+    session: Session = Depends(get_session)
+):
+    consulta = select(Fichas)
+
+    if Id_Car is not None:
+        consulta = consulta.where(
+            Fichas.Id_Car == Id_Car
+        )
+
+    fichas = session.exec(
+        consulta.order_by(Fichas.Num_Fic)
+    ).all()
+
+    return [
+        {
+            "Id_Fic": ficha.Id_Fic,
+            "Id_Car": ficha.Id_Car,
+            "Num_Fic": ficha.Num_Fic,
+            "Jor_Fic": ficha.Jor_Fic,
+            "Fec_inicio_Fic": ficha.Fec_inicio_Fic,
+            "Fec_Fin_Fic": ficha.Fec_Fin_Fic
+        }
+        for ficha in fichas
+    ]
 
 # =========================================================
 # ACTUALIZAR APRENDIZ
@@ -178,7 +307,6 @@ def crear_usuario(
 def actualizar_aprendiz(
     id_aprendiz: int,
     datos: UsuarioActualizar,
-    administrador=Depends(verificar_administrador),
     session: Session = Depends(get_session)
 ):
 
@@ -226,7 +354,6 @@ def actualizar_aprendiz(
 @Router_usuarios.patch("/aprendiz/{id_aprendiz}/desactivar")
 def desactivar_aprendiz(
     id_aprendiz: int,
-    administrador=Depends(verificar_administrador),
     session: Session = Depends(get_session)
 ):
 
@@ -255,7 +382,6 @@ def desactivar_aprendiz(
 @Router_usuarios.patch("/aprendiz/{id_aprendiz}/activar")
 def activar_aprendiz(
     id_aprendiz: int,
-    administrador=Depends(verificar_administrador),
     session: Session = Depends(get_session)
 ):
 
@@ -275,3 +401,4 @@ def activar_aprendiz(
     return {
         "mensaje": "Aprendiz activado correctamente"
     }
+
