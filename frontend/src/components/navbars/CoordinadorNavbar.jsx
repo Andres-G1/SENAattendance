@@ -4,11 +4,16 @@ import '../../styles/navbar.css'
  * Navbar del rol Coordinador.
  * @param {{ user: { Nom_Adm: string } }} props
  */
+  const cerrarSesion = (e) => {
+    e.preventDefault(); // Evita que el enlace recargue la página de forma nativa
+    localStorage.clear(); // Elimina el token, rol, nombre, etc.
+    navigate("/", { replace: true }); // Envía al login y destruye la ruta previa del historial
+  };
 export default function CoordinadorNavbar({ user }) {
   return (
     <nav className="navbar navbar-expand-lg navbar-sena px-3 navbar-dark">
       <div className="container-fluid">
-        <Link className="navbar-brand d-flex align-items-center gap-2" to="/coordinador">
+        <Link className="navbar-brand d-flex align-items-center gap-2" to="/administrador">
           <img
             src="/Logoblanco.png"
             width="50"
@@ -30,7 +35,7 @@ export default function CoordinadorNavbar({ user }) {
         <div className="collapse navbar-collapse" id="navCoordinador">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
             <li className="nav-item">
-              <Link className="nav-link active px-3 py-2" to="/coordinador">
+              <Link className="nav-link active px-3 py-2" to="/administrador">
                 Inicio
               </Link>
             </li>
@@ -127,7 +132,7 @@ export default function CoordinadorNavbar({ user }) {
                 <hr className="dropdown-divider" />
               </li>
               <li>
-                <a className="dropdown-item text-danger fw-bold" href="/">
+                <a className="dropdown-item text-danger fw-bold" href="/" onClick={cerrarSesion}>
                   Cerrar sesión
                 </a>
               </li>

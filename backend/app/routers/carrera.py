@@ -5,7 +5,6 @@ from typing import List
 from models.model import Carrera
 from pydantic import BaseModel
 
-
 Router_carrera = APIRouter(
     prefix="/carreras",
     tags=["Carreras SENAattendance"]
@@ -20,7 +19,6 @@ class CarreraCreateRequest(BaseModel):
 class CarreraUpdateRequest(BaseModel):
     Nom_Car: str
     Des_Car: str
-
 
 @Router_carrera.post(
     "/",

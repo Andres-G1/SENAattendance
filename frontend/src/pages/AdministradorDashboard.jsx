@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom' 
 import CoordinadorNavbar from '../components/navbars/CoordinadorNavbar.jsx'
 import useCurrentDate from '../hooks/useCurrentDate.js'
 
@@ -51,24 +52,25 @@ export default function CoordinadorDashboard() {
                   Registro de aprendices, instructores y coordinadores del sistema.
                 </p>
                 <div className="d-flex flex-column gap-2 mt-auto">
-                  <a
-                    href="/coordinador/module_aprendiz_config"
+                  {/* 2. Cambiado de <a> a <Link to="..."> */}
+                  <Link
+                    to="/coordinador/module_aprendiz_config"
                     className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
                   >
                     Gestionar Aprendices
-                  </a>
-                  <a
-                    href="/coordinador/module_instructor_config"
+                  </Link>
+                  <Link
+                    to="/coordinador/module_instructor_config"
                     className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
                   >
                     Gestionar Instructores
-                  </a>
-                  <a
-                    href="/coordinador/module_coordinador_config"
+                  </Link>
+                  <Link
+                    to="/coordinador/module_coordinador_config"
                     className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
                   >
                     Gestionar Administradores
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -101,6 +103,7 @@ export default function CoordinadorDashboard() {
                   Carga de listados oficiales de SofíaPlus en formato PDF o Excel.
                 </p>
 
+                {/* Si es una ancla interna (#) puede permanecer como <a> */}
                 <a
                   href="#registro-carga-archivo"
                   className="btn btn-primary rounded-3 mt-auto w-100 fw-semibold py-2 shadow-sm"
@@ -141,108 +144,33 @@ export default function CoordinadorDashboard() {
                 </div>
                 <p className="text-muted small mb-4">Registro de fichas, carreras y competencias del programa.</p>
                 <div className="d-flex flex-column gap-2 mt-auto">
-                  <a
-                    href="/token/module_token_config"
+                  <Link
+                    to="/token/module_token_config"
                     className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
                   >
                     Gestionar Fichas
-                  </a>
-                  <a
-                    href="/career/module_career_config"
+                  </Link>
+                  
+                  {/* 3. CORREGIDO: to="/administrador/carreras" para que coincida con App.jsx */}
+                  <Link
+                    to="/administrador/carreras"
                     className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
                   >
                     Gestionar Carreras
-                  </a>
-                  <a
-                    href="/token/Create_token"
+                  </Link>
+                  
+                  <Link
+                    to="/administrador/competencias"
                     className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
                   >
                     Gestionar Competencias
-                  </a>
+                  </Link>
                 </div>
               </div>
-            </div>
-
-            <div className="col-12 col-md-6">
-              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4 border border-primary-subtle">
-                <div className="d-flex align-items-center gap-3 mb-3">
-                  <div className="p-3 rounded-3 bg-primary-subtle text-primary">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                      <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                  </div>
-                  <h5 className="fw-bold text-dark mb-0">Gestion de fichas (PDF / Excel)</h5>
-                </div>
-                <p className="text-muted small mb-4">
-                  Carga de listados oficiales de SofíaPlus en formato PDF o Excel.
-                </p>
-
-                <a
-                  href="#registro-carga-archivo"
-                  className="btn btn-primary rounded-3 mt-auto w-100 fw-semibold py-2 shadow-sm"
-                >
-                  Subir Documento / PDF
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted">
-            Auditoría y Reportes de Coordinación
-          </h4>
-
-          <div className="row g-4">
-            <div className="col-12">
-              <a
-                href="#reportes-globales"
-                className="card text-decoration-none bg-white border-0 shadow-sm p-4 rounded-4 card-hover-premium"
-              >
-                <div className="d-flex align-items-center gap-3">
-                  <div className="p-3 rounded-3 bg-secondary-subtle text-secondary">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="18" y1="20" x2="18" y2="10"></line>
-                      <line x1="12" y1="20" x2="12" y2="4"></line>
-                      <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
-                  </div>
-                  <div className="flex-grow-1">
-                    <h5 className="fw-bold text-dark mb-1">Métricas y Reportes del Centro</h5>
-                    <p className="text-muted small mb-0">
-                      Consulta el índice de inasistencias general, estadísticas por jornadas formativas y
-                      reportes de deserción escolar.
-                    </p>
-                  </div>
-                  <span className="text-secondary font-monospace d-none d-md-inline">&rarr;</span>
-                </div>
-              </a>
             </div>
           </div>
         </main>
       </div>
     </>
-  )
+  );
 }
