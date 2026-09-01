@@ -6,7 +6,7 @@ import AprendizDashboard from "./pages/AprendizDashboard";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import AdministradorDashboard from "./pages/AdministradorDashboard";
 
-import ConfigCarrera from "./pages/ConfigCarrera"; 
+import ConfigCarrera from "./pages/Carrera/ConfigCarrera"; 
 import CreateC from "./pages/Carrera/Create";
 import EditC from "./pages/Carrera/Edit";
 import DeleteC from "./pages/Carrera/Delete";

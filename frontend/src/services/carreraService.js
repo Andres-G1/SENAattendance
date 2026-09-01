@@ -7,7 +7,6 @@ async function handleResponse(res) {
       const data = await res.json();
       detail = data.detail || detail;
     } catch {
-      // respuesta sin cuerpo JSON (ej. 204)
     }
     throw new Error(detail);
   }

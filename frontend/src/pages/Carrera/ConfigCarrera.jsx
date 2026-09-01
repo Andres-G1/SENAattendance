@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getCarreras } from "../services/carreraService";
-import CoordinadorNavbar from '../components/navbars/CoordinadorNavbar.jsx';
+import { getCarreras } from "/src/services/carreraService";
+import CoordinadorNavbar from '/src/components/navbars/CoordinadorNavbar.jsx';
 
 export default function CarreraList() {
   const [carreras, setCarreras] = useState([]);
