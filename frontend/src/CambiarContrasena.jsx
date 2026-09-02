@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import "./configuracion.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -60,58 +61,42 @@ export default function CambiarContrasena() {
   };
 
   return (
-    <div style={{ maxWidth: 460, margin: "2rem auto", fontFamily: "sans-serif" }}>
-      <h2>Cambiar contraseña</h2>
-      <p style={{ marginTop: 0 }}>
+    <main className="config-page">
+      <section className="config-card">
+        <p className="config-eyebrow">Configuración de cuenta</p>
+        <h2>Cambiar contraseña</h2>
+        <p className="config-description">
         Usa los mismos datos del usuario que inició sesión.
-      </p>
+        </p>
 
-      <form onSubmit={onSubmit} style={{ display: "grid", gap: "0.75rem" }}>
+        <div className="session-details" aria-label="Datos de sesión">
         <input
           name="role"
           value={form.role}
-          onChange={onChange}
-          placeholder="role (instructor/aprendiz/coordinador)"
-          required
+          readOnly
+          aria-label="Rol"
         />
-
         <input
           name="user_id"
           value={form.user_id}
-          onChange={onChange}
-          placeholder="user_id"
-          required
+          readOnly
+          aria-label="Identificador de usuario"
         />
+        </div>
 
-        <input
-          type="password"
-          name="contraseña_actual"
-          value={form.contraseña_actual}
-          onChange={onChange}
-          placeholder="contraseña_actual"
-          required
-        />
+        <form onSubmit={onSubmit} className="config-form">
+          <label>Contraseña actual<input type="password" name="contraseña_actual" value={form.contraseña_actual} onChange={onChange} placeholder="Ingresa tu contraseña actual" required /></label>
 
-        <input
-          type="password"
-          name="contraseña_nueva"
-          value={form.contraseña_nueva}
-          onChange={onChange}
-          placeholder="contraseña_nueva"
-          required
-        />
+          <label>Nueva contraseña<input type="password" name="contraseña_nueva" value={form.contraseña_nueva} onChange={onChange} placeholder="Ingresa una nueva contraseña" required /></label>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Guardando..." : "Cambiar contraseña"}
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>{loading ? "Guardando..." : "Actualizar contraseña"}</button>
+        </form>
 
-      {error ? <p style={{ color: "#b00020" }}>{error}</p> : null}
-      {success ? <p style={{ color: "#126c2f" }}>{success}</p> : null}
+        {error ? <p className="form-message form-error">{error}</p> : null}
+        {success ? <p className="form-message form-success">{success}</p> : null}
 
-      <p>
-        <Link to="/">Volver a login</Link>
-      </p>
-    </div>
+        <Link className="back-link" to="/">Volver al inicio de sesión</Link>
+      </section>
+    </main>
   );
 }
