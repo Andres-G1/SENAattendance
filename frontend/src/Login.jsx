@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import "./Login.css";
+import "./login.css";
+import senaLogo from "./assets/Senalogo.png";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -9,6 +10,11 @@ export default function Login() {
   const [form, setForm] = useState({ typeid: "", id: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add("login-page");
+    return () => document.body.classList.remove("login-page");
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -48,7 +54,7 @@ export default function Login() {
 
   return (
     <div className="Login_container">
-      <nav className="navbar">
+      <nav className="login-navbar">
         <div className="nav-links">
           <Link to="/" style={{ color: "rgb(0, 201, 90)" }}>
             Inicio
@@ -57,7 +63,7 @@ export default function Login() {
         </div>
         <div className="titulo">
           <img
-            src="https://www.sena.edu.co/Style%20Library/alayout/images/logoSena.png"
+            src={senaLogo}
             alt="Logo SENA"
             width="40"
             height="40"
@@ -67,7 +73,6 @@ export default function Login() {
 
       <form className="formulario_login" onSubmit={handleSubmit}>
         <select
-          style={{ width: "250px" }}
           className="input-login"
           name="typeid"
           value={form.typeid}

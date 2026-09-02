@@ -70,18 +70,8 @@ export default function CambiarContrasena() {
         </p>
 
         <div className="session-details" aria-label="Datos de sesión">
-        <input
-          name="role"
-          value={form.role}
-          readOnly
-          aria-label="Rol"
-        />
-        <input
-          name="user_id"
-          value={form.user_id}
-          readOnly
-          aria-label="Identificador de usuario"
-        />
+          <span>Cuenta autenticada</span>
+          <span>Datos protegidos</span>
         </div>
 
         <form onSubmit={onSubmit} className="config-form">
