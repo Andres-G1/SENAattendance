@@ -6,11 +6,11 @@ from pydantic import BaseModel
 from sqlmodel import Session, select
 
 
-from app.database import get_session
-from app.models.model import  Aprendiz, Instructor, Administrador, TipoIdentificacion, Fichas, Carrera
+from database import get_session
+from models.model import  Aprendiz, Instructor, Administrador, TipoIdentificacion, Fichas, Carrera
 
-from app.security import hash_contraseña
-from app.dependencias import verificar_administrador
+from security import hash_contraseña
+from dependencias import verificar_administrador
 
 
 Router_usuarios = APIRouter(
@@ -420,4 +420,292 @@ def obtener_aprendiz(
         "Cor_Apr": usuario.Cor_Apr,
         "Es_Apr": usuario.Es_Apr,
         "Id_Fic": usuario.Id_Fic
+    }
+    # =========================================================
+# LISTAR INSTRUCTORES
+# =========================================================
+
+@Router_usuarios.get("/instructores")
+def listar_instructores(
+    session: Session = Depends(get_session)
+):
+    instructores = session.exec(
+        select(Instructor)
+    ).all()
+
+    return [
+        {
+            "Id_Ins": instructor.Id_Ins,
+            "Nom_Ins": instructor.Nom_Ins,
+            "Ape_Ins": instructor.Ape_Ins,
+            "Tip_ide_Ins": instructor.Tip_ide_Ins,
+            "Num_ide_Ins": instructor.Num_ide_Ins,
+            "Cor_Ins": instructor.Cor_Ins,
+            "Es_Ins": instructor.Es_Ins,
+        }
+        for instructor in instructores
+    ]
+
+# =========================================================
+# OBTENER INSTRUCTOR
+# =========================================================
+
+@Router_usuarios.get("/instructor/{id_instructor}")
+def obtener_instructor(
+    id_instructor: int,
+    session: Session = Depends(get_session)
+):
+    instructor = session.get(Instructor, id_instructor)
+
+    if not instructor:
+        raise HTTPException(
+            status_code=404,
+            detail="Instructor no encontrado"
+        )
+
+    return {
+        "Id_Ins": instructor.Id_Ins,
+        "Nom_Ins": instructor.Nom_Ins,
+        "Ape_Ins": instructor.Ape_Ins,
+        "Tip_ide_Ins": instructor.Tip_ide_Ins,
+        "Num_ide_Ins": instructor.Num_ide_Ins,
+        "Cor_Ins": instructor.Cor_Ins,
+        "Es_Ins": instructor.Es_Ins,
+    }
+
+# =========================================================
+# ACTUALIZAR INSTRUCTOR
+# =========================================================
+
+@Router_usuarios.put("/instructor/{id_instructor}")
+def actualizar_instructor(
+    id_instructor: int,
+    datos: UsuarioActualizar,
+    session: Session = Depends(get_session)
+):
+    usuario = session.get(Instructor, id_instructor)
+
+    if not usuario:
+        raise HTTPException(
+            status_code=404,
+            detail="Instructor no encontrado"
+        )
+
+    if datos.nombre is not None:
+        usuario.Nom_Ins = datos.nombre
+
+    if datos.apellido is not None:
+        usuario.Ape_Ins = datos.apellido
+
+    if datos.tipo_identificacion is not None:
+        usuario.Tip_ide_Ins = datos.tipo_identificacion
+
+    if datos.numero_identificacion is not None:
+        usuario.Num_ide_Ins = datos.numero_identificacion
+
+    if datos.correo is not None:
+        usuario.Cor_Ins = datos.correo
+
+    if datos.contraseña is not None:
+        usuario.Con_Ins = hash_contraseña(datos.contraseña)
+
+    session.add(usuario)
+    session.commit()
+
+    return {
+        "mensaje": "Instructor actualizado correctamente"
+    }
+
+# =========================================================
+# DESACTIVAR INSTRUCTOR
+# =========================================================
+
+@Router_usuarios.patch("/instructor/{id_instructor}/desactivar")
+def desactivar_instructor(
+    id_instructor: int,
+    session: Session = Depends(get_session)
+):
+    usuario = session.get(Instructor, id_instructor)
+
+    if not usuario:
+        raise HTTPException(
+            status_code=404,
+            detail="Instructor no encontrado"
+        )
+
+    usuario.Es_Ins = False
+    session.add(usuario)
+    session.commit()
+
+    return {
+        "mensaje": "Instructor desactivado correctamente"
+    }
+
+# =========================================================
+# ACTIVAR INSTRUCTOR
+# =========================================================
+
+@Router_usuarios.patch("/instructor/{id_instructor}/activar")
+def activar_instructor(
+    id_instructor: int,
+    session: Session = Depends(get_session)
+):
+    usuario = session.get(Instructor, id_instructor)
+
+    if not usuario:
+        raise HTTPException(
+            status_code=404,
+            detail="Instructor no encontrado"
+        )
+
+    usuario.Es_Ins = True
+    session.add(usuario)
+    session.commit()
+
+    return {
+        "mensaje": "Instructor activado correctamente"
+    }
+# =========================================================
+# LISTAR ADMINISTRADORES
+# =========================================================
+
+@Router_usuarios.get("/administradores")
+def listar_administradores(
+    session: Session = Depends(get_session)
+):
+    administradores = session.exec(
+        select(Administrador)
+    ).all()
+
+    return [
+        {
+            "Id_Adm": administrador.Id_Adm,
+            "Nom_Adm": administrador.Nom_Adm,
+            "Ape_Adm": administrador.Ape_Adm,
+            "Tip_ide_Adm": administrador.Tip_ide_Adm,
+            "Num_ide_Adm": administrador.Num_ide_Adm,
+            "Cor_Adm": administrador.Cor_Adm,
+            "Es_Adm": administrador.Es_Adm,
+        }
+        for administrador in administradores
+    ]
+
+# =========================================================
+# OBTENER ADMINISTRADOR
+# =========================================================
+
+@Router_usuarios.get("/administrador/{id_administrador}")
+def obtener_administrador(
+    id_administrador: int,
+    session: Session = Depends(get_session)
+):
+    administrador = session.get(Administrador, id_administrador)
+
+    if not administrador:
+        raise HTTPException(
+            status_code=404,
+            detail="Administrador no encontrado"
+        )
+
+    return {
+        "Id_Adm": administrador.Id_Adm,
+        "Nom_Adm": administrador.Nom_Adm,
+        "Ape_Adm": administrador.Ape_Adm,
+        "Tip_ide_Adm": administrador.Tip_ide_Adm,
+        "Num_ide_Adm": administrador.Num_ide_Adm,
+        "Cor_Adm": administrador.Cor_Adm,
+        "Es_Adm": administrador.Es_Adm,
+    }
+
+# =========================================================
+# ACTUALIZAR ADMINISTRADOR
+# =========================================================
+
+@Router_usuarios.put("/administrador/{id_administrador}")
+def actualizar_administrador(
+    id_administrador: int,
+    datos: UsuarioActualizar,
+    session: Session = Depends(get_session)
+):
+    usuario = session.get(Administrador, id_administrador)
+
+    if not usuario:
+        raise HTTPException(
+            status_code=404,
+            detail="Administrador no encontrado"
+        )
+
+    if datos.nombre is not None:
+        usuario.Nom_Adm = datos.nombre
+
+    if datos.apellido is not None:
+        usuario.Ape_Adm = datos.apellido
+
+    if datos.tipo_identificacion is not None:
+        usuario.Tip_ide_Adm = datos.tipo_identificacion
+
+    if datos.numero_identificacion is not None:
+        usuario.Num_ide_Adm = datos.numero_identificacion
+
+    if datos.correo is not None:
+        usuario.Cor_Adm = datos.correo
+
+    if datos.contraseña is not None:
+        usuario.Con_Adm = hash_contraseña(datos.contraseña)
+
+    session.add(usuario)
+    session.commit()
+
+    return {
+        "mensaje": "Administrador actualizado correctamente"
+    }
+
+# =========================================================
+# DESACTIVAR ADMINISTRADOR
+# =========================================================
+
+@Router_usuarios.patch("/administrador/{id_administrador}/desactivar")
+def desactivar_administrador(
+    id_administrador: int,
+    session: Session = Depends(get_session)
+):
+    usuario = session.get(Administrador, id_administrador)
+
+    if not usuario:
+        raise HTTPException(
+            status_code=404,
+            detail="Administrador no encontrado"
+        )
+
+    usuario.Es_Adm = False
+    session.add(usuario)
+    session.commit()
+
+    return {
+        "mensaje": "Administrador desactivado correctamente"
+    }
+
+# =========================================================
+# ACTIVAR ADMINISTRADOR
+# =========================================================
+
+@Router_usuarios.patch("/administrador/{id_administrador}/activar")
+def activar_administrador(
+    id_administrador: int,
+    session: Session = Depends(get_session)
+):
+    usuario = session.get(Administrador, id_administrador)
+
+    if not usuario:
+        raise HTTPException(
+            status_code=404,
+            detail="Administrador no encontrado"
+        )
+
+    usuario.Es_Adm = True
+    session.add(usuario)
+    session.commit()
+
+    return {
+        "mensaje": "Administrador activado correctamente"
     }

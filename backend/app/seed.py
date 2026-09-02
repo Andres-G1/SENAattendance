@@ -40,7 +40,7 @@ def seed():
             Num_ide_Adm=3001,
             Cor_Adm="admin.prueba@sena.edu.co",
             Con_Adm=hash_contraseña("admin123"),
-            Es_Adm=False,
+            Es_Adm=True,
         )
 
         session.add(aprendiz)
