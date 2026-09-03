@@ -4,13 +4,15 @@ load_dotenv()
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
  
-from database import crear_tablas
+from app.database import crear_tablas
 from routers.login import Router_login
 from routers.asistencia import Router_asistencia
 from routers.ficha import Router_ficha
 from routers.carrera import Router_carrera
- 
+from routers.asignaciones import Router_asignaciones
+
 app = FastAPI()
+app.include_router(Router_asignaciones)
  
 app.add_middleware(
     CORSMiddleware,

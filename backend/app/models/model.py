@@ -159,6 +159,10 @@ class FichaInstructor(SQLModel, table=True):
     Id_Fic: int = Field(foreign_key="Fichas.Id_Fic", primary_key=True)
     Id_Ins: int = Field(foreign_key="Instructor.Id_Ins", primary_key=True)
 
+    class AsignarFichaInstructorSchema(SQLModel):
+        Id_Fic: int
+        Id_Ins: int
+
     ficha: Optional[Fichas] = Relationship()
     instructor: Optional[Instructor] = Relationship(back_populates="fichas_asignadas")
 

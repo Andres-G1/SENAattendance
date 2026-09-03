@@ -17,6 +17,7 @@ import CreateF from "./pages/Ficha/Create";
 import EditF from "./pages/Ficha/Edit";
 import DeleteF from "./pages/Ficha/Delete";
 */
+import AsignarFicha from "./pages/Ficha/AsignarFicha"; //nuevo componente lo puso maday
 function App() {
   return (
     <BrowserRouter>
@@ -80,8 +81,15 @@ function App() {
               <DeleteC />
             </RutaProtegida>
           }
-        />       
-
+        />  
+        <Route
+          path="/fichas/asignar"
+          element={
+            <RutaProtegida rolPermitido="Coordinador">
+              <AsignarFicha />
+            </RutaProtegida>
+          }
+        />     
         {/* cualquier ruta desconocida vuelve al login */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -125,3 +133,4 @@ export default App;
           }
         />
         */  
+       
