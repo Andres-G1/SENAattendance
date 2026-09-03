@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import AprendizNavbar from '../components/navbars/AprendizNavbar.jsx'
 import useCurrentDate from '../hooks/useCurrentDate.js'
+import FallasNovedades from './Aprendiz/FallasNovedades.jsx'
 
 export default function AprendizDashboard() {
   const currentDate = useCurrentDate();
   const nombreCompleto = localStorage.getItem('firstName') || ''; 
   const firstName = nombreCompleto.split(' ')[0];
+
+  const [mostrarFallas, setMostrarFallas] = useState(false);
 
   return (
     <>
@@ -64,10 +68,10 @@ export default function AprendizDashboard() {
 
             <div className="col-12 col-lg-7">
               <div className="d-flex flex-column h-100 justify-content-between gap-4">
-                <a
+                
                   href="#historial"
                   className="card text-decoration-none bg-white border-0 shadow-sm p-4 rounded-4 card-hover-premium flex-grow-1"
-                >
+                <a>
                   <div className="d-flex align-items-start gap-3">
                     <div className="p-3 rounded-3 bg-success-subtle text-success border border-success-subtle">
                       <svg
@@ -98,9 +102,13 @@ export default function AprendizDashboard() {
                   </div>
                 </a>
 
-                <a
-                  href="#justificaciones"
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setMostrarFallas((v) => !v)}
+                  onKeyDown={(e) => e.key === 'Enter' && setMostrarFallas((v) => !v)}
                   className="card text-decoration-none bg-white border-0 shadow-sm p-4 rounded-4 card-hover-premium flex-grow-1"
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="d-flex align-items-start gap-3">
                     <div className="p-3 rounded-3 bg-danger-subtle text-danger border border-danger-subtle">
@@ -123,7 +131,9 @@ export default function AprendizDashboard() {
                     <div className="flex-grow-1">
                       <div className="d-flex justify-content-between align-items-center mb-1">
                         <h5 className="fw-bold text-dark mb-0">Fallas y Novedades</h5>
-                        <span className="text-danger small fw-medium">Ver Detalle &rarr;</span>
+                        <span className="text-danger small fw-medium">
+                          {mostrarFallas ? 'Ocultar' : 'Ver Detalle'} &rarr;
+                        </span>
                       </div>
                       <p className="text-muted small mb-0">
                         Monitorea los reportes de inasistencia y verifica si el instructor ya aprobó tus
@@ -131,10 +141,12 @@ export default function AprendizDashboard() {
                       </p>
                     </div>
                   </div>
-                </a>
+                </div>
               </div>
             </div>
           </div>
+
+          {mostrarFallas && <FallasNovedades onClose={() => setMostrarFallas(false)} />}
         </main>
       </div>
     </>

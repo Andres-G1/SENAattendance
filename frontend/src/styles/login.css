@@ -1,3 +1,4 @@
+
 * {
   margin: 0;
   padding: 0;
@@ -5,10 +6,14 @@
 }
 
 body.login-page {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(rgba(57, 201, 0, 0.2), rgba(16, 197, 0, 0.2)),
-              url(/fondo.png) no-repeat center/cover;
-  height: 85vh;
+    url("/fondo.png") no-repeat center / cover;
+  min-height: 100vh;
+}
+
+body.login-page #root {
+  background: transparent;
 }
 
 .Login_container {
@@ -108,6 +113,11 @@ body.login-page {
 
 .formulario_login button:hover {
   background-color: #00b51e;
+}
+
+.formulario_login button:disabled {
+  background-color: #8bc79a;
+  cursor: not-allowed;
 }
 
 .login-error {

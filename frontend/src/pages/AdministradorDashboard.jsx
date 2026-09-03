@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import CoordinadorNavbar from '../components/navbars/CoordinadorNavbar.jsx';
 import useCurrentDate from '../hooks/useCurrentDate.js';
 
+
+
 export default function AdministradorDashboard() {
   const currentDate = useCurrentDate();
 
@@ -144,13 +146,13 @@ export default function AdministradorDashboard() {
                   Carga de listados oficiales de SofíaPlus en formato PDF o Excel.
                 </p>
 
-                {/* BOTÓN CORREGIDO */}
-                <a
-                  href="#registro-carga-archivo"
+                
+                   <Link
+                  to="registro/carga-archivos"
                   className="btn btn-primary rounded-3 mt-auto w-100 fw-semibold py-2 shadow-sm"
                 >
-                  Subir Documento / PDF
-                </a>
+                  Subir Documento / Excel
+                </Link>
 
               </div>
             </div>
@@ -232,6 +234,109 @@ export default function AdministradorDashboard() {
               </div>
             </div>
 
+            {/* ---------------- CARGA DE ARCHIVOS PLANOS (FICHAS/CARRERAS/COMPETENCIAS) ---------------- */}
+            <div className="col-12 col-md-6">
+
+              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4 border border-primary-subtle">
+
+                <div className="d-flex align-items-center gap-3 mb-3">
+
+                  <div className="p-3 rounded-3 bg-primary-subtle text-primary">
+
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10 9 9 9 8 9" />
+                    </svg>
+
+                  </div>
+
+                  <h5 className="fw-bold text-dark mb-0">
+                    Gestión de Fichas (CSV / Excel)
+                  </h5>
+
+                </div>
+
+                <p className="text-muted small mb-4">
+                  Carga de listados planos de fichas, carreras y competencias.
+                </p>
+
+                <Link
+                  to="/fichas/subir-archivos"
+                  className="btn btn-primary rounded-3 mt-auto w-100 fw-semibold py-2 shadow-sm"
+                >
+                  Subir Documento / Excel
+                </Link>
+
+              </div>
+            </div>
+
+          </div>
+
+
+          {/* =====================================================
+              ASIGNACIÓN DE FICHAS
+          ====================================================== */}
+          <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted">
+            Asignación de Fichas
+          </h4>
+
+          <div className="row g-4 mb-5">
+            <div className="col-12 col-md-6">
+              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
+
+                <div className="d-flex align-items-center gap-3 mb-3">
+
+                  <div className="p-3 rounded-3 bg-success-subtle text-success">
+
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 11l3 3L22 4" />
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                    </svg>
+
+                  </div>
+
+                  <h5 className="fw-bold text-dark mb-0">
+                    Asignación de Fichas
+                  </h5>
+
+                </div>
+
+                <p className="text-muted small mb-4">
+                  Elige qué fichas maneja cada instructor.
+                </p>
+
+                <Link
+                  to="/fichas/asignar"
+                  className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2 mt-auto"
+                >
+                  Asignar Fichas
+                </Link>
+
+              </div>
+            </div>
           </div>
 
         </main>
