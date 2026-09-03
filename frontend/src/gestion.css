@@ -1,0 +1,27 @@
+.management-page { min-height: 100svh; box-sizing: border-box; padding: 34px clamp(20px, 5vw, 72px); background: #f4f8f5; color: #193522; }
+.management-header { max-width: 1180px; margin: 0 auto 24px; display: flex; align-items: end; justify-content: space-between; gap: 20px; }
+.management-header h1 { margin: 0 0 6px; color: #193522; font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; }
+.management-header p { color: #647268; }
+.management-header a { color: #087f2a; font-weight: 700; text-decoration: none; }
+.management-eyebrow { margin: 0 0 7px; color: #16823a !important; font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.management-tabs { max-width: 1180px; margin: 0 auto 20px; display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid #d5e2d8; }
+.management-tabs button { padding: 11px 15px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #647268; font: inherit; font-weight: 700; cursor: pointer; }
+.management-tabs button.active { border-bottom-color: #087f2a; color: #087f2a; }
+.management-section { max-width: 1180px; margin: 0 auto; padding: 26px; border: 1px solid #dce9df; border-radius: 12px; background: #fff; box-shadow: 0 12px 32px rgba(22, 82, 43, .07); }
+.section-heading h2, .management-section h2 { margin: 0 0 18px; color: #193522; font-size: 1.45rem; }
+.management-form { display: grid; gap: 12px; margin-bottom: 24px; }
+.user-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.management-form input, .management-form select, .management-form textarea { width: 100%; box-sizing: border-box; padding: 11px 12px; border: 1px solid #cbd9cf; border-radius: 7px; background: #fff; color: #193522; font: inherit; }
+.management-form input:focus, .management-form select:focus, .management-form textarea:focus { outline: 3px solid rgba(22, 130, 58, .12); border-color: #16823a; }
+.management-form button, .record button { padding: 10px 13px; border: 0; border-radius: 7px; background: #087f2a; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.record button { background: #b23a32; font-size: .82rem; }
+.records { display: grid; gap: 8px; }
+.record { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 14px; border: 1px solid #e1e9e3; border-radius: 7px; background: #f8faf8; }
+.record div { min-width: 0; display: grid; gap: 3px; }
+.record strong { color: #193522; }
+.record span { overflow: hidden; color: #657268; font-size: .86rem; text-overflow: ellipsis; white-space: nowrap; }
+.management-columns { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.management-message { max-width: 1180px; margin: 0 auto 16px; padding: 11px 13px; border-radius: 7px; }
+.management-message.success { background: #edf9ef; color: #176b2f; }
+.management-message.error { background: #fff1f0; color: #ad2d25; }
+@media (max-width: 760px) { .management-header { align-items: start; flex-direction: column; } .user-grid, .management-columns { grid-template-columns: 1fr; } .management-section { padding: 20px 16px; } }

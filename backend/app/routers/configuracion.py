@@ -4,11 +4,11 @@ from pydantic import BaseModel, EmailStr
 
 try:
     from app.database import get_session
-    from app.models.model import Aprendiz, Instructor, Administrador
+    from app.models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
     from app.security import hash_contraseña, verificar_contraseña
 except ImportError:
     from database import get_session
-    from models.model import Aprendiz, Instructor, Administrador
+    from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
     from security import hash_contraseña, verificar_contraseña
 
 Router_configuracion = APIRouter(prefix="/users", tags=["Configuración"])
@@ -48,6 +48,13 @@ class CambiarContraseñaDirectaRequest(BaseModel):
     contraseña_nueva: str
 
 
+class RecuperarContraseñaRequest(BaseModel):
+    typeid: str
+    id: int
+    correo: EmailStr
+    contraseña_nueva: str
+
+
 def _procesar_cambio_contraseña(
     role: str,
     user_id: int,
@@ -71,6 +78,37 @@ def _procesar_cambio_contraseña(
     session.commit()
 
     return {"detail": "Contraseña actualizada correctamente"}
+
+
+@Router_configuracion.post("/recuperar-contrasena")
+async def recuperar_contraseña(
+    data: RecuperarContraseñaRequest,
+    session: Session = Depends(get_session),
+):
+    try:
+        tipo_documento = TipoIdentificacion(data.typeid.upper())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Tipo de documento inválido")
+
+    for modelo, campo_tipo, campo_numero, campo_correo, campo_contraseña in (
+        (Aprendiz, "Tip_ide_Apr", "Num_ide_Apr", "Cor_Apr", "Con_Apr"),
+        (Instructor, "Tip_ide_Ins", "Num_ide_Ins", "Cor_Ins", "Con_Ins"),
+        (Administrador, "Tip_ide_Adm", "Num_ide_Adm", "Cor_Adm", "Con_Adm"),
+    ):
+        usuario = session.exec(
+            select(modelo).where(
+                getattr(modelo, campo_tipo) == tipo_documento,
+                getattr(modelo, campo_numero) == data.id,
+                getattr(modelo, campo_correo) == str(data.correo),
+            )
+        ).first()
+        if usuario:
+            setattr(usuario, campo_contraseña, hash_contraseña(data.contraseña_nueva))
+            session.add(usuario)
+            session.commit()
+            return {"detail": "Contraseña recuperada correctamente"}
+
+    raise HTTPException(status_code=404, detail="Los datos no coinciden con una cuenta")
 
 
 @Router_configuracion.put("/{role}/{user_id}/contraseña", include_in_schema=False)
@@ -102,6 +140,27 @@ class ActualizarPerfilRequest(BaseModel):
     nombre: str | None = None
     apellido: str | None = None
     correo: EmailStr | None = None
+
+
+@Router_configuracion.get("/{role}/{user_id}/perfil")
+async def obtener_perfil(
+    role: str,
+    user_id: int,
+    session: Session = Depends(get_session),
+):
+    modelo = obtener_modelo(role)
+    usuario = session.get(modelo, user_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    prefijo = modelo.__name__[:3]
+    return {
+        "id": user_id,
+        "tipo_documento": getattr(usuario, f"Tip_ide_{prefijo}"),
+        "numero_documento": getattr(usuario, f"Num_ide_{prefijo}"),
+        "correo": getattr(usuario, f"Cor_{prefijo}"),
+        "rol": role.lower(),
+    }
 
 
 class CambiarEstadoDirectoRequest(BaseModel):

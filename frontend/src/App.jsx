@@ -1,8 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./Login.jsx";
 import CambiarContrasena from "./CambiarContrasena.jsx";
-import ActualizarPerfil from "./ActualizarPerfil.jsx";
 import CambiarEstado from "./CambiarEstado.jsx";
+import RecuperarContrasena from "./RecuperarContrasena.jsx";
+import GestionCoordinador from "./GestionCoordinador.jsx";
 
 function Dashboard({ title }) {
   const role = localStorage.getItem("role") || "";
@@ -22,6 +23,7 @@ function Dashboard({ title }) {
         <a href="/config/contrasena">Cambiar contraseña</a>
         <a href="/config/perfil">Actualizar perfil</a>
         <a href="/config/estado">Cambiar estado</a>
+        {role.toLowerCase() === "coordinador" ? <a href="/administrador/gestion">Administrar usuarios</a> : null}
         <button type="button" onClick={logout}>
           Cerrar sesión
         </button>
@@ -36,8 +38,10 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/config/contrasena" element={<CambiarContrasena />} />
-        <Route path="/config/perfil" element={<ActualizarPerfil />} />
+        <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
+        <Route path="/config/perfil" element={<CambiarContrasena />} />
         <Route path="/config/estado" element={<CambiarEstado />} />
+        <Route path="/administrador/gestion" element={<GestionCoordinador />} />
         <Route path="/aprendiz" element={<Dashboard title="Panel Aprendiz" />} />
         <Route path="/instructor" element={<Dashboard title="Panel Instructor" />} />
         <Route path="/administrador" element={<Dashboard title="Panel Coordinador" />} />
