@@ -9,17 +9,16 @@ export default function CoordinadorNavbar({ user }) {
   const navigate = useNavigate();
 
   const cerrarSesion = (e) => {
-    e.preventDefault(); // Evita que el enlace recargue la página de forma nativa
-    localStorage.clear(); // Elimina el token, rol, nombre, etc.
-    navigate("/", { replace: true }); // Envía al login y destruye la ruta previa del historial
+    e.preventDefault(); 
+    localStorage.clear(); 
+    navigate("/", { replace: true });
   };
 
-  // Extraemos la inicial de forma segura si el nombre existe
   const obtenerInicial = () => {
     if (user && user.Nom_Adm) {
       return user.Nom_Adm.charAt(0).toUpperCase();
     }
-    return "U"; // Letra por defecto mientras carga
+    return "U"; 
   };
 
   return (
@@ -66,17 +65,17 @@ export default function CoordinadorNavbar({ user }) {
               </a>
               <ul className="dropdown-menu" aria-labelledby="navUsuarios">
                 <li>
-                  <Link className="dropdown-item" to="/coordinador/module_aprendiz_config">
+                  <Link className="dropdown-item" to="/administrador/aprendices">
                     Gestionar Aprendices
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/coordinador/module_instructor_config">
+                  <Link className="dropdown-item" to="/administrador/Instructores">
                     Gestionar Instructores
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/coordinador/module_coordinador_config">
+                  <Link className="dropdown-item" to="/administrador/administradores">
                     Gestionar Coordinadores
                   </Link>
                 </li>
@@ -97,18 +96,37 @@ export default function CoordinadorNavbar({ user }) {
               </a>
               <ul className="dropdown-menu" aria-labelledby="navAcademico">
                 <li>
-                  <Link className="dropdown-item" to="/token/module_token_config">
+                  <Link className="dropdown-item" to="/administrador/fichas">
                     Gestionar Fichas
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/career/module_career_config">
+                  <Link className="dropdown-item" to="/administrador/carreras">
                     Gestionar Carreras
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/coordinador/module_career_config">
+                  <Link className="dropdown-item" to="/administrador/competencias">
                     Gestionar Competencias
+                  </Link>
+                </li>
+              </ul>
+            </li>
+            <li className="nav-item dropdown">
+              <a
+                className="nav-link dropdown-toggle active px-3 py-2"
+                href="#"
+                id="navAcademico"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Gestion Grupos
+              </a>
+              <ul className="dropdown-menu" aria-labelledby="navAcademico">
+                <li>
+                  <Link className="dropdown-item" to="/fichas/asignar">
+                    Asignación de Fichas
                   </Link>
                 </li>
               </ul>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import '../../styles/navbar.css'
 /**
  * Navbar del rol Instructor.
@@ -8,6 +8,21 @@ import '../../styles/navbar.css'
  * @param {{ user: { Nom_Ins: string } }} props
  */
 export default function InstructorNavbar({ user }) {
+    const navigate = useNavigate();
+
+  const cerrarSesion = (e) => {
+    e.preventDefault(); 
+    localStorage.clear(); 
+    navigate("/", { replace: true });
+  };
+
+  const obtenerInicial = () => {
+    if (user && user.Nom_Adm) {
+      return user.Nom_Adm.charAt(0).toUpperCase();
+    }
+    return "U"; 
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-sena px-3 navbar-dark">
       <div className="container-fluid">
@@ -66,11 +81,11 @@ export default function InstructorNavbar({ user }) {
             >
               <div className="text-end lh-sm">
                 <div style={{ fontWeight: 600, color: 'white', fontSize: '0.88rem' }}>
-                  {user?.Nom_Ins}
+                  {user?.Nom_Ins || "Cargando..."}
                 </div>
                 <span className="badge-aprendiz">Instructor</span>
               </div>
-              <div className="avatar">{user?.Nom_Ins[0]}</div>
+              <div className="avatar">{obtenerInicial()}</div>
             </div>
 
             <ul className="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
@@ -88,7 +103,7 @@ export default function InstructorNavbar({ user }) {
                 <hr className="dropdown-divider" />
               </li>
               <li>
-                <a className="dropdown-item text-danger fw-bold" href="/">
+                <a className="dropdown-item text-danger fw-bold" href="/" onClick={cerrarSesion}>
                   Cerrar sesión
                 </a>
               </li>
