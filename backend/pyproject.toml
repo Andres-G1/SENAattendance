@@ -12,4 +12,5 @@ dependencies = [
     "pymysql>=1.2.0",
     "python-dotenv>=1.0.1",
     "sqlmodel>=0.0.39",
+    "werkzeug>=3.1.8",
 ]

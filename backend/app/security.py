@@ -2,6 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 import jwt
+from werkzeug.security import check_password_hash
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -11,6 +12,8 @@ def hash_contraseña(contraseña: str) -> str:
 
 
 def verificar_contraseña(contraseña_plana: str, contraseña_hash: str) -> bool:
+    if contraseña_hash.startswith(("scrypt:", "pbkdf2:")):
+        return check_password_hash(contraseña_hash, contraseña_plana)
     return pwd_context.verify(contraseña_plana, contraseña_hash)
 
 
