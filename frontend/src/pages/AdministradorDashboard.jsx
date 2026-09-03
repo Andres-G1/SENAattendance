@@ -148,7 +148,26 @@ export default function AdministradorDashboard() {
 
                 
                    <Link
-                  to="registro/carga-archivos"
+                  to="/administrador/aprendices/cargar"
+                  className="btn btn-primary rounded-3 mt-auto w-100 fw-semibold py-2 shadow-sm"
+                >
+                  Subir Documento / Excel
+                </Link>
+                  <p className="text-muted small mb-4">
+                </p>
+
+                
+                   <Link
+                  to="/administrador/instructores/cargar"
+                  className="btn btn-primary rounded-3 mt-auto w-100 fw-semibold py-2 shadow-sm"
+                >
+                  Subir Documento / Excel
+                </Link>  <p className="text-muted small mb-4">
+                </p>
+
+                
+                   <Link
+                  to="/administrador/coordinador/cargar"
                   className="btn btn-primary rounded-3 mt-auto w-100 fw-semibold py-2 shadow-sm"
                 >
                   Subir Documento / Excel

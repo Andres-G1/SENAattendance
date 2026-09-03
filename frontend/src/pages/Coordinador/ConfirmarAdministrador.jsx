@@ -41,7 +41,7 @@ export default function ConfirmarAdministrador() {
           className="rounded-4 overflow-hidden shadow"
           style={{ maxWidth: 420, width: "100%" }}
         >
-          <div className="bg-danger text-white p-3">
+          <div className="bg-success text-white p-3">
             <h5 className="fw-bold mb-0">
               {esDesactivar ? "Desactivar Administrador" : "Activar Administrador"}
             </h5>

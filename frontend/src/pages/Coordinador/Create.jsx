@@ -5,6 +5,8 @@ import { crearUsuario } from "../../services/api";
 import { getCarreras } from "../../services/carreraService";
 import { obtenerFichas } from "../../services/fichaService";
 
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
+
 export default function CrearAprendiz() {
   const navigate = useNavigate();
 
@@ -18,6 +20,9 @@ export default function CrearAprendiz() {
 
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
+
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
 
   const [error, setError] = useState("");
 
@@ -220,6 +225,8 @@ export default function CrearAprendiz() {
   // =====================================================
 
   return (
+      <>
+        <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
     <main className="container my-5">
 
       <div
@@ -556,5 +563,6 @@ export default function CrearAprendiz() {
       </div>
 
     </main>
+    </>
   );
 }

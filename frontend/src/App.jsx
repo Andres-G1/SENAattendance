@@ -15,6 +15,9 @@ import ConfigFicha from "./pages/Ficha/ConfigFicha";
 import CreateF from "./pages/Ficha/Create";
 import EditF from "./pages/Ficha/Edit";
 import DeleteF from "./pages/Ficha/Delete";
+
+import CargarInstructores from "./pages/Coordinador/CargarInstructores";
+import CargarAprendices from "./pages/Coordinador/CargarAprendices";
 import SubirArchivosMenu from "./pages/CargaArchivos/SubirArchivosMenu";
 import AsignarFicha from "./pages/Ficha/AsignarFicha"; // nuevo componente, lo puso Maday
 
@@ -83,6 +86,7 @@ function App() {
             </RutaProtegida>
           }
         />
+
         <Route
           path="/carreras/nueva"
           element={
@@ -194,6 +198,25 @@ function App() {
             </RutaProtegida>
           }
         />
+                <Route
+          path="/administrador/aprendices"
+          element={
+            <RutaProtegida rolPermitido="Coordinador">
+              <Aprendices />
+            </RutaProtegida>
+          }
+        />
+
+
+        <Route
+          path="/administrador/aprendices/cargar"
+          element={
+            <RutaProtegida rolPermitido="Coordinador">
+              <CargarAprendices />
+            </RutaProtegida>
+          }
+        />
+
         <Route
           path="/administrador/aprendices/activar/:id"
           element={
@@ -244,6 +267,15 @@ function App() {
             </RutaProtegida>
           }
         />
+        <Route
+        path="/administrador/instructores/cargar"
+        element={
+          <RutaProtegida rolPermitido="Coordinador">
+            <CargarInstructores />
+          </RutaProtegida>
+        }
+      />
+
 
         {/* Gestión de administradores */}
         <Route

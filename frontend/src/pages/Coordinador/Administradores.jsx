@@ -43,6 +43,7 @@ export default function Administradores() {
   if (cargando) {
     return (
       <>
+      
         <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
         <main className="container my-4">
           <div className="card p-4 shadow-sm">

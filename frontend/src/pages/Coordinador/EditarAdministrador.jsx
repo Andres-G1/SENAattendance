@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { obtenerAdministrador, actualizarAdministrador } from "../../services/api";
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
 
 export default function EditarAdministrador() {
   const { id } = useParams();
@@ -9,6 +10,9 @@ export default function EditarAdministrador() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
+
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
 
   const [formulario, setFormulario] = useState({
     nombre: "",
@@ -98,9 +102,13 @@ export default function EditarAdministrador() {
   }
 
   return (
+
+  <>
+        <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
+
     <main className="container my-5">
       <div className="card shadow-sm" style={{ maxWidth: "700px", margin: "0 auto" }}>
-        <div className="card-header bg-warning text-dark py-3">
+        <div className="card-header bg-success text-white py-3">
           <h1 className="h5 mb-0">Modificar Datos del Administrador</h1>
           <small>ID: {id}</small>
         </div>
@@ -226,5 +234,7 @@ export default function EditarAdministrador() {
         </div>
       </div>
     </main>
+
+    </>
   );
 }

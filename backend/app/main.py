@@ -12,6 +12,7 @@ from routers.carrera import Router_carrera
 from routers.competencias import Router_competencia
 from routers.Usuarios import Router_usuarios
 from routers.asignaciones import Router_asignaciones
+from routers.carga_instructores import Router_carga_instructores
 
 app = FastAPI()
 
@@ -30,6 +31,7 @@ app.include_router(Router_carrera)
 app.include_router(Router_competencia)
 app.include_router(Router_usuarios)
 app.include_router(Router_asignaciones)
+app.include_router(Router_carga_instructores)
 
 @app.on_event("startup")
 def on_startup():

@@ -4,7 +4,7 @@ import {
   obtenerAprendiz,
   actualizarAprendiz,
 } from "../../services/api";
-
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
 
 export default function EditarAprendiz() {
   const { id } = useParams();
@@ -14,7 +14,9 @@ export default function EditarAprendiz() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
-
+  
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
 
   const [formulario, setFormulario] = useState({
     nombre: "",
@@ -185,6 +187,10 @@ export default function EditarAprendiz() {
 
 
   return (
+    <>
+
+        <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
+
     <main className="container my-5">
 
 
@@ -200,7 +206,7 @@ export default function EditarAprendiz() {
         {/* CABECERA */}
 
 
-        <div className="card-header bg-warning text-dark py-3">
+        <div className="card-header bg-success text-white py-3">
 
 
           <h1 className="h5 mb-0">
@@ -483,5 +489,7 @@ export default function EditarAprendiz() {
 
 
     </main>
+
+    </>
   );
 }

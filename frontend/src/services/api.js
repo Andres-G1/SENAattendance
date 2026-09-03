@@ -133,3 +133,33 @@ export const eliminarCompetencia = async (id) => {
   return response.data;
 };
 export default api;
+
+export const cargarAprendices = async (archivo) => {
+  const formData = new FormData();
+
+
+  formData.append("file", archivo);
+
+
+  const response = await api.post(
+    "/usuarios/aprendices/upload",
+    formData
+  );
+
+
+  return response.data;
+};
+
+export const cargarInstructores = async (archivo) => {
+  const formData = new FormData();
+  formData.append("file", archivo);
+
+
+  const response = await api.post(
+    "/usuarios/instructores/upload",
+    formData
+  );
+
+
+  return response.data;
+};

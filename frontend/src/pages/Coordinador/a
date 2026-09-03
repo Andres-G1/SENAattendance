@@ -1,0 +1,8 @@
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
+      <>
+
+        <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
+
+    </>
