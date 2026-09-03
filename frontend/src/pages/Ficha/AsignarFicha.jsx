@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar";
+
+const API_BASE = "http://localhost:8000";
 
 export default function AsignarFicha() {
   const [fichas, setFichas] = useState([]);
@@ -11,6 +14,11 @@ export default function AsignarFicha() {
   const [mensaje, setMensaje] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
+  const [enviando, setEnviando] = useState(false);
+
+  const user = {
+    Nom_Adm: localStorage.getItem("firstName") || "Usuario",
+  };
 
   useEffect(() => {
     async function cargarDatos() {
@@ -18,9 +26,9 @@ export default function AsignarFicha() {
       setErrorCarga(null);
       try {
         const [resFichas, resInstructores, resAprendices] = await Promise.all([
-          fetch("http://localhost:8000/fichas"),
-          fetch("http://localhost:8000/usuarios/instructores"),
-          fetch("http://localhost:8000/usuarios/aprendices"),
+          fetch(`${API_BASE}/fichas`),
+          fetch(`${API_BASE}/usuarios/instructores`),
+          fetch(`${API_BASE}/usuarios/aprendices`),
         ]);
 
         if (!resFichas.ok) throw new Error(`Error al cargar fichas (status ${resFichas.status})`);
@@ -49,13 +57,13 @@ export default function AsignarFicha() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // 🛠️ CORRECCIÓN 1: Se cambiaron los endpoints para apuntar al prefijo /asignaciones de FastAPI
-    const url = tipoAsignacion === "instructor"
-      ? "http://localhost:8000/asignaciones/instructor"
-      : "http://localhost:8000/asignaciones/aprendiz";
+    setEnviando(true);
+    setMensaje(null);
 
-    // 🛠️ CORRECCIÓN 2: Se mapearon las propiedades de los objetos de acuerdo a tu base de datos y UI
+    const url = tipoAsignacion === "instructor"
+      ? `${API_BASE}/asignaciones/instructor`
+      : `${API_BASE}/asignaciones/aprendiz`;
+
     const bodyData = tipoAsignacion === "instructor"
       ? { Id_Fic: parseInt(selectedFicha), Id_Ins: parseInt(selectedUsuario) }
       : { Id_Fic: parseInt(selectedFicha), Id_Apr: parseInt(selectedUsuario) };
@@ -68,104 +76,155 @@ export default function AsignarFicha() {
       });
 
       if (res.ok) {
-        setMensaje({ tipo: "success", texto: "Asignación realizada correctamente" });
-        // Limpiamos los selects tras guardar con éxito
-        setSelectedFicha("");
-        setSelectedUsuario("");
+        setMensaje({ tipo: "exito", texto: "Asignación realizada correctamente" });
       } else {
-        const errorDetail = await res.json();
-        setMensaje({ 
-          tipo: "danger", 
-          texto: `Error: ${errorDetail.detail || "No se pudo realizar la asignación"}` 
-        });
+        setMensaje({ tipo: "error", texto: `Error al realizar la asignación (status ${res.status})` });
       }
     } catch (err) {
       console.error("Error en la asignación:", err);
-      setMensaje({ tipo: "danger", texto: "No se pudo conectar con el servidor" });
+      setMensaje({ tipo: "error", texto: "No se pudo conectar con el servidor" });
+    } finally {
+      setEnviando(false);
     }
   };
 
-  if (cargando) {
-    return (
-      <div className="container mt-4">
-        <h2>Asignar Fichas</h2>
-        <p className="text-muted">Cargando datos...</p>
-      </div>
-    );
-  }
-
-  if (errorCarga) {
-    return (
-      <div className="container mt-4">
-        <h2>Asignar Fichas</h2>
-        <div className="alert alert-danger">{errorCarga}</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mt-4">
-      <h2>Asignar Fichas</h2>
+    <>
+      <CoordinadorNavbar user={user} />
 
-      {mensaje && <div className={`alert alert-${mensaje.tipo} alert-dismissible fade show`}>{mensaje.texto}</div>}
+      <div className="bg-light min-vh-100 py-5">
+        <main className="container" style={{ maxWidth: 700 }}>
 
-      <form onSubmit={handleSubmit} className="card p-4 shadow-sm">
-        <div className="mb-3">
-          <label className="form-label">Tipo de Asignación</label>
-          <select
-            className="form-select"
-            value={tipoAsignacion}
-            onChange={(e) => { setTipoAsignacion(e.target.value); setSelectedUsuario(""); setMensaje(null); }}
+          <div className="mb-4">
+          </div>
+
+          <div
+            className="rounded-4 p-4 bg-white"
+            style={{ border: "2px solid #00851d" }}
           >
-            <option value="instructor">Asignar Instructor a Ficha</option>
-            <option value="aprendiz">Asignar Aprendiz a Ficha</option>
-          </select>
-        </div>
+            <div className="d-flex align-items-center gap-3 mb-3">
+              <div
+                className="p-3 rounded-3"
+                style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                </svg>
+              </div>
 
-        <div className="mb-3">
-          <label className="form-label">Seleccionar Ficha</label>
-          <select
-            className="form-select"
-            value={selectedFicha}
-            onChange={(e) => setSelectedFicha(e.target.value)}
-            required
-          >
-            <option value="">-- Seleccione una Ficha --</option>
-            {fichas.map((f) => (
-              <option key={f.Id_Fic} value={f.Id_Fic}>
-                Ficha {f.Num_Fic} ({f.Jor_Fic})
-              </option>
-            ))}
-          </select>
-        </div>
+              <h5 className="fw-bold text-dark mb-0">Asignación de Fichas</h5>
+            </div>
 
-        <div className="mb-3">
-          <label className="form-label">
-            {tipoAsignacion === "instructor" ? "Seleccionar Instructor" : "Seleccionar Aprendiz"}
-          </label>
-          <select
-            className="form-select"
-            value={selectedUsuario}
-            onChange={(e) => setSelectedUsuario(e.target.value)}
-            required
-          >
-            <option value="">-- Seleccione --</option>
-            {tipoAsignacion === "instructor"
-              ? instructores.map((i) => (
-                  <option key={i.Id_Ins} value={i.Id_Ins}>
-                    {i.Nom_Ins} {i.Ape_Ins} - {i.Num_ide_Ins}
-                  </option>
-                ))
-              : aprendices.map((a) => (
-                  <option key={a.Id_Apr} value={a.Id_Apr}>
-                    {a.Nom_Apr} {a.Ape_Apr} - {a.Num_ide_Apr}
-                  </option>
-                ))}
-          </select>
-        </div>
+            <p className="text-muted small mb-4">
+              Selecciona el tipo de asignación, la ficha y la persona a asignar.
+            </p>
 
-        <button type="submit" className="btn btn-primary">Asignar</button>
-      </form>
-    </div>
+            {cargando ? (
+              <div className="text-muted small py-3">Cargando datos...</div>
+            ) : errorCarga ? (
+              <div className="alert alert-danger small mb-0">{errorCarga}</div>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                {mensaje && (
+                  <div
+                    className={`small mb-3 ${
+                      mensaje.tipo === "exito" ? "text-success" : "text-danger"
+                    }`}
+                  >
+                    {mensaje.tipo === "exito" ? "✓ " : ""}
+                    {mensaje.texto}
+                  </div>
+                )}
+
+                <div className="mb-3">
+                  <label className="form-label small fw-medium">Tipo de Asignación</label>
+                  <select
+                    className="form-select"
+                    value={tipoAsignacion}
+                    onChange={(e) => {
+                      setTipoAsignacion(e.target.value);
+                      setSelectedUsuario("");
+                    }}
+                  >
+                    <option value="instructor">Asignar Instructor a Ficha</option>
+                    <option value="aprendiz">Asignar Aprendiz a Ficha</option>
+                  </select>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label small fw-medium">Seleccionar Ficha</label>
+                  <select
+                    className="form-select"
+                    value={selectedFicha}
+                    onChange={(e) => setSelectedFicha(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Seleccione una Ficha --</option>
+                    {fichas.map((f) => (
+                      <option key={f.Id_Fic} value={f.Id_Fic}>
+                        Ficha {f.Num_Fic} ({f.Jor_Fic})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="mb-4">
+                  <label className="form-label small fw-medium">
+                    {tipoAsignacion === "instructor" ? "Seleccionar Instructor" : "Seleccionar Aprendiz"}
+                  </label>
+                  <select
+                    className="form-select"
+                    value={selectedUsuario}
+                    onChange={(e) => setSelectedUsuario(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Seleccione --</option>
+                    {tipoAsignacion === "instructor"
+                      ? instructores.map((i) => (
+                          <option key={i.Id_Ins} value={i.Id_Ins}>
+                            {i.Nom_Ins} {i.Ape_Ins} - {i.Num_ide_Ins}
+                          </option>
+                        ))
+                      : aprendices.map((a) => (
+                          <option key={a.Id_Apr} value={a.Id_Apr}>
+                            {a.Nom_Apr} {a.Ape_Apr} - {a.Num_ide_Apr}
+                          </option>
+                        ))}
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={enviando}
+                  className="btn rounded-3 w-100 fw-semibold py-2 shadow-sm text-white"
+                  style={{ backgroundColor: "#00851d" }}
+                >
+                  {enviando ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      Asignando...
+                    </>
+                  ) : (
+                    "Asignar"
+                  )}
+                </button>
+              </form>
+            )}
+          </div>
+
+        </main>
+      </div>
+    </>
   );
 }

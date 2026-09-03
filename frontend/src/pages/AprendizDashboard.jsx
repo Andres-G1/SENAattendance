@@ -5,7 +5,7 @@ import FallasNovedades from './Aprendiz/FallasNovedades.jsx'
 
 export default function AprendizDashboard() {
   const currentDate = useCurrentDate();
-  const nombreCompleto = localStorage.getItem('firstName') || ''; 
+  const nombreCompleto = localStorage.getItem('firstName') || '';
   const firstName = nombreCompleto.split(' ')[0];
 
   const [mostrarFallas, setMostrarFallas] = useState(false);
@@ -34,7 +34,7 @@ export default function AprendizDashboard() {
                 </h5>
 
                 <div className="d-flex align-items-baseline mb-2">
-                  <span className="display-4 fw-extrabold text-success tracking-tight">92%</span>
+                  <span className="display-4 fw-extrabold text-success tracking-tight">82%</span>
                   <span className="text-muted ms-2 fw-medium">de asistencia</span>
                 </div>
 
@@ -61,17 +61,17 @@ export default function AprendizDashboard() {
                     </div>
                     <span className="text-secondary fw-medium small">Inasistencias registradas</span>
                   </div>
-                  <span className="badge bg-danger fs-6 px-3 rounded-pill">0 Fallas</span>
+                  <span className="badge bg-danger fs-6 px-3 rounded-pill">4 Fallas</span>
                 </div>
               </div>
             </div>
 
             <div className="col-12 col-lg-7">
               <div className="d-flex flex-column h-100 justify-content-between gap-4">
-                
+                <a
                   href="#historial"
                   className="card text-decoration-none bg-white border-0 shadow-sm p-4 rounded-4 card-hover-premium flex-grow-1"
-                <a>
+                >
                   <div className="d-flex align-items-start gap-3">
                     <div className="p-3 rounded-3 bg-success-subtle text-success border border-success-subtle">
                       <svg

@@ -11,9 +11,6 @@ export default function Aprendices() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
-  const [aprendizSeleccionado, setAprendizSeleccionado] = useState(null);
-  const [mostrarFallas, setMostrarFallas] = useState(false);
-
   const navigate = useNavigate();
 
   const nombreCompleto = localStorage.getItem("firstName") || "";
@@ -42,11 +39,6 @@ export default function Aprendices() {
   useEffect(() => {
     cargarAprendices();
   }, []);
-
-  const abrirHistorialFallas = (nombre) => {
-    setAprendizSeleccionado(nombre);
-    setMostrarFallas(true);
-  };
 
   if (cargando) {
     return (
@@ -122,13 +114,6 @@ export default function Aprendices() {
 
                     <div>
                       <button
-                        className="btn btn-outline-danger btn-sm me-2"
-                        onClick={() => abrirHistorialFallas(nombreCompleto)}
-                      >
-                        ⚠️ Ver Fallas
-                      </button>
-
-                      <button
                         className="btn btn-warning btn-sm me-2"
                         onClick={() =>
                           navigate(`/administrador/aprendices/editar/${aprendiz.Id_Apr}`)
@@ -167,51 +152,6 @@ export default function Aprendices() {
             </ul>
           )}
         </div>
-
-        {mostrarFallas && (
-          <div className="card p-4 shadow-sm border-danger">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h3 className="h6 mb-0 text-danger font-weight-bold">
-                📊 Reporte e Inasistencias de: <span className="text-dark">{aprendizSeleccionado}</span>
-              </h3>
-              <button
-                className="btn-close"
-                type="button"
-                onClick={() => setMostrarFallas(false)}
-                aria-label="Close"
-              ></button>
-            </div>
-
-            <p className="small text-muted mb-3">Vista de simulación de control académico para la sustentación del jurado.</p>
-
-            <div className="table-responsive">
-              <table className="table table-sm table-hover text-center align-middle">
-                <thead className="table-light">
-                  <tr className="small text-uppercase">
-                    <th>Competencia / Guía</th>
-                    <th>Fecha</th>
-                    <th>Horas</th>
-                    <th>Estado</th>
-                  </tr>
-                </thead>
-                <tbody className="small">
-                  <tr>
-                    <td className="text-start">Desarrollo de software según requerimientos técnicos</td>
-                    <td>15/02/2026</td>
-                    <td>6 horas</td>
-                    <td><span className="badge bg-danger">Injustificada</span></td>
-                  </tr>
-                  <tr>
-                    <td className="text-start">Promover la interacción idónea consigo mismo (Ética)</td>
-                    <td>22/02/2026</td>
-                    <td>3 horas</td>
-                    <td><span className="badge bg-warning text-dark">Justificada</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </main>
     </>
   );

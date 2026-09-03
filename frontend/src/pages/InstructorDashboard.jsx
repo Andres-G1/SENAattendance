@@ -1,10 +1,28 @@
+import { useEffect, useState } from 'react'
 import InstructorNavbar from '../components/navbars/InstructorNavbar.jsx'
 import useCurrentDate from '../hooks/useCurrentDate.js'
 
 export default function InstructorDashboard() {
   const currentDate = useCurrentDate()
-  const nombreCompleto = localStorage.getItem('firstName') || ''; 
+  const nombreCompleto = localStorage.getItem('firstName') || '';
   const firstName = nombreCompleto.split(' ')[0];
+  const idInstructor = localStorage.getItem('user_id');
+
+  const [fichas, setFichas] = useState([]);
+  const [loadingFichas, setLoadingFichas] = useState(true);
+
+  useEffect(() => {
+    if (!idInstructor) {
+      setLoadingFichas(false);
+      return;
+    }
+
+    fetch(`http://localhost:8000/asignaciones/instructor/${idInstructor}/fichas`)
+      .then(res => res.json())
+      .then(data => setFichas(data))
+      .catch(err => console.error('Error al cargar fichas:', err))
+      .finally(() => setLoadingFichas(false));
+  }, [idInstructor]);
 
   return (
     <>
@@ -27,7 +45,9 @@ export default function InstructorDashboard() {
                 </h5>
 
                 <div className="d-flex align-items-baseline mb-3">
-                  <span className="display-4 fw-extrabold text-primary tracking-tight">4</span>
+                  <span className="display-4 fw-extrabold text-primary tracking-tight">
+                    {loadingFichas ? '...' : fichas.length}
+                  </span>
                   <span className="text-muted ms-2 fw-medium">Grupos a cargo</span>
                 </div>
 
@@ -89,6 +109,100 @@ export default function InstructorDashboard() {
                 </a>
               </div>
             </div>
+          </div>
+
+          {/* Recuadro de abajo — fichas asignadas */}
+          <div
+            id="mis-fichas"
+            className="rounded-4 p-4 bg-white mt-5"
+            style={{ border: "2px solid #00851d" }}
+          >
+            <div className="d-flex align-items-center gap-3 mb-3">
+              <div
+                className="p-3 rounded-3"
+                style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </div>
+              <h5 className="fw-bold text-dark mb-0">Fichas Asignadas</h5>
+            </div>
+
+            <p className="text-muted small mb-4">
+              Grupos de formación que tienes actualmente a cargo.
+            </p>
+
+            {loadingFichas ? (
+              <p className="text-muted small">Cargando fichas...</p>
+            ) : fichas.length === 0 ? (
+              <p className="text-muted small mb-0">No tienes fichas asignadas actualmente.</p>
+            ) : (
+              <>
+                <div
+                  className="d-inline-block rounded-3 px-4 py-3 mb-4"
+                  style={{ backgroundColor: "#E6F4D7" }}
+                >
+                  <div className="fw-bold fs-4" style={{ color: "#1B5E20" }}>
+                    {fichas.length}
+                  </div>
+                  <div className="small text-muted">A cargo</div>
+                </div>
+
+                <div className="d-flex flex-column gap-2">
+                  {fichas.map((f) => (
+                    <div
+                      key={f.Id_Fic}
+                      className="d-flex align-items-center gap-3 p-3 rounded-3"
+                      style={{ border: "1px solid #e0e0e0" }}
+                    >
+                      <div
+                        className="p-2 rounded-3 d-flex align-items-center justify-content-center"
+                        style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                      </div>
+                      <div>
+                        <span className="fw-medium text-dark">Ficha {f.Num_Fic}</span>
+                        <span className="text-muted small"> · {f.Jor_Fic}</span>
+                        <span className="text-muted small">
+                          {" "}
+                          · {f.Fec_inicio_Fic} a {f.Fec_Fin_Fic}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </main>
       </div>

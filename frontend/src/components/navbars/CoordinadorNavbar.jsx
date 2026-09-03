@@ -1,15 +1,27 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import '../../styles/navbar.css'
+
 /**
  * Navbar del rol Coordinador.
  * @param {{ user: { Nom_Adm: string } }} props
  */
+export default function CoordinadorNavbar({ user }) {
+  const navigate = useNavigate();
+
   const cerrarSesion = (e) => {
     e.preventDefault(); // Evita que el enlace recargue la página de forma nativa
     localStorage.clear(); // Elimina el token, rol, nombre, etc.
     navigate("/", { replace: true }); // Envía al login y destruye la ruta previa del historial
   };
-export default function CoordinadorNavbar({ user }) {
+
+  // Extraemos la inicial de forma segura si el nombre existe
+  const obtenerInicial = () => {
+    if (user && user.Nom_Adm) {
+      return user.Nom_Adm.charAt(0).toUpperCase();
+    }
+    return "U"; // Letra por defecto mientras carga
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-sena px-3 navbar-dark">
       <div className="container-fluid">
@@ -40,6 +52,7 @@ export default function CoordinadorNavbar({ user }) {
               </Link>
             </li>
 
+            {/* Menú Dropdown de Usuarios */}
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle active px-3 py-2"
@@ -53,23 +66,24 @@ export default function CoordinadorNavbar({ user }) {
               </a>
               <ul className="dropdown-menu" aria-labelledby="navUsuarios">
                 <li>
-                  <a className="dropdown-item" href="/coordinador/module_aprendiz_config">
+                  <Link className="dropdown-item" to="/coordinador/module_aprendiz_config">
                     Gestionar Aprendices
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a className="dropdown-item" href="/coordinador/module_instructor_config">
+                  <Link className="dropdown-item" to="/coordinador/module_instructor_config">
                     Gestionar Instructores
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a className="dropdown-item" href="/coordinador/module_coordinador_config">
+                  <Link className="dropdown-item" to="/coordinador/module_coordinador_config">
                     Gestionar Coordinadores
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </li>
 
+            {/* Menú Dropdown de Académico */}
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle active px-3 py-2"
@@ -83,19 +97,19 @@ export default function CoordinadorNavbar({ user }) {
               </a>
               <ul className="dropdown-menu" aria-labelledby="navAcademico">
                 <li>
-                  <a className="dropdown-item" href="/token/module_token_config">
+                  <Link className="dropdown-item" to="/token/module_token_config">
                     Gestionar Fichas
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a className="dropdown-item" href="/career/module_career_config">
+                  <Link className="dropdown-item" to="/career/module_career_config">
                     Gestionar Carreras
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a className="dropdown-item" href="/coordinador/module_career_config">
+                  <Link className="dropdown-item" to="/coordinador/module_career_config">
                     Gestionar Competencias
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </li>
@@ -107,26 +121,27 @@ export default function CoordinadorNavbar({ user }) {
               id="dropdownUser"
               data-bs-toggle="dropdown"
               aria-expanded="false"
+              style={{ cursor: "pointer" }}
             >
-              <div className="text-end lh-sm">
+              <div className="text-end lh-smme-2">
                 <div style={{ fontWeight: 600, color: 'white', fontSize: '0.88rem' }}>
-                  {user?.Nom_Adm}
+                  {user?.Nom_Adm || "Cargando..."}
                 </div>
                 <span className="badge-aprendiz">Coordinador</span>
               </div>
-              <div className="avatar">{user?.Nom_Adm[0]}</div>
+              <div className="avatar">{obtenerInicial()}</div>
             </div>
 
             <ul className="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
               <li>
-                <a className="dropdown-menu-item dropdown-item" href="/config/porfile_users">
+                <Link className="dropdown-menu-item dropdown-item" to="/config/porfile_users">
                   Mi Perfil
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="dropdown-menu-item dropdown-item" href="/config/module_config">
+                <Link className="dropdown-menu-item dropdown-item" to="/config/module_config">
                   Configuración
-                </a>
+                </Link>
               </li>
               <li>
                 <hr className="dropdown-divider" />

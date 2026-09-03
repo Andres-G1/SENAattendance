@@ -149,19 +149,7 @@ export default function Administradores() {
             </ul>
           )}
         </div>
-
-        <div className="card p-4 shadow-sm bg-light border-secondary border-dashed">
-          <div className="card-body text-center py-3">
-            <h3 className="h6 card-title text-secondary mb-2">Asignación de Instructores a Fichas</h3>
-            <p className="card-text small text-muted mb-3">
-              Módulo asignado a Maday para vincular instructores con sus respectivas fichas y competencias del programa.
-            </p>
-            <span className="badge bg-info text-dark p-2">
-              ⚙️ Componente en Desarrollo (Maday)
-            </span>
-          </div>
-        </div>
       </main>
     </>
   );
-}
+} 

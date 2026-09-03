@@ -21,6 +21,19 @@ export default function InstructorNavbar({ user }) {
           <span className="fw-bold">SENA Attendance</span>
         </Link>
 
+        <ul className="navbar-nav flex-row gap-1 d-none d-lg-flex ms-3">
+          <li className="nav-item">
+            <Link className="nav-link active px-3 py-2" to="/instructor">
+              Inicio
+            </Link>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link px-3 py-2" href="/instructor#mis-fichas">
+              Mis Fichas
+            </a>
+          </li>
+        </ul>
+
         <button
           className="navbar-toggler"
           type="button"
@@ -31,15 +44,20 @@ export default function InstructorNavbar({ user }) {
         </button>
 
         <div className="collapse navbar-collapse" id="navInstructor">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+          <ul className="navbar-nav d-lg-none gap-1 mb-2">
             <li className="nav-item">
               <Link className="nav-link active px-3 py-2" to="/instructor">
                 Inicio
               </Link>
             </li>
+            <li className="nav-item">
+              <a className="nav-link px-3 py-2" href="/instructor#mis-fichas">
+                Mis Fichas
+              </a>
+            </li>
           </ul>
 
-          <div className="dropdown">
+          <div className="dropdown ms-lg-auto">
             <div
               className="user-pill dropdown-toggle"
               id="dropdownUser"
