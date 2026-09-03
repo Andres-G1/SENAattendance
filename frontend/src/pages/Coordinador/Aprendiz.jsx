@@ -39,6 +39,7 @@ export default function Aprendices() {
   useEffect(() => {
     cargarAprendices();
   }, []);
+  
 
   if (cargando) {
     return (

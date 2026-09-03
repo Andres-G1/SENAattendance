@@ -8,6 +8,7 @@ export default function Administradores() {
   const [administradores, setAdministradores] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+  const [busqueda, setBusqueda] = useState("");
 
   const navigate = useNavigate();
 
@@ -39,6 +40,10 @@ export default function Administradores() {
   useEffect(() => {
     cargarAdministradores();
   }, []);
+
+  const administradoresFiltrados = administradores.filter((administrador) =>
+    String(administrador.Num_ide_Adm).toLowerCase().includes(busqueda.trim().toLowerCase())
+  );
 
   if (cargando) {
     return (
@@ -83,11 +88,24 @@ export default function Administradores() {
             </button>
           </div>
 
+          <input
+            type="text"
+            className="form-control mb-4"
+            placeholder="Buscar por identificación..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: "240px" }}
+          />
+
           {administradores.length === 0 ? (
             <div className="alert alert-info">No hay administradores registrados.</div>
+          ) : administradoresFiltrados.length === 0 ? (
+            <div className="alert alert-info">
+              No se encontraron administradores con esa identificación.
+            </div>
           ) : (
             <ul className="list-group">
-              {administradores.map((administrador) => {
+              {administradoresFiltrados.map((administrador) => {
                 const nombreCompleto = `${administrador.Nom_Adm} ${administrador.Ape_Adm}`;
 
                 return (
@@ -153,4 +171,4 @@ export default function Administradores() {
       </main>
     </>
   );
-} 
+}
