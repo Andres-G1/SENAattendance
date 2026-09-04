@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { cargarAprendices } from "../../services/api";
-import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar";
+
 
 function CargarAprendices() {
   const [archivo, setArchivo] = useState(null);
@@ -9,11 +9,7 @@ function CargarAprendices() {
   const [error, setError] = useState("");
   const inputRef = useRef(null);
 
-  // Igual que en SubirArchivosMenu: la sesión se guarda en keys sueltas
-  // (firstName, user_id, role, access_token), no como un objeto "user".
-  const user = {
-    Nom_Adm: localStorage.getItem("firstName") || "Usuario",
-  };
+
 
   const seleccionarArchivo = (e) => {
     const archivoSeleccionado = e.target.files[0];
@@ -65,8 +61,8 @@ function CargarAprendices() {
   };
 
   return (
-    <>
-      <CoordinadorNavbar user={user} />
+   
+      
 
       <div className="bg-light min-vh-100 py-5">
         <main className="container" style={{ maxWidth: 700 }}>
@@ -258,7 +254,7 @@ function CargarAprendices() {
 
         </main>
       </div>
-    </>
+  
   );
 }
 

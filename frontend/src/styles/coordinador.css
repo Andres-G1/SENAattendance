@@ -12,3 +12,71 @@
   .form-actions { flex-direction: column; align-items: stretch; }
   .btn { width: 100%; }
 }
+
+.carga-card {
+  background: #ffffff;
+  border: 2px solid #009639;
+  border-radius: 16px;
+  padding: 25px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.carga-icon {
+  width: 58px;
+  height: 58px;
+  background: #e8f5d8;
+  border-radius: 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.carga-content {
+  flex: 1;
+}
+
+.carga-content h3 {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.carga-content p {
+  margin-bottom: 25px;
+  color: #5f6673;
+  font-size: 16px;
+}
+
+.btn-carga {
+  display: block;
+  width: 100%;
+
+  background: #009639;
+  color: white;
+
+  text-decoration: none;
+  text-align: center;
+
+  padding: 13px 20px;
+  border-radius: 8px;
+
+  font-weight: 600;
+  font-size: 16px;
+
+  transition: 0.2s ease;
+}
+
+.btn-carga:hover {
+  background: #007d30;
+  color: white;
+}

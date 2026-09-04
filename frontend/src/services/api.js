@@ -163,3 +163,17 @@ export const cargarInstructores = async (archivo) => {
 
   return response.data;
 };
+
+
+export const cargarAdministradores = async (archivo) => {
+  const formData = new FormData();
+
+  formData.append("file", archivo);
+
+  const response = await api.post(
+    "/usuarios/administradores/upload",
+    formData
+  );
+
+  return response.data;
+};
