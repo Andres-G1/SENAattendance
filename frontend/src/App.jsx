@@ -21,6 +21,8 @@ import CreateF from "./pages/Ficha/Create";
 import EditF from "./pages/Ficha/Edit";
 import DeleteF from "./pages/Ficha/Delete";
 
+import CargaUsuarios from "./pages/Coordinador/CargaUsuarios";
+import CargarAdministradores from "./pages/Coordinador/CargarAdministradores";
 import CargarInstructores from "./pages/Coordinador/CargarInstructores";
 import CargarAprendices from "./pages/Coordinador/CargarAprendices";
 import SubirArchivosMenu from "./pages/CargaArchivos/SubirArchivosMenu";
@@ -118,6 +120,14 @@ return (
             CARRERAS
         ============================== */}
 
+        <Route
+          path="/administrador/carga-usuarios"
+          element={
+            <RutaProtegida rolPermitido="Coordinador">
+              <CargaUsuarios />
+            </RutaProtegida>
+          }
+        />
         <Route
           path="/administrador/carreras"
           element={
@@ -259,6 +269,14 @@ return (
           element={
             <RutaProtegida rolPermitido="Coordinador">
               <CargarAprendices />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/administrador/administradores/cargar"
+          element={
+            <RutaProtegida rolPermitido="Coordinador">
+              <CargarAdministradores />
             </RutaProtegida>
           }
         />
