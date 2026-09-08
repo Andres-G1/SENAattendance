@@ -1,4 +1,9 @@
-.navbar-sena { background-color: #00851d; }
+.navbar-sena {   background: linear-gradient(
+    135deg,
+    #006b18 0%,
+    #00851d 55%,
+    #0a9f2e 100%
+  );}
 .navbar-sena .nav-link { color: rgba(255,255,255,0.85) !important; font-size: 0.9rem; }
 .navbar-sena .nav-link:hover,
 .navbar-sena .nav-link.active { color: #fff !important; background: rgba(255,255,255,0.15); border-radius: 6px; }

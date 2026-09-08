@@ -1,0 +1,286 @@
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer {
+  width: 100%;
+  margin-top: 50px;
+
+  background: linear-gradient(
+    135deg,
+    #006b18 0%,
+    #00851d 55%,
+    #0a9f2e 100%
+  );
+
+  color: white;
+}
+
+
+/* =====================================================
+   CONTENEDOR
+===================================================== */
+
+.footer-container {
+  width: 100%;
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 55px 30px 25px;
+}
+
+
+/* =====================================================
+   CONTENIDO PRINCIPAL
+===================================================== */
+
+.footer-content {
+  display: grid;
+
+  grid-template-columns:
+    2fr
+    1fr
+    1.3fr;
+
+  gap: 60px;
+
+  align-items: start;
+}
+
+
+/* =====================================================
+   MARCA
+===================================================== */
+
+.footer-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.footer-brand h4 {
+  margin: 0;
+
+  font-size: 21px;
+
+  font-weight: 700;
+}
+
+
+.footer-brand-header span {
+  display: block;
+
+  margin-top: 3px;
+
+  font-size: 13px;
+
+  color: rgba(255, 255, 255, 0.72);
+}
+
+
+.footer-brand > p {
+  max-width: 500px;
+
+  margin: 0;
+
+  font-size: 14px;
+
+  line-height: 1.7;
+
+  color: rgba(255, 255, 255, 0.82);
+}
+
+
+/* =====================================================
+   SECCIONES
+===================================================== */
+
+.footer-section h6 {
+  margin: 0 0 18px;
+
+  font-size: 15px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+}
+
+
+.footer-section ul {
+  list-style: none;
+
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 11px;
+}
+
+
+.footer-section li {
+  font-size: 14px;
+
+  color: rgba(255, 255, 255, 0.78);
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.footer-section li:hover {
+  color: white;
+
+  transform: translateX(4px);
+}
+
+
+/* ICONOS */
+
+.footer-section li span {
+  display: inline-block;
+
+  width: 25px;
+
+  margin-right: 5px;
+}
+
+
+/* =====================================================
+   SEPARADOR
+===================================================== */
+
+.footer-divider {
+  width: 100%;
+
+  height: 1px;
+
+  margin: 40px 0 22px;
+
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+
+/* =====================================================
+   PARTE INFERIOR
+===================================================== */
+
+.footer-bottom {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+.footer-bottom p {
+  margin: 0;
+
+  font-size: 13px;
+
+  color: rgba(255, 255, 255, 0.7);
+}
+
+
+.footer-bottom span {
+  padding: 8px 16px;
+
+  border-radius: 50px;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+  color: rgba(255, 255, 255, 0.85);
+
+  background-color: rgba(255, 255, 255, 0.12);
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 900px) {
+
+  .footer-content {
+    grid-template-columns:
+      1.5fr
+      1fr;
+
+    gap: 40px;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+
+}
+
+
+/* =====================================================
+   CELULAR
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .footer-container {
+    padding: 40px 22px 22px;
+  }
+
+
+  .footer-content {
+    grid-template-columns: 1fr;
+
+    gap: 32px;
+  }
+
+
+  .footer-brand {
+    grid-column: auto;
+  }
+
+
+  .footer-brand-header {
+    gap: 12px;
+  }
+
+
+  .footer-logo {
+    width: 48px;
+    height: 48px;
+
+    font-size: 24px;
+  }
+
+
+  .footer-brand h4 {
+    font-size: 19px;
+  }
+
+
+  .footer-bottom {
+    flex-direction: column;
+
+    text-align: center;
+
+    gap: 12px;
+  }
+
+
+  .footer-divider {
+    margin: 30px 0 20px;
+  }
+
+}

@@ -1,82 +1,161 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
+import { Link } from 'react-router-dom';
 import InstructorNavbar from '../components/navbars/InstructorNavbar.jsx'
 import useCurrentDate from '../hooks/useCurrentDate.js'
 
 export default function InstructorDashboard() {
   const currentDate = useCurrentDate()
-  const nombreCompleto = localStorage.getItem('firstName') || '';
-  const firstName = nombreCompleto.split(' ')[0];
-  const idInstructor = localStorage.getItem('user_id');
 
-  const [fichas, setFichas] = useState([]);
-  const [loadingFichas, setLoadingFichas] = useState(true);
+  const nombreCompleto = localStorage.getItem('firstName') || ''
+  const firstName = nombreCompleto.split(' ')[0]
+  const idInstructor = localStorage.getItem('user_id')
+
+  const [fichas, setFichas] = useState([])
+  const [loadingFichas, setLoadingFichas] = useState(true)
 
   useEffect(() => {
     if (!idInstructor) {
-      setLoadingFichas(false);
-      return;
+      setLoadingFichas(false)
+      return
     }
 
-    fetch(`http://localhost:8000/asignaciones/instructor/${idInstructor}/fichas`)
-      .then(res => res.json())
-      .then(data => setFichas(data))
-      .catch(err => console.error('Error al cargar fichas:', err))
-      .finally(() => setLoadingFichas(false));
-  }, [idInstructor]);
+    fetch(
+      `http://localhost:8000/asignaciones/instructor/${idInstructor}/fichas`
+    )
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Error al obtener las asignaciones')
+        }
+
+        return res.json()
+      })
+      .then((data) => {
+        console.log('Asignaciones recibidas:', data)
+        setFichas(data)
+      })
+      .catch((err) => {
+        console.error('Error al cargar fichas:', err)
+        setFichas([])
+      })
+      .finally(() => {
+        setLoadingFichas(false)
+      })
+  }, [idInstructor])
+
+  // -----------------------------------------
+  // CANTIDAD DE FICHAS DIFERENTES
+  // -----------------------------------------
+  const cantidadFichas = new Set(
+    fichas.map((f) => f.Id_Fic)
+  ).size
 
   return (
     <>
       <InstructorNavbar user={{ Nom_Ins: firstName }} />
 
       <div className="bg-light min-vh-100 py-5">
-        <main className="container" style={{ maxWidth: 950 }}>
+
+        <main
+          className="container"
+          style={{ maxWidth: 950 }}
+        >
+
+          {/* =====================================
+              ENCABEZADO
+          ====================================== */}
+
           <div className="row align-items-center mb-5">
+
             <div className="col-12 col-md-8 text-center text-md-start">
-              <h1 className="fw-bold text-dark display-6 mb-1">¡Bienvenido Instructor, {firstName}!</h1>
-              <p className="text-muted mb-0">{currentDate}</p>
+
+              <h1 className="fw-bold text-dark display-6 mb-1">
+                ¡Bienvenido Instructor, {firstName}!
+              </h1>
+
+              <p className="text-muted mb-0">
+                {currentDate}
+              </p>
+
             </div>
+
           </div>
 
+
+          {/* =====================================
+              TARJETAS SUPERIORES
+          ====================================== */}
+
           <div className="row g-4">
+
+            {/* ---------------------------------
+                MIS FICHAS
+            ---------------------------------- */}
+
             <div className="col-12 col-lg-5">
+
               <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
+
                 <h5 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted">
                   Mis Fichas Activas
                 </h5>
 
                 <div className="d-flex align-items-baseline mb-3">
+
                   <span className="display-4 fw-extrabold text-primary tracking-tight">
-                    {loadingFichas ? '...' : fichas.length}
+                    {loadingFichas ? '...' : cantidadFichas}
                   </span>
-                  <span className="text-muted ms-2 fw-medium">Grupos a cargo</span>
+
+                  <span className="text-muted ms-2 fw-medium">
+                    Grupos a cargo
+                  </span>
+
                 </div>
 
                 <p className="text-muted small mb-4">
-                  Recuerda validar y cerrar las novedades de asistencia antes del cierre de cada mes
-                  formativo.
+                  Recuerda validar y cerrar las novedades de asistencia
+                  antes del cierre de cada mes formativo.
                 </p>
 
                 <hr className="text-muted opacity-25 my-3" />
 
                 <div className="d-flex justify-content-between align-items-center bg-warning-subtle p-3 rounded-3 border-start border-warning border-3">
+
                   <div className="d-flex align-items-center gap-2">
+
                     <span className="text-warning-emphasis fw-medium small">
                       Aprendices con alertas por fallas
                     </span>
+
                   </div>
-                  <span className="badge bg-warning text-dark fw-bold rounded-pill">3 Alertas</span>
+
+                  <span className="badge bg-warning text-dark fw-bold rounded-pill">
+                    3 Alertas
+                  </span>
+
                 </div>
+
               </div>
+
             </div>
 
+
+            {/* ---------------------------------
+                ASISTENCIAS
+            ---------------------------------- */}
+
             <div className="col-12 col-lg-7">
+
               <div className="d-flex flex-column h-100 justify-content-between gap-4">
-                <a
-                  href="#control-asistencia"
+
+                <Link
+                  to="/instructor/asistencia"
                   className="card text-decoration-none bg-white border-0 shadow-sm p-4 rounded-4 card-hover-premium flex-grow-1"
                 >
+
                   <div className="d-flex align-items-start gap-3">
+
                     <div className="p-3 rounded-3 bg-primary-subtle text-primary border border-primary-subtle">
+
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -88,40 +167,81 @@ export default function InstructorDashboard() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
+
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+
+                        <polyline points="14 2 14 8 20 8" />
+
+                        <line x1="16" y1="13" x2="8" y2="13" />
+
+                        <line x1="16" y1="17" x2="8" y2="17" />
+
+                        <polyline points="10 9 9 9 8 9" />
+
                       </svg>
+
                     </div>
+
+
                     <div className="flex-grow-1">
+
                       <div className="d-flex justify-content-between align-items-center mb-1">
-                        <h5 className="fw-bold text-dark mb-0">Revisar Asistencias</h5>
-                        <span className="text-primary small fw-medium">Ingresar &rarr;</span>
+
+                        <h5 className="fw-bold text-dark mb-0">
+                          Revisar Asistencias
+                        </h5>
+
+                        <span className="text-primary small fw-medium">
+                          Ingresar →
+                        </span>
+
                       </div>
+
                       <p className="text-muted small mb-0">
-                        Consulta el consolidado de ingresos, gestiona retardos y evalúa el porcentaje de
-                        asistencia general de tus fichas.
+                        Consulta el consolidado de ingresos, gestiona
+                        retardos y evalúa el porcentaje de asistencia
+                        general de tus fichas.
                       </p>
+
                     </div>
+
                   </div>
-                </a>
+
+                </Link>
+
               </div>
+
             </div>
+
           </div>
 
-          {/* Recuadro de abajo — fichas asignadas */}
+
+          {/* =====================================
+              FICHAS ASIGNADAS
+          ====================================== */}
+
           <div
             id="mis-fichas"
             className="rounded-4 p-4 bg-white mt-5"
-            style={{ border: "2px solid #00851d" }}
+            style={{
+              border: '2px solid #00851d'
+            }}
           >
+
+            {/* ---------------------------------
+                TITULO
+            ---------------------------------- */}
+
             <div className="d-flex align-items-center gap-3 mb-3">
+
               <div
                 className="p-3 rounded-3"
-                style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
+                style={{
+                  backgroundColor: '#E6F4D7',
+                  color: '#1B5E20'
+                }}
               >
+
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -133,78 +253,270 @@ export default function InstructorDashboard() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
+
+                  <rect
+                    x="3"
+                    y="4"
+                    width="18"
+                    height="18"
+                    rx="2"
+                    ry="2"
+                  />
+
+                  <line
+                    x1="16"
+                    y1="2"
+                    x2="16"
+                    y2="6"
+                  />
+
+                  <line
+                    x1="8"
+                    y1="2"
+                    x2="8"
+                    y2="6"
+                  />
+
+                  <line
+                    x1="3"
+                    y1="10"
+                    x2="21"
+                    y2="10"
+                  />
+
                 </svg>
+
               </div>
-              <h5 className="fw-bold text-dark mb-0">Fichas Asignadas</h5>
+
+
+              <h5 className="fw-bold text-dark mb-0">
+                Fichas Asignadas
+              </h5>
+
             </div>
 
+
             <p className="text-muted small mb-4">
-              Grupos de formación que tienes actualmente a cargo.
+              Competencias, días y períodos de formación de las fichas
+              que tienes actualmente a cargo.
             </p>
 
+
+            {/* =====================================
+                CONTENIDO
+            ====================================== */}
+
             {loadingFichas ? (
-              <p className="text-muted small">Cargando fichas...</p>
+
+              <p className="text-muted small">
+                Cargando fichas...
+              </p>
+
             ) : fichas.length === 0 ? (
-              <p className="text-muted small mb-0">No tienes fichas asignadas actualmente.</p>
+
+              <p className="text-muted small mb-0">
+                No tienes fichas asignadas actualmente.
+              </p>
+
             ) : (
+
               <>
-                <div
-                  className="d-inline-block rounded-3 px-4 py-3 mb-4"
-                  style={{ backgroundColor: "#E6F4D7" }}
-                >
-                  <div className="fw-bold fs-4" style={{ color: "#1B5E20" }}>
-                    {fichas.length}
-                  </div>
-                  <div className="small text-muted">A cargo</div>
+
+                {/* ---------------------------------
+                    CONTADOR
+                ---------------------------------- */}
+                {/* =====================================
+                    LISTA DE ASIGNACIONES
+                ====================================== */}
+
+                <div className="d-flex flex-column gap-3">
+
+                  {fichas.map((f) => (
+
+                    <div
+                      key={`${f.Id_Fic}-${f.Id_Ins}-${f.Id_Comp}-${f.Dia}`}
+                      className="p-3 rounded-3"
+                      style={{
+                        border: '1px solid #e0e0e0',
+                        backgroundColor: '#fff'
+                      }}
+                    >
+
+                      <div className="d-flex align-items-start gap-3">
+
+                        {/* ---------------------------------
+                            ICONO
+                        ---------------------------------- */}
+
+                        <div
+                          className="p-2 rounded-3 d-flex align-items-center justify-content-center"
+                          style={{
+                            backgroundColor: '#E6F4D7',
+                            color: '#1B5E20'
+                          }}
+                        >
+
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+
+                            <rect
+                              x="3"
+                              y="4"
+                              width="18"
+                              height="18"
+                              rx="2"
+                              ry="2"
+                            />
+
+                            <line
+                              x1="16"
+                              y1="2"
+                              x2="16"
+                              y2="6"
+                            />
+
+                            <line
+                              x1="8"
+                              y1="2"
+                              x2="8"
+                              y2="6"
+                            />
+
+                            <line
+                              x1="3"
+                              y1="10"
+                              x2="21"
+                              y2="10"
+                            />
+
+                          </svg>
+
+                        </div>
+
+
+                        {/* =================================
+                            INFORMACIÓN
+                        ================================== */}
+
+                        <div className="flex-grow-1">
+
+                          {/* FICHA */}
+
+                          <div className="fw-bold text-dark fs-5">
+                            Ficha {f.Num_Fic || f.Id_Fic}
+                          </div>
+
+
+                          {/* COMPETENCIA */}
+
+                          <div className="text-muted small mt-2">
+
+                            Competencia:
+
+                            <span className="fw-medium text-dark ms-1">
+
+                              {f.Competencia || `Competencia ${f.Id_Comp}`}
+
+                            </span>
+
+                          </div>
+
+                          {/* DÍA */}
+
+                          <div className="text-muted small">
+
+                            Día de formación:
+
+                            <span className="fw-medium text-dark ms-1">
+                              {f.Dia}
+                            </span>
+
+                          </div>
+
+
+                          {/* JORNADA */}
+
+                          {f.Jor_Fic && (
+
+                            <div className="text-muted small">
+
+                              Jornada:
+
+                              <span className="fw-medium text-dark ms-1">
+                                {f.Jor_Fic}
+                              </span>
+
+                            </div>
+
+                          )}
+
+
+                          {/* =================================
+                              PERÍODO DE LA COMPETENCIA
+                          ================================== */}
+
+                          {f.Fec_Inicio_Comp && f.Fec_Fin_Comp && (
+
+                            <div className="mt-2 p-2 rounded-3"
+                              style={{
+                                backgroundColor: '#F0F8EA'
+                              }}
+                            >
+
+                              <div className="text-muted small">
+
+                                Período de la competencia:
+
+                              </div>
+
+                              <div
+                                className="fw-semibold"
+                                style={{
+                                  color: '#1B5E20'
+                                }}
+                              >
+
+                                {f.Fec_Inicio_Comp}
+
+                                <span className="mx-2">
+                                  →
+                                </span>
+
+                                {f.Fec_Fin_Comp}
+
+                              </div>
+
+                            </div>
+
+                          )}
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  ))}
+
                 </div>
 
-                <div className="d-flex flex-column gap-2">
-                  {fichas.map((f) => (
-                    <div
-                      key={f.Id_Fic}
-                      className="d-flex align-items-center gap-3 p-3 rounded-3"
-                      style={{ border: "1px solid #e0e0e0" }}
-                    >
-                      <div
-                        className="p-2 rounded-3 d-flex align-items-center justify-content-center"
-                        style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                          <line x1="16" y1="2" x2="16" y2="6"></line>
-                          <line x1="8" y1="2" x2="8" y2="6"></line>
-                          <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                      </div>
-                      <div>
-                        <span className="fw-medium text-dark">Ficha {f.Num_Fic}</span>
-                        <span className="text-muted small"> · {f.Jor_Fic}</span>
-                        <span className="text-muted small">
-                          {" "}
-                          · {f.Fec_inicio_Fic} a {f.Fec_Fin_Fic}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </>
+
             )}
+
           </div>
+
         </main>
+
       </div>
     </>
   )
