@@ -47,6 +47,8 @@ import ConfigCompetencia from "./pages/Competencias/ConfigCompetencias";
 import CreateCompetencia from "./pages/Competencias/Create";
 import EditCompetencia from "./pages/Competencias/Edit";
 import ConfirmarCompetencia from "./pages/Competencias/ConfirmarCompetencias";
+import ActualizarPerfil from "./ActualizarPerfl";
+import MiPerfil from "./MiPerfil";
 
 function App() {
 return (
@@ -75,6 +77,24 @@ return (
           element={
             <RutaProtegida rolPermitido="Aprendiz">
               <AprendizDashboard />
+            </RutaProtegida>
+          }
+        />
+
+        <Route
+          path="/config/perfil"
+          element={
+            <RutaProtegida>
+              <MiPerfil />
+            </RutaProtegida>
+          }
+        />
+
+        <Route
+          path="/config/modulo_config"
+          element={
+            <RutaProtegida>
+              <ActualizarPerfil />
             </RutaProtegida>
           }
         />

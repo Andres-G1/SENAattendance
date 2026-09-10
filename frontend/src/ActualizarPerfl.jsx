@@ -1,20 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "./configuracion.css";
+import CuentaNavbar from "./components/CuentaNavbar";
+import "./styles/Configuracion.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function ActualizarPerfil() {
   const storedRole = (localStorage.getItem("role") || "").toLowerCase();
   const storedUserId = localStorage.getItem("user_id") || "";
+  const storedName = localStorage.getItem("firstName") || "";
+  const roleLabel = storedRole === "coordinador" ? "Coordinador" : storedRole.charAt(0).toUpperCase() + storedRole.slice(1);
+  const dashboardByRole = { aprendiz: "/aprendiz", instructor: "/instructor", coordinador: "/administrador", administrador: "/administrador" };
+  const dashboard = dashboardByRole[storedRole] || "/";
 
   const [form, setForm] = useState({
     role: storedRole,
     user_id: storedUserId,
-    nombre: "",
+    nombre: storedName,
     apellido: "",
     correo: "",
+    contraseña_actual: "",
+    contraseña_nueva: "",
   });
+
+  useEffect(() => {
+    const rolePath = storedRole === "coordinador" ? "administrador" : storedRole;
+    fetch(`${API_URL}/usuarios/${rolePath}/${storedUserId}`)
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (!data) return;
+        setForm((prev) => ({
+          ...prev,
+          nombre: data.Nom_Apr || data.Nom_Ins || data.Nom_Adm || prev.nombre,
+          apellido: data.Ape_Apr || data.Ape_Ins || data.Ape_Adm || prev.apellido,
+          correo: data.Cor_Apr || data.Cor_Ins || data.Cor_Adm || prev.correo,
+        }));
+      })
+      .catch(() => {});
+  }, [storedRole, storedUserId]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -35,21 +58,33 @@ export default function ActualizarPerfil() {
       if (form.apellido.trim()) payload.apellido = form.apellido.trim();
       if (form.correo.trim()) payload.correo = form.correo.trim();
 
-      if (Object.keys(payload).length === 0) {
+      if (Object.keys(payload).length === 0 && !form.contraseña_nueva.trim()) {
         throw new Error("Debes enviar al menos un campo para actualizar");
       }
 
-      const path = `${API_URL}/users/${form.role}/${Number(form.user_id)}/perfil`;
-      const res = await fetch(path, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      if (Object.keys(payload).length > 0) {
+        const path = `${API_URL}/users/${form.role}/${Number(form.user_id)}/perfil`;
+        const res = await fetch(path, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const detail = Array.isArray(data.detail) ? "Error de validación" : data.detail;
-        throw new Error(detail || "No fue posible actualizar perfil");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const detail = Array.isArray(data.detail) ? "Error de validación" : data.detail;
+          throw new Error(detail || "No fue posible actualizar perfil");
+        }
+      }
+
+      if (form.contraseña_nueva.trim()) {
+        const passwordResponse = await fetch(`${API_URL}/users/cambiar-contrasena`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: form.role, user_id: Number(form.user_id), contraseña_actual: form.contraseña_actual, contraseña_nueva: form.contraseña_nueva }),
+        });
+        const passwordData = await passwordResponse.json().catch(() => ({}));
+        if (!passwordResponse.ok) throw new Error(passwordData.detail || "No fue posible cambiar la contraseña");
       }
 
       setSuccess("Perfil actualizado correctamente");
@@ -61,25 +96,33 @@ export default function ActualizarPerfil() {
   };
 
   return (
-    <main className="config-page">
-      <section className="config-card">
-        <p className="config-eyebrow">Configuración de cuenta</p>
-        <h2>Actualizar perfil</h2>
-        <p className="config-description">Actualiza la información del usuario que inició sesión.</p>
-
-        <div className="session-details" aria-label="Datos de sesión">
-          <span>Cuenta autenticada</span>
-          <span>Datos protegidos</span>
-        </div>
+    <div className="account-page">
+      <CuentaNavbar role={storedRole} name={storedName} />
+      <main className="config-page">
+      <section className="config-card config-card-edit">
+        <header className="config-header">
+          <div>
+            <h2>Configuración de cuenta</h2>
+            <p className="config-description">Actualiza tus datos de acceso con seguridad y claridad.</p>
+          </div>
+          <span className="role-badge">{roleLabel}</span>
+        </header>
 
         <form onSubmit={onSubmit} className="config-form">
-          <label>Nombre<input name="nombre" value={form.nombre} onChange={onChange} placeholder="Tu nombre" /></label>
+          <label>Nombre completo<input name="nombre" value={form.nombre} onChange={onChange} placeholder="Tu nombre" /></label>
 
-          <label>Apellido<input name="apellido" value={form.apellido} onChange={onChange} placeholder="Tu apellido" /></label>
+          <label>Rol<input value={roleLabel} readOnly disabled /></label>
 
-          <label>Correo electrónico<input name="correo" value={form.correo} onChange={onChange} placeholder="correo@ejemplo.com" type="email" /></label>
+          <label className="config-field-wide">Correo electrónico<input name="correo" value={form.correo} onChange={onChange} placeholder="correo@ejemplo.com" type="email" /></label>
 
-          <button type="submit" disabled={loading}>{loading ? "Guardando..." : "Guardar cambios"}</button>
+          <label className="config-field-wide">Nueva contraseña<input name="contraseña_nueva" type="password" value={form.contraseña_nueva} onChange={onChange} placeholder="Deja vacío si no quieres cambiarla" /></label>
+
+          <label className="config-field-wide">Confirma tu contraseña actual<input name="contraseña_actual" type="password" value={form.contraseña_actual} onChange={onChange} placeholder="Necesaria para guardar cualquier cambio" /></label>
+
+          <div className="config-actions config-field-wide">
+            <Link className="config-cancel" to={dashboard}>Cancelar</Link>
+            <button type="submit" disabled={loading}>{loading ? "Guardando..." : "Guardar cambios"}</button>
+          </div>
         </form>
 
         {error ? <p className="form-message form-error">{error}</p> : null}
@@ -87,6 +130,7 @@ export default function ActualizarPerfil() {
 
         <Link className="back-link" to="/">Volver al inicio de sesión</Link>
       </section>
-    </main>
+      </main>
+    </div>
   );
 }

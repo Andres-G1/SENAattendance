@@ -70,17 +70,17 @@ export default function CoordinadorNavbar({ user }) {
 
             <ul className="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
               <li>
-                <a className="dropdown-menu-item dropdown-item" href="/config/porfile_aprendiz">
+                <Link className="dropdown-menu-item dropdown-item" to="/config/perfil">
                   Mi Perfil
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   className="dropdown-menu-item dropdown-item"
-                  href="/config/module_config_aprendiz"
+                  to="/config/modulo_config"
                 >
                   Configuración
-                </a>
+                </Link>
               </li>
               <li>
                 <hr className="dropdown-divider" />
