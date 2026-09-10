@@ -17,8 +17,8 @@ export default function InstructorNavbar({ user }) {
   };
 
   const obtenerInicial = () => {
-    if (user && user.Nom_Adm) {
-      return user.Nom_Adm.charAt(0).toUpperCase();
+    if (user && user.Nom_Ins) {
+      return user.Nom_Ins.charAt(0).toUpperCase();
     }
     return "U"; 
   };
@@ -43,9 +43,14 @@ export default function InstructorNavbar({ user }) {
             </Link>
           </li>
           <li className="nav-item">
-            <a className="nav-link px-3 py-2" href="/instructor#mis-fichas">
+            <a className="nav-link active px-3 py-2" href="/instructor#mis-fichas">
               Mis Fichas
             </a>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link active px-3 py-2" to="/instructor/asistencia">
+              Revisar Asistencia
+            </Link>
           </li>
         </ul>
 

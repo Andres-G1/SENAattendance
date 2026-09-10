@@ -15,8 +15,8 @@ export default function CoordinadorNavbar({ user }) {
   };
 
   const obtenerInicial = () => {
-    if (user && user.Nom_Adm) {
-      return user.Nom_Adm.charAt(0).toUpperCase();
+    if (user && user.Nom_Apr) {
+      return user.Nom_Apr.charAt(0).toUpperCase();
     }
     return "U"; 
   };
