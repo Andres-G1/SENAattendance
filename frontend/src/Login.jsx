@@ -26,10 +26,32 @@ export default function Login() {
     setLoading(true);
 
     try {
+      const typeid = form.typeid?.trim();
+      const documentId = String(form.id ?? "").trim();
+      const password = String(form.password ?? "").trim();
+
+      if (!typeid) {
+        throw new Error("Selecciona un tipo de documento.");
+      }
+
+      if (!/^\d+$/.test(documentId)) {
+        throw new Error("El documento debe contener solo números.");
+      }
+
+      if (!password) {
+        throw new Error("Ingresa tu contraseña.");
+      }
+
+      const payload = {
+        typeid,
+        id: Number(documentId),
+        password,
+      };
+
       const res = await fetch(`${API_URL}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
