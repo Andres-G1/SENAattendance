@@ -30,7 +30,9 @@ class UsuarioCrear(BaseModel):
     tipo_identificacion: TipoIdentificacion
     numero_identificacion: int
     correo: str
-    contraseña: str
+    # Si no se envía contraseña, se usa el número de documento por
+    # defecto (mismo criterio que la carga masiva por Excel/CSV).
+    contraseña: Optional[str] = None
 
     Id_Fic: Optional[int] = None
 
@@ -56,6 +58,10 @@ def crear_usuario(
     datos: UsuarioCrear,
     session: Session = Depends(get_session)
 ):
+    # Si no se envía contraseña desde el formulario, se usa el número
+    # de documento como contraseña inicial del usuario.
+    contraseña_final = datos.contraseña or str(datos.numero_identificacion)
+
     # -----------------------------------------------------
     # APRENDIZ
     # -----------------------------------------------------
@@ -81,7 +87,7 @@ def crear_usuario(
             Tip_ide_Apr=datos.tipo_identificacion,
             Num_ide_Apr=datos.numero_identificacion,
             Cor_Apr=datos.correo,
-            Con_Apr=hash_contraseña(datos.contraseña),
+            Con_Apr=hash_contraseña(contraseña_final),
             Es_Apr=True,
             Id_Fic=datos.Id_Fic
         )
@@ -110,7 +116,7 @@ def crear_usuario(
             Tip_ide_Ins=datos.tipo_identificacion,
             Num_ide_Ins=datos.numero_identificacion,
             Cor_Ins=datos.correo,
-            Con_Ins=hash_contraseña(datos.contraseña),
+            Con_Ins=hash_contraseña(contraseña_final),
             Es_Ins=True
         )
     # -----------------------------------------------------
@@ -139,7 +145,7 @@ def crear_usuario(
             Tip_ide_Adm=datos.tipo_identificacion,
             Num_ide_Adm=datos.numero_identificacion,
             Cor_Adm=datos.correo,
-            Con_Adm=hash_contraseña(datos.contraseña),
+            Con_Adm=hash_contraseña(contraseña_final),
             Es_Adm=True
         )
 

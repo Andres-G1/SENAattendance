@@ -18,7 +18,6 @@ export default function CrearInstructor() {
     tipo_identificacion: "CC",
     numero_identificacion: "",
     correo: "",
-    contraseña: "",
   });
 
   const handleChange = (e) => {
@@ -35,8 +34,7 @@ export default function CrearInstructor() {
       !formulario.apellido ||
       !formulario.tipo_identificacion ||
       !formulario.numero_identificacion ||
-      !formulario.correo ||
-      !formulario.contraseña
+      !formulario.correo
     ) {
       setError("Todos los campos son obligatorios.");
       return;
@@ -52,7 +50,8 @@ export default function CrearInstructor() {
         tipo_identificacion: formulario.tipo_identificacion,
         numero_identificacion: Number(formulario.numero_identificacion),
         correo: formulario.correo.trim(),
-        contraseña: formulario.contraseña,
+        // La contraseña inicial es el número de documento
+        // (se asigna automáticamente en el backend).
       };
 
       await crearUsuario(datos);
@@ -170,18 +169,10 @@ export default function CrearInstructor() {
               </div>
 
               <div className="col-md-12">
-                <label htmlFor="contraseña" className="form-label">
-                  Contraseña
-                </label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="contraseña"
-                  name="contraseña"
-                  value={formulario.contraseña}
-                  onChange={handleChange}
-                  required
-                />
+                <div className="alert alert-info py-2 mb-0" role="alert">
+                  La contraseña inicial del instructor será su número
+                  de documento. Podrá cambiarla luego desde su perfil.
+                </div>
               </div>
             </div>
 

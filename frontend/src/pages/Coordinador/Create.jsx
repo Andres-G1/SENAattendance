@@ -32,7 +32,6 @@ export default function CrearAprendiz() {
     tipo_identificacion: "CC",
     numero_identificacion: "",
     correo: "",
-    contraseña: "",
     Id_Car: "",
     Id_Fic: "",
   });
@@ -142,7 +141,6 @@ export default function CrearAprendiz() {
       !formulario.tipo_identificacion ||
       !formulario.numero_identificacion ||
       !formulario.correo ||
-      !formulario.contraseña ||
       !formulario.Id_Car ||
       !formulario.Id_Fic
     ) {
@@ -166,7 +164,8 @@ export default function CrearAprendiz() {
           formulario.numero_identificacion
         ),
         correo: formulario.correo.trim(),
-        contraseña: formulario.contraseña,
+        // La contraseña inicial es el número de documento
+        // (se asigna automáticamente en el backend).
         Id_Fic: Number(formulario.Id_Fic),
       };
 
@@ -404,28 +403,14 @@ export default function CrearAprendiz() {
               </div>
 
               {/* =================================================
-                  CONTRASEÑA
+                  CONTRASEÑA (automática)
               ================================================== */}
 
               <div className="col-md-12">
-
-                <label
-                  htmlFor="contraseña"
-                  className="form-label"
-                >
-                  Contraseña
-                </label>
-
-                <input
-                  type="password"
-                  className="form-control"
-                  id="contraseña"
-                  name="contraseña"
-                  value={formulario.contraseña}
-                  onChange={handleChange}
-                  required
-                />
-
+                <div className="alert alert-info py-2 mb-0" role="alert">
+                  La contraseña inicial del aprendiz será su número
+                  de documento. Podrá cambiarla luego desde su perfil.
+                </div>
               </div>
 
               {/* =================================================

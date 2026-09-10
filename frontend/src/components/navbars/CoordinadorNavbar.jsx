@@ -70,13 +70,21 @@ export default function CoordinadorNavbar({ user }) {
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/administrador/Instructores">
+                  <Link className="dropdown-item" to="/administrador/instructores">
                     Gestionar Instructores
                   </Link>
                 </li>
                 <li>
                   <Link className="dropdown-item" to="/administrador/administradores">
                     Gestionar Coordinadores
+                  </Link>
+                </li>
+                <li>
+                  <hr className="dropdown-divider" />
+                </li>
+                <li>
+                  <Link className="dropdown-item" to="/administrador/carga-usuarios">
+                    Cargar usuarios (Excel)
                   </Link>
                 </li>
               </ul>
@@ -110,20 +118,28 @@ export default function CoordinadorNavbar({ user }) {
                     Gestionar Competencias
                   </Link>
                 </li>
+                <li>
+                  <hr className="dropdown-divider" />
+                </li>
+                <li>
+                  <Link className="dropdown-item" to="/fichas/subir-archivos">
+                    Cargar archivos planos (Fichas/Carreras/Competencias)
+                  </Link>
+                </li>
               </ul>
             </li>
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle active px-3 py-2"
                 href="#"
-                id="navAcademico"
+                id="navGrupos"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
                 Gestion Grupos
               </a>
-              <ul className="dropdown-menu" aria-labelledby="navAcademico">
+              <ul className="dropdown-menu" aria-labelledby="navGrupos">
                 <li>
                   <Link className="dropdown-item" to="/fichas/asignar">
                     Asignación de Fichas
