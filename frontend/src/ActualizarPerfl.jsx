@@ -19,6 +19,7 @@ export default function ActualizarPerfil() {
     nombre: storedName,
     apellido: "",
     correo: "",
+    numero_identificacion: "",
     contraseña_actual: "",
     contraseña_nueva: "",
   });
@@ -34,6 +35,7 @@ export default function ActualizarPerfil() {
           nombre: data.Nom_Apr || data.Nom_Ins || data.Nom_Adm || prev.nombre,
           apellido: data.Ape_Apr || data.Ape_Ins || data.Ape_Adm || prev.apellido,
           correo: data.Cor_Apr || data.Cor_Ins || data.Cor_Adm || prev.correo,
+          numero_identificacion: data.Num_ide_Apr || data.Num_ide_Ins || data.Num_ide_Adm || prev.numero_identificacion,
         }));
       })
       .catch(() => {});
@@ -112,6 +114,8 @@ export default function ActualizarPerfil() {
           <label>Nombre completo<input name="nombre" value={form.nombre} onChange={onChange} placeholder="Tu nombre" /></label>
 
           <label>Rol<input value={roleLabel} readOnly disabled /></label>
+
+          <label>Número de identificación<input value={form.numero_identificacion} readOnly disabled /></label>
 
           <label className="config-field-wide">Correo electrónico<input name="correo" value={form.correo} onChange={onChange} placeholder="correo@ejemplo.com" type="email" /></label>
 

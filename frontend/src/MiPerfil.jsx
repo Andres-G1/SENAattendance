@@ -16,7 +16,7 @@ export default function MiPerfil() {
   const firstName = localStorage.getItem("firstName") || "Usuario";
   const dashboard = dashboardByRole[role.toLowerCase()] || "/";
   const initials = firstName.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
-  const [profile, setProfile] = useState({ correo: "Información de contacto", documento: "CC", ficha: "Sin ficha" });
+  const [profile, setProfile] = useState({ correo: "Información de contacto", documento: "CC", numero: "-", ficha: "Sin ficha" });
 
   useEffect(() => {
     const rolePath = role.toLowerCase() === "coordinador" ? "administrador" : role.toLowerCase();
@@ -27,6 +27,7 @@ export default function MiPerfil() {
         setProfile({
           correo: data.Cor_Apr || data.Cor_Ins || data.Cor_Adm || "Información de contacto",
           documento: data.Tip_ide_Apr || data.Tip_ide_Ins || data.Tip_ide_Adm || "CC",
+          numero: data.Num_ide_Apr || data.Num_ide_Ins || data.Num_ide_Adm || "-",
           ficha: data.Num_Fic || "Sin ficha",
         });
       })
@@ -50,6 +51,7 @@ export default function MiPerfil() {
           <div><span>Nombre completo</span><strong>{firstName}</strong></div>
           <div><span>Tipo de documento</span><strong>{profile.documento}</strong></div>
           <div><span>Correo electrónico</span><strong>{profile.correo}</strong></div>
+          <div><span>Número de identificación</span><strong>{profile.numero}</strong></div>
           <div><span>Ficha o token</span><strong>{profile.ficha}</strong></div>
         </div>
 
