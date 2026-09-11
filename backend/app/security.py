@@ -1,6 +1,9 @@
 import os
+from hmac import compare_digest
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
+from passlib.exc import UnknownHashError
+from werkzeug.security import check_password_hash
 import jwt
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -11,7 +14,14 @@ def hash_contraseña(contraseña: str) -> str:
 
 
 def verificar_contraseña(contraseña_plana: str, contraseña_hash: str) -> bool:
-    return pwd_context.verify(contraseña_plana, contraseña_hash)
+    if str(contraseña_hash or "").startswith("scrypt:"):
+        return check_password_hash(contraseña_hash, contraseña_plana)
+
+    try:
+        return pwd_context.verify(contraseña_plana, contraseña_hash)
+    except UnknownHashError:
+        # Compatibilidad con datos legacy guardados sin hash.
+        return compare_digest(contraseña_plana, str(contraseña_hash or ""))
 
 
 SECRET_KEY = os.getenv("SECRET_KEY")
