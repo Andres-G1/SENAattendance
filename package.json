@@ -1,0 +1,9 @@
+{
+  "name": "senaattendance-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "cd backend && uv run fastapi dev app/main.py"
+  }
+}

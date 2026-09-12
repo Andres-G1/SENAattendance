@@ -34,10 +34,13 @@ export default function Login({ onLoginSuccess }) {
 
       navigate(data.redirect);
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError(err.response.data.detail || "Credenciales inválidas");
+      if (err.response?.data?.detail) {
+        const detail = err.response.data.detail;
+        setError(typeof detail === "string" ? detail : "Datos de ingreso inválidos");
+      } else if (err.response?.status === 401) {
+        setError("Credenciales inválidas");
       } else {
-        setError("Error al conectar con el servidor");
+        setError("Error al conectar con el servidor (" + (err.message || "red") + ")");
       }
     }
   };

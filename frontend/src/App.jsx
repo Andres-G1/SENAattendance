@@ -89,9 +89,41 @@ return (
             </RutaProtegida>
           }
         />
+        <Route
+          path="/config/porfile_users"
+          element={
+            <RutaProtegida>
+              <MiPerfil />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/config/porfile_aprendiz"
+          element={
+            <RutaProtegida>
+              <MiPerfil />
+            </RutaProtegida>
+          }
+        />
 
         <Route
           path="/config/modulo_config"
+          element={
+            <RutaProtegida>
+              <ActualizarPerfil />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/config/module_config"
+          element={
+            <RutaProtegida>
+              <ActualizarPerfil />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/config/module_config_aprendiz"
           element={
             <RutaProtegida>
               <ActualizarPerfil />

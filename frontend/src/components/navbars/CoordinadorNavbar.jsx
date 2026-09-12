@@ -168,12 +168,12 @@ export default function CoordinadorNavbar({ user }) {
 
             <ul className="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
               <li>
-                <Link className="dropdown-menu-item dropdown-item" to="/config/porfile_users">
+                <Link className="dropdown-menu-item dropdown-item" to="/config/perfil">
                   Mi Perfil
                 </Link>
               </li>
               <li>
-                <Link className="dropdown-menu-item dropdown-item" to="/config/module_config">
+                <Link className="dropdown-menu-item dropdown-item" to="/config/modulo_config">
                   Configuración
                 </Link>
               </li>

@@ -17,3 +17,5 @@ Thumbs.db
 
 *.log
 npm-debug.log*
+*.db
+backend/*.db

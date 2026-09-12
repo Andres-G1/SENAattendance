@@ -30,6 +30,7 @@ def obtener_usuario(role: str, user_id: int, session: Session):
 		"instructor": Instructor,
 		"coordinador": Administrador,
 		"administrador": Administrador,
+		"admin": Administrador,
 	}
 	modelo = modelos.get(role.lower())
 	if modelo is None:

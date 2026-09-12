@@ -77,6 +77,9 @@ export default function ActualizarPerfil() {
           const detail = Array.isArray(data.detail) ? "Error de validación" : data.detail;
           throw new Error(detail || "No fue posible actualizar perfil");
         }
+        if (form.nombre.trim()) {
+          localStorage.setItem("firstName", form.nombre.trim());
+        }
       }
 
       if (form.contraseña_nueva.trim()) {
