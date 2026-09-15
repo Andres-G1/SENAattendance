@@ -11,12 +11,33 @@ export default function Login({ onLoginSuccess }) {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // =====================================================
+  // NUEVO: Capturar si la sesión expiró por la URL
+  // =====================================================
+  const query = new URLSearchParams(window.location.search);
+  const estaExpirado = query.get("expirado") === "true";
+
   useEffect(() => {
     document.body.classList.add("login-page");
     return () => {
       document.body.classList.remove("login-page");
     };
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const role = localStorage.getItem("role");
+
+    if (token && role) {
+      if (role === "Aprendiz") {
+        navigate("/aprendiz", { replace: true });
+      } else if (role === "Instructor") {
+        navigate("/instructor", { replace: true });
+      } else if (role === "Coordinador") {
+        navigate("/administrador", { replace: true });
+      }
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,10 +46,10 @@ export default function Login({ onLoginSuccess }) {
     try {
       const data = await login(typeid, Number(id), password);
 
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("role", data.role);
-        localStorage.setItem("user_id", data.user_id);
-        localStorage.setItem("firstName", data.firstName);
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("user_id", data.user_id);
+      localStorage.setItem("firstName", data.firstName);
 
       if (onLoginSuccess) onLoginSuccess(data);
 
@@ -151,6 +172,12 @@ export default function Login({ onLoginSuccess }) {
             )}
           </button>
         </div>
+
+        {estaExpirado && !error && (
+          <p className="login-error">
+             Tu sesión ha expirado. Ingresa de nuevo.
+          </p>
+        )}
 
         {error && <p className="login-error">{error}</p>}
 

@@ -110,7 +110,6 @@ export default function ActualizarPerfil() {
             <h2>Configuración de cuenta</h2>
             <p className="config-description">Actualiza tus datos de acceso con seguridad y claridad.</p>
           </div>
-          <span className="role-badge">{roleLabel}</span>
         </header>
 
         <form onSubmit={onSubmit} className="config-form">
@@ -135,7 +134,6 @@ export default function ActualizarPerfil() {
         {error ? <p className="form-message form-error">{error}</p> : null}
         {success ? <p className="form-message form-success">{success}</p> : null}
 
-        <Link className="back-link" to="/">Volver al inicio de sesión</Link>
       </section>
       </main>
     </div>

@@ -1,48 +1,40 @@
+import { useEffect } from 'react'; // <-- AGREGADO: Importamos useEffect para el cronómetro
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Footer from "./components/footer/Footer.jsx";
-
 import Login from "./components/Login";
 import RutaProtegida from "./components/RutaProtegida";
 import "./hooks/useCurrentDate"
 import AprendizDashboard from "./pages/AprendizDashboard";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import AdministradorDashboard from "./pages/AdministradorDashboard";
-
 import InstructorAsistencia from "./pages/Instructor/InstructorAsistencia";
-
 import ConfigCarrera from "./pages/Carrera/ConfigCarrera";
 import CreateC from "./pages/Carrera/Create";
 import EditC from "./pages/Carrera/Edit";
 import DeleteC from "./pages/Carrera/Delete";
-
 import ConfigFicha from "./pages/Ficha/ConfigFicha";
 import CreateF from "./pages/Ficha/Create";
 import EditF from "./pages/Ficha/Edit";
 import DeleteF from "./pages/Ficha/Delete";
-
 import CargaUsuarios from "./pages/Coordinador/CargaUsuarios";
 import CargarAdministradores from "./pages/Coordinador/CargarAdministradores";
 import CargarInstructores from "./pages/Coordinador/CargarInstructores";
 import CargarAprendices from "./pages/Coordinador/CargarAprendices";
 import SubirArchivosMenu from "./pages/CargaArchivos/SubirArchivosMenu";
 import AsignarFicha from "./pages/Ficha/AsignarFicha";
-
 import Aprendices from "./pages/Coordinador/Aprendiz";
 import CrearAprendiz from "./pages/Coordinador/Create";
 import EditarAprendiz from "./pages/Coordinador/Edit";
 import ConfirmarAprendiz from "./pages/Coordinador/ConfirmarAprendiz";
-
 import Instructores from "./pages/Coordinador/Instructores";
 import CrearInstructor from "./pages/Coordinador/CrearInstructor";
 import EditarInstructor from "./pages/Coordinador/EditarInstructor";
 import ConfirmarInstructor from "./pages/Coordinador/ConfirmarInstructor";
-
 import Administradores from "./pages/Coordinador/Administradores";
 import CrearAdministrador from "./pages/Coordinador/CrearAdministrador";
 import EditarAdministrador from "./pages/Coordinador/EditarAdministrador";
 import ConfirmarAdministrador from "./pages/Coordinador/ConfirmarAdministrador";
-
 import ConfigCompetencia from "./pages/Competencias/ConfigCompetencias";
 import CreateCompetencia from "./pages/Competencias/Create";
 import EditCompetencia from "./pages/Competencias/Edit";
@@ -51,8 +43,62 @@ import ActualizarPerfil from "./ActualizarPerfl";
 import MiPerfil from "./MiPerfil";
 
 function App() {
+
+  // =====================================================
+  // GUARDIÁN SILENCIOSO DE EXPIRACIÓN EN VIVO
+  // =====================================================
+  useEffect(() => {
+    const verificarExpiracionEnVivo = () => {
+      const token = localStorage.getItem("access_token"); 
+      if (!token) return;
+
+      try {
+        const partes = token.split('.');
+        if (partes.length !== 3) return; 
+
+        // Decodificamos el payload interno del JWT
+        const payloadBase64 = partes[1].replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(window.atob(payloadBase64));
+
+        if (payload.exp) {
+          const tiempoActual = Math.floor(Date.now() / 1000);
+          
+          // Margen de gracia automático (30 segundos) alineado con PyJWT
+          const tiempoExpiracionReal = payload.exp + 30; 
+          const segundosRestantes = tiempoExpiracionReal - tiempoActual;
+
+          if (segundosRestantes <= 0) {
+            ejecutarCierreDeSesion();
+          } else {
+            // Programa el cierre exacto en segundo plano
+            const temporizador = setTimeout(() => {
+              ejecutarCierreDeSesion();
+            }, segundosRestantes * 1000);
+
+            return () => clearTimeout(temporizador);
+          }
+        }
+      } catch (error) {
+        console.error("Error al validar el tiempo del token en segundo plano:", error);
+      }
+    };
+
+    const ejecutarCierreDeSesion = () => {
+      console.warn("Tiempo cumplido. Cerrando sesión de la plataforma del SENA...");
+      localStorage.removeItem("access_token"); 
+      
+      // AJUSTADO: Apunta a la raíz (/) que es donde mapeas tu <Login />
+      window.location.href = "/?expirado=true"; 
+    };
+
+    verificarExpiracionEnVivo();
+  }, []); 
+
+  // =====================================================
+  // CONTINUACIÓN DE TU RENDER DE RUTAS (CON UN SÓLO RETURN)
+  // =====================================================
 return (
-<BrowserRouter>
+  <BrowserRouter>
 
   {/* CONTENEDOR GENERAL */}
   <div className="d-flex flex-column min-vh-100">

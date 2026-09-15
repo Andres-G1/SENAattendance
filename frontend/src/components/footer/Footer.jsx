@@ -14,7 +14,7 @@ export default function Footer() {
                 <div className="footer-brand-header">
 
                 <img
-                    src="/public/logoblanco.png"
+                    src="./Logoblanco.png"
                     alt="Logo SENA Attendance"
                     width="80"
                     height="80"
