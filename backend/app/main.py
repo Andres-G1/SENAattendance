@@ -1,13 +1,8 @@
-import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
-# IMPORTANTE: Importamos tu función de verificar_token
-from security import verificar_token 
 
 from database import crear_tablas
 from routers.login import Router_login
@@ -23,21 +18,6 @@ from routers.carga_aprendices import Router_carga_aprendices
 from routers.configuracion import Router_configuracion
 
 app = FastAPI()
-
-# Configuración del esquema de seguridad Bearer
-security = HTTPBearer()
-
-# NUEVO: Función guardiana que verifica el token.
-# Si lanza tu ValueError("Token expirado"), responde HTTP 401 de inmediato.
-def verificar_sesion_activa(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        return verificar_token(credentials.credentials)
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,21 +35,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 1. El Router de Login se queda libre (sin dependencias) para que puedan iniciar sesión
 app.include_router(Router_login)
-
-# 2. A todos los demás routers les inyectamos la verificación global:
-app.include_router(Router_asistencia, dependencies=[Depends(verificar_sesion_activa)])
-app.include_router(Router_ficha, dependencies=[Depends(verificar_sesion_activa)])
-app.include_router(Router_carrera, dependencies=[Depends(verificar_sesion_activa)])
-app.include_router(Router_competencia, dependencies=[Depends(verificar_sesion_activa)])
-app.include_router(Router_usuarios, dependencies=[Depends(verificar_sesion_activa)])
-app.include_router(Router_asignaciones, dependencies=[Depends(verificar_sesion_activa)])
-app.include_router(Router_carga_instructores, dependencies=[Depends(verificar_sesion_activa)])
-app.include_router(Router_carga_administradores, dependencies=[Depends(verificar_sesion_activa)])
-app.include_router(Router_carga_aprendices, dependencies=[Depends(verificar_sesion_activa)])
-app.include_router(Router_configuracion, dependencies=[Depends(verificar_sesion_activa)])
-
+app.include_router(Router_asistencia)
+app.include_router(Router_ficha)
+app.include_router(Router_carrera)
+app.include_router(Router_competencia)
+app.include_router(Router_usuarios)
+app.include_router(Router_asignaciones)
+app.include_router(Router_carga_instructores)
+app.include_router(Router_carga_administradores)
+app.include_router(Router_carga_aprendices)
+app.include_router(Router_configuracion)
 @app.on_event("startup")
 def on_startup():
     crear_tablas()

@@ -11,18 +11,13 @@ export default function Login({ onLoginSuccess }) {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // =====================================================
-  // NUEVO: Capturar si la sesión expiró por la URL
-  // =====================================================
-  const query = new URLSearchParams(window.location.search);
-  const estaExpirado = query.get("expirado") === "true";
-
   useEffect(() => {
     document.body.classList.add("login-page");
     return () => {
       document.body.classList.remove("login-page");
     };
   }, []);
+
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -172,12 +167,6 @@ export default function Login({ onLoginSuccess }) {
             )}
           </button>
         </div>
-
-        {estaExpirado && !error && (
-          <p className="login-error">
-             Tu sesión ha expirado. Ingresa de nuevo.
-          </p>
-        )}
 
         {error && <p className="login-error">{error}</p>}
 

@@ -16,24 +16,6 @@ api.interceptors.request.use((config) => {
 });
 
 // =====================================================
-// INTERCEPTOR DE RESPUESTA: Atrapa el error 401 y expulsa al Login
-// =====================================================
-api.interceptors.response.use(
-  (response) => response, // Si todo sale bien, la petición continúa normal
-  (error) => {
-    // Si FastAPI responde con un 401 porque el token expiró
-    if (error.response && error.response.status === 401) {
-      console.warn("Sesión del SENA expirada. Redirigiendo al login...");
-      localStorage.removeItem("access_token"); // Borramos tu token usando tu nombre exacto
-      
-      // AJUSTE AQUÍ: Enviamos el parámetro de expiración a la URL
-      window.location.href = "/login?expirado=true";         
-    }
-    return Promise.reject(error);
-  }
-);
-
-// =====================================================
 // AUTH
 // =====================================================
 export const login = async (typeid, id, password) => {
@@ -42,7 +24,7 @@ export const login = async (typeid, id, password) => {
 };
 
 // =====================================================
-// APRENDICES (router: /usuarios)
+// APRENDICES  (router: /usuarios)
 // =====================================================
 export const listarAprendices = async () => {
   const response = await api.get("/usuarios/aprendices");
@@ -75,7 +57,7 @@ export const activarAprendiz = async (id) => {
 };
 
 // =====================================================
-// INSTRUCTORES (router: /usuarios)
+// INSTRUCTORES  (router: /usuarios)
 // =====================================================
 export const listarInstructores = async () => {
   const response = await api.get("/usuarios/instructores");
@@ -101,9 +83,8 @@ export const activarInstructor = async (id) => {
   const response = await api.patch(`/usuarios/instructor/${id}/activar`);
   return response.data;
 };
-
 // =====================================================
-// ADMINISTRADORES (router: /usuarios)
+// ADMINISTRADORES  (router: /usuarios)
 // =====================================================
 export const listarAdministradores = async () => {
   const response = await api.get("/usuarios/administradores");
@@ -129,9 +110,8 @@ export const activarAdministrador = async (id) => {
   const response = await api.patch(`/usuarios/administrador/${id}/activar`);
   return response.data;
 };
-
 // =====================================================
-// COMPETENCIAS (router: /competencias)
+// COMPETENCIAS  (router: /competencias)
 // =====================================================
 export const listarCompetencias = async () => {
   const response = await api.get("/competencias/");
@@ -152,26 +132,48 @@ export const eliminarCompetencia = async (id) => {
   const response = await api.delete(`/competencias/${id}`);
   return response.data;
 };
+export default api;
 
 export const cargarAprendices = async (archivo) => {
   const formData = new FormData();
+
+
   formData.append("file", archivo);
-  const response = await api.post("/usuarios/aprendices/upload", formData);
+
+
+  const response = await api.post(
+    "/usuarios/aprendices/upload",
+    formData
+  );
+
+
   return response.data;
 };
 
 export const cargarInstructores = async (archivo) => {
   const formData = new FormData();
   formData.append("file", archivo);
-  const response = await api.post("/usuarios/instructores/upload", formData);
+
+
+  const response = await api.post(
+    "/usuarios/instructores/upload",
+    formData
+  );
+
+
   return response.data;
 };
+
 
 export const cargarAdministradores = async (archivo) => {
   const formData = new FormData();
+
   formData.append("file", archivo);
-  const response = await api.post("/usuarios/administradores/upload", formData);
+
+  const response = await api.post(
+    "/usuarios/administradores/upload",
+    formData
+  );
+
   return response.data;
 };
-
-export default api;
