@@ -3,7 +3,7 @@ from typing import Optional, List
 from enum import Enum
 
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import Column, ForeignKeyConstraint, Enum as SQLEnum
+from sqlalchemy import Column, ForeignKeyConstraint, Enum as SQLEnum, UniqueConstraint, Index
 from sqlalchemy.orm import foreign
 
 # =========================================================
@@ -44,6 +44,12 @@ class DiaSemana(str, Enum):
     jueves = "Jueves"
     viernes = "Viernes"
     sabado = "Sabado"
+
+
+class TipoNotificacion(str, Enum):
+    advertencia = "ADVERTENCIA_ACUMULADO"
+    desercion = "DESERCION_RACHA"
+    sin_lista = "LISTA_NO_LLAMADA"
 
 
 # =========================================================
@@ -461,12 +467,17 @@ class ResultadoAprendizaje(SQLModel, table=True):
 
 class Asistencia(SQLModel, table=True):
     __tablename__ = "Asistencia"
-    
+
     __table_args__ = (
         ForeignKeyConstraint(
             ["Id_Fic", "Id_Ins", "Id_Comp", "Dia"],
             ["Ficha_Instructor.Id_Fic", "Ficha_Instructor.Id_Ins", "Ficha_Instructor.Id_Comp", "Ficha_Instructor.Dia"],
         ),
+        UniqueConstraint(
+            "Fec_Asi", "Id_Apr", "Id_Fic", "Id_Ins", "Id_Comp", "Dia",
+            name="uq_asistencia_sesion"
+        ),
+        Index("ix_asistencia_apr_fic_fec", "Id_Apr", "Id_Fic", "Fec_Asi"),
         {"extend_existing": True}
     )
 
@@ -541,6 +552,28 @@ class Notificacion(SQLModel, table=True):
     Id_Adm: Optional[int] = Field(
         default=None,
         foreign_key="Administrador.Id_Adm"
+    )
+
+    Id_Fic: Optional[int] = Field(
+        default=None,
+        foreign_key="Fichas.Id_Fic"
+    )
+
+    Tip_Not: TipoNotificacion = Field(
+        sa_column=Column(
+            SQLEnum(
+                TipoNotificacion,
+                values_callable=lambda enum_class: [
+                    member.value for member in enum_class
+                ]
+            ),
+            nullable=False
+        )
+    )
+
+    Env_Not: bool = Field(
+        default=False,
+        nullable=False
     )
 
     Fec_Cre: datetime = Field(

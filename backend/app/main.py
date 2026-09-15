@@ -16,6 +16,7 @@ from routers.carga_instructores import Router_carga_instructores
 from routers.carga_administradores import Router_carga_administradores
 from routers.carga_aprendices import Router_carga_aprendices
 from routers.configuracion import Router_configuracion
+from jobs_asistencia import scheduler
 
 app = FastAPI()
 
@@ -46,6 +47,9 @@ app.include_router(Router_carga_instructores)
 app.include_router(Router_carga_administradores)
 app.include_router(Router_carga_aprendices)
 app.include_router(Router_configuracion)
+
+
 @app.on_event("startup")
 def on_startup():
     crear_tablas()
+    scheduler.start()

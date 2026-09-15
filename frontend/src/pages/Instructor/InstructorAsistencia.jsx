@@ -5,7 +5,8 @@ const API_BASE = "http://localhost:8000";
 
 // =====================================================
 // ESTADOS DE ASISTENCIA
-// Los valores son los que espera el ENUM del backend
+// El front usa minúscula, el backend espera mayúscula inicial
+// (así está definido el ENUM EstadoAsistencia en models/model.py)
 // =====================================================
 
 const ESTADOS = [
@@ -34,6 +35,31 @@ const ESTADOS = [
     texto: "#000",
   },
 ];
+
+// NUEVO: traducción entre minúscula (front) y mayúscula (backend)
+const A_BACKEND = {
+  presente: "Presente",
+  retardo: "Retardo",
+  falla: "Falla",
+  excusa: "Excusa",
+};
+
+const DESDE_BACKEND = {
+  Presente: "presente",
+  Retardo: "retardo",
+  Falla: "falla",
+  Excusa: "excusa",
+};
+
+// =====================================================
+// COLORES DEL SEMÁFORO DE DESERCIÓN
+// =====================================================
+
+const COLOR_SEMAFORO = {
+  ROJO: { fondo: "#dc3545", texto: "#fff" },
+  AMARILLO: { fondo: "#ffc107", texto: "#000" },
+  VERDE: { fondo: "#198754", texto: "#fff" },
+};
 
 // =====================================================
 // FUNCIONES PARA MANEJAR LOS DÍAS
@@ -108,6 +134,9 @@ export default function InstructorAsistencia() {
     useState([]);
 
   const [estados, setEstados] =
+    useState({});
+
+  const [estadosAprendices, setEstadosAprendices] =
     useState({});
 
   const [cargandoAsignaciones, setCargandoAsignaciones] =
@@ -189,6 +218,7 @@ export default function InstructorAsistencia() {
     setFecha("");
     setAprendices([]);
     setEstados({});
+    setEstadosAprendices({});
     setMensaje(null);
   }
 
@@ -214,6 +244,7 @@ export default function InstructorAsistencia() {
     setFecha("");
     setAprendices([]);
     setEstados({});
+    setEstadosAprendices({});
     setMensaje(null);
   }
 
@@ -316,25 +347,50 @@ export default function InstructorAsistencia() {
 
       // -------------------------------------------------
       // CARGAR ESTADOS EXISTENTES
+      // (traduce de "Presente" del backend a "presente" del front)
       // -------------------------------------------------
 
       const nuevosEstados = {};
 
       data.forEach((aprendiz) => {
-        nuevosEstados[
-          aprendiz.Id_Apr
-        ] =
-          aprendiz.Es_Asi ||
-          "presente";
+        nuevosEstados[aprendiz.Id_Apr] =
+          DESDE_BACKEND[aprendiz.Es_Asi] || "presente";
       });
 
       setEstados(nuevosEstados);
+
+      // -------------------------------------------------
+      // CARGAR SEMÁFORO ACTUAL DE CADA APRENDIZ
+      // (por si ya tenía fallas de días anteriores)
+      // -------------------------------------------------
+
+      const nuevosSemaforos = {};
+
+      await Promise.all(
+        data.map(async (aprendiz) => {
+          try {
+            const res = await fetch(
+              `${API_BASE}/asistencia/aprendiz/${aprendiz.Id_Apr}/estado`
+            );
+
+            if (res.ok) {
+              nuevosSemaforos[aprendiz.Id_Apr] =
+                await res.json();
+            }
+          } catch {
+            // si falla uno solo, no interrumpe la carga de la clase
+          }
+        })
+      );
+
+      setEstadosAprendices(nuevosSemaforos);
 
     } catch (error) {
       console.error(error);
 
       setAprendices([]);
       setEstados({});
+      setEstadosAprendices({});
 
       setMensaje({
         tipo: "error",
@@ -411,6 +467,8 @@ export default function InstructorAsistencia() {
     setGuardando(true);
     setMensaje(null);
 
+    const nuevosSemaforos = { ...estadosAprendices };
+
     try {
       for (const aprendiz of aprendices) {
         const estado =
@@ -434,10 +492,9 @@ export default function InstructorAsistencia() {
               body: JSON.stringify({
                 Fec_Asi: fecha,
 
-                // IMPORTANTE:
-                // Se manda en minúscula porque
-                // así está definido el ENUM
-                Es_Asi: estado,
+                // Se traduce de minúscula (front) a
+                // mayúscula inicial (ENUM del backend)
+                Es_Asi: A_BACKEND[estado],
 
                 Id_Apr:
                   aprendiz.Id_Apr,
@@ -472,7 +529,19 @@ export default function InstructorAsistencia() {
             "Error guardando asistencia."
           );
         }
+
+        // -------------------------------------------------
+        // GUARDAR EL SEMÁFORO DEVUELTO POR EL BACKEND
+        // -------------------------------------------------
+
+        const resultado = await response.json();
+
+        if (resultado.estado) {
+          nuevosSemaforos[aprendiz.Id_Apr] = resultado.estado;
+        }
       }
+
+      setEstadosAprendices(nuevosSemaforos);
 
       setMensaje({
         tipo: "exito",
@@ -482,6 +551,8 @@ export default function InstructorAsistencia() {
 
     } catch (error) {
       console.error(error);
+
+      setEstadosAprendices(nuevosSemaforos);
 
       setMensaje({
         tipo: "error",
@@ -502,6 +573,7 @@ export default function InstructorAsistencia() {
     setFecha("");
     setAprendices([]);
     setEstados({});
+    setEstadosAprendices({});
     setMensaje(null);
   }
 
@@ -984,6 +1056,7 @@ export default function InstructorAsistencia() {
                   setFecha("");
                   setAprendices([]);
                   setEstados({});
+                  setEstadosAprendices({});
                   setMensaje(null);
                 }}
               >
@@ -1169,7 +1242,16 @@ export default function InstructorAsistencia() {
                     <div className="d-flex flex-column gap-2">
 
                       {aprendices.map(
-                        (aprendiz) => (
+                        (aprendiz) => {
+
+                          const semaforo =
+                            estadosAprendices[aprendiz.Id_Apr];
+
+                          const colores = semaforo
+                            ? COLOR_SEMAFORO[semaforo.semaforo]
+                            : null;
+
+                          return (
 
                           <div
                             key={
@@ -1184,11 +1266,33 @@ export default function InstructorAsistencia() {
 
                               <div className="col-md-5">
 
-                                <div className="fw-bold">
+                                <div className="fw-bold d-flex align-items-center flex-wrap gap-2">
 
                                   {aprendiz.Nom_Apr}{" "}
 
                                   {aprendiz.Ape_Apr}
+
+                                  {/* SEMÁFORO DE FALLAS */}
+
+                                  {semaforo && (
+
+                                    <span
+                                      className="badge rounded-pill"
+                                      style={{
+                                        backgroundColor: colores.fondo,
+                                        color: colores.texto,
+                                        fontWeight: 600,
+                                      }}
+                                      title={
+                                        `Fallas brutas: ${semaforo.fallas_brutas} · ` +
+                                        `Excusas: ${semaforo.excusas} · ` +
+                                        `Racha actual: ${semaforo.racha_dias} día(s)`
+                                      }
+                                    >
+                                      {semaforo.acumulado} fallas
+                                    </span>
+
+                                  )}
 
                                 </div>
 
@@ -1199,6 +1303,24 @@ export default function InstructorAsistencia() {
                                   {aprendiz.Num_ide_Apr}
 
                                 </div>
+
+                                {semaforo && semaforo.deserta_por_racha && (
+
+                                  <div className="small mt-1 fw-semibold" style={{ color: "#dc3545" }}>
+                                    ⚠ 3 fallas seguidas — riesgo de deserción
+                                  </div>
+
+                                )}
+
+                                {semaforo &&
+                                  !semaforo.deserta_por_racha &&
+                                  semaforo.deserta_por_acumulado && (
+
+                                  <div className="small mt-1 fw-semibold" style={{ color: "#dc3545" }}>
+                                    ⚠ Fallas acumuladas al máximo — riesgo de deserción
+                                  </div>
+
+                                )}
 
                               </div>
 
@@ -1271,7 +1393,9 @@ export default function InstructorAsistencia() {
 
                           </div>
 
-                        )
+                          );
+
+                        }
                       )}
 
                     </div>

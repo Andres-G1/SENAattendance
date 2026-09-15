@@ -1,14 +1,58 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AprendizNavbar from '../components/navbars/AprendizNavbar.jsx'
 import useCurrentDate from '../hooks/useCurrentDate.js'
 import FallasNovedades from './Aprendiz/FallasNovedades.jsx'
+
+const API_BASE = "http://localhost:8000";
 
 export default function AprendizDashboard() {
   const currentDate = useCurrentDate();
   const nombreCompleto = localStorage.getItem('firstName') || '';
   const firstName = nombreCompleto.split(' ')[0];
+  const idAprendiz = localStorage.getItem('user_id');
 
   const [mostrarFallas, setMostrarFallas] = useState(false);
+
+  // =====================================================
+  // ESTADO DE ASISTENCIA (reemplaza los valores hardcodeados)
+  // =====================================================
+
+  const [estado, setEstado] = useState(null);
+  const [cargandoEstado, setCargandoEstado] = useState(true);
+
+  useEffect(() => {
+    if (!idAprendiz) {
+      setCargandoEstado(false);
+      return;
+    }
+
+    fetch(`${API_BASE}/asistencia/aprendiz/${idAprendiz}/estado`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("No se pudo cargar el estado de asistencia");
+        }
+        return res.json();
+      })
+      .then((data) => setEstado(data))
+      .catch((error) => {
+        console.error(error);
+        setEstado(null);
+      })
+      .finally(() => setCargandoEstado(false));
+  }, [idAprendiz]);
+
+  // Porcentaje de asistencia = 100 - (proporción de fallas netas)
+  // Nota: esto asume que el total de sesiones esperadas se puede
+  // derivar; si el backend no lo devuelve, ajusta aquí.
+  const colorSemaforo = {
+    ROJO: { bg: "bg-danger-subtle", text: "text-danger" },
+    AMARILLO: { bg: "bg-warning-subtle", text: "text-warning" },
+    VERDE: { bg: "bg-success-subtle", text: "text-success" },
+  };
+
+  const colores = estado
+    ? colorSemaforo[estado.semaforo]
+    : colorSemaforo.VERDE;
 
   return (
     <>
@@ -33,36 +77,78 @@ export default function AprendizDashboard() {
                   Resumen de Rendimiento
                 </h5>
 
-                <div className="d-flex align-items-baseline mb-2">
-                  <span className="display-4 fw-extrabold text-success tracking-tight">82%</span>
-                  <span className="text-muted ms-2 fw-medium">de asistencia</span>
-                </div>
-
-                <div className="progress mb-4" style={{ height: 8 }}>
-                  <div
-                    className="progress-bar bg-success rounded-pill"
-                    role="progressbar"
-                    style={{ width: '92%' }}
-                    aria-valuenow="92"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-
-                <hr className="text-muted opacity-25 my-4" />
-
-                <div className="d-flex justify-content-between align-items-center bg-light p-3 rounded-3">
-                  <div className="d-flex align-items-center gap-2">
-                    <div
-                      className="p-2 bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center"
-                      style={{ width: 32, height: 32 }}
-                    >
-                      <small className="fw-bold">!</small>
-                    </div>
-                    <span className="text-secondary fw-medium small">Inasistencias registradas</span>
+                {cargandoEstado ? (
+                  <div className="text-center py-4">
+                    <div className="spinner-border text-success" />
                   </div>
-                  <span className="badge bg-danger fs-6 px-3 rounded-pill">4 Fallas</span>
-                </div>
+                ) : !estado ? (
+                  <p className="text-muted small mb-0">
+                    No se pudo cargar tu información de asistencia.
+                  </p>
+                ) : (
+                  <>
+                    <div className="d-flex align-items-baseline mb-2">
+                      <span className={`display-4 fw-extrabold tracking-tight ${colores.text}`}>
+                        {estado.acumulado}
+                      </span>
+                      <span className="text-muted ms-2 fw-medium">
+                        fallas acumuladas
+                      </span>
+                    </div>
+
+                    <div className="progress mb-4" style={{ height: 8 }}>
+                      <div
+                        className={`progress-bar rounded-pill ${
+                          estado.semaforo === 'ROJO'
+                            ? 'bg-danger'
+                            : estado.semaforo === 'AMARILLO'
+                            ? 'bg-warning'
+                            : 'bg-success'
+                        }`}
+                        role="progressbar"
+                        style={{ width: `${Math.min(100, (estado.acumulado / 5) * 100)}%` }}
+                        aria-valuenow={estado.acumulado}
+                        aria-valuemin="0"
+                        aria-valuemax="5"
+                      ></div>
+                    </div>
+
+                    <hr className="text-muted opacity-25 my-4" />
+
+                    <div className={`d-flex justify-content-between align-items-center p-3 rounded-3 ${colores.bg}`}>
+                      <div className="d-flex align-items-center gap-2">
+                        <div
+                          className={`p-2 rounded-circle d-flex align-items-center justify-content-center ${colores.bg} ${colores.text}`}
+                          style={{ width: 32, height: 32 }}
+                        >
+                          <small className="fw-bold">!</small>
+                        </div>
+                        <span className="text-secondary fw-medium small">
+                          Racha actual sin asistir
+                        </span>
+                      </div>
+                      <span className={`badge fs-6 px-3 rounded-pill ${
+                        estado.semaforo === 'ROJO' ? 'bg-danger' :
+                        estado.semaforo === 'AMARILLO' ? 'bg-warning text-dark' :
+                        'bg-success'
+                      }`}>
+                        {estado.racha_dias} día(s)
+                      </span>
+                    </div>
+
+                    {estado.deserta_por_racha && (
+                      <div className="alert alert-danger mt-3 mb-0 small">
+                        ⚠ Llevas 3 días seguidos sin asistir. Contacta a tu instructor o coordinación cuanto antes.
+                      </div>
+                    )}
+
+                    {!estado.deserta_por_racha && estado.deserta_por_acumulado && (
+                      <div className="alert alert-danger mt-3 mb-0 small">
+                        ⚠ Alcanzaste el máximo de fallas acumuladas permitidas.
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 
@@ -146,7 +232,7 @@ export default function AprendizDashboard() {
             </div>
           </div>
 
-          {mostrarFallas && <FallasNovedades onClose={() => setMostrarFallas(false)} />}
+          {mostrarFallas && <FallasNovedades onClose={() => setMostrarFallas(false)} idAprendiz={idAprendiz} />}
         </main>
       </div>
     </>

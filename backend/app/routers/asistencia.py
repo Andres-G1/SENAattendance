@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
@@ -11,9 +11,13 @@ from models.model import (
     Aprendiz,
     Fichas,
     FichaInstructor,
+    Competencia,
     EstadoAsistencia,
-    DiaSemana
+    DiaSemana,
 )
+
+from .asistencia_calculo import calcular_estado
+from .asistencia_notificaciones import evaluar_y_notificar
 
 
 Router_asistencia = APIRouter(
@@ -39,32 +43,105 @@ class RegistrarAsistenciaRequest(BaseModel):
 
 
 # =========================================================
+# VALIDACIONES REUTILIZABLES
+# =========================================================
+
+_DIA_POR_WEEKDAY = {
+    0: DiaSemana.lunes,
+    1: DiaSemana.martes,
+    2: DiaSemana.miercoles,
+    3: DiaSemana.jueves,
+    4: DiaSemana.viernes,
+    5: DiaSemana.sabado,
+}
+
+
+def _verificar_ficha(session: Session, id_fic: int) -> Fichas:
+
+    ficha = session.get(Fichas, id_fic)
+
+    if not ficha:
+        raise HTTPException(status_code=404, detail="Ficha no encontrada")
+
+    return ficha
+
+
+def _verificar_aprendiz(session: Session, id_apr: int) -> Aprendiz:
+
+    aprendiz = session.get(Aprendiz, id_apr)
+
+    if not aprendiz:
+        raise HTTPException(status_code=404, detail="Aprendiz no encontrado")
+
+    return aprendiz
+
+
+def _verificar_pertenencia(aprendiz: Aprendiz, id_fic: int):
+
+    if aprendiz.Id_Fic != id_fic:
+        raise HTTPException(
+            status_code=400,
+            detail="El aprendiz no pertenece a esta ficha"
+        )
+
+
+def _verificar_periodo_ficha(ficha: Fichas, fecha: date):
+
+    if fecha < ficha.Fec_inicio_Fic:
+        raise HTTPException(
+            status_code=400,
+            detail="La fecha es anterior al inicio de la ficha"
+        )
+
+    if fecha > ficha.Fec_Fin_Fic:
+        raise HTTPException(
+            status_code=400,
+            detail="La fecha es posterior al fin de la ficha"
+        )
+
+
+def _verificar_periodo_competencia(asignacion: FichaInstructor, fecha: date):
+
+    if not (asignacion.Fec_Inicio_Comp <= fecha <= asignacion.Fec_Fin_Comp):
+        raise HTTPException(
+            status_code=400,
+            detail="La fecha está fuera del período de esta competencia"
+        )
+
+
+def _verificar_dia_coincide(fecha: date, dia: DiaSemana):
+
+    esperado = _DIA_POR_WEEKDAY.get(fecha.weekday())
+
+    if esperado is None:
+        raise HTTPException(
+            status_code=400,
+            detail="No se registra asistencia los domingos"
+        )
+
+    if esperado != dia:
+        raise HTTPException(
+            status_code=400,
+            detail=f"La fecha {fecha} es {esperado.value}, no {dia.value}"
+        )
+
+
+# =========================================================
 # OBTENER APRENDICES DE UNA FICHA
 # =========================================================
 
-@Router_asistencia.get(
-    "/ficha/{Id_Fic}/aprendices"
-)
+@Router_asistencia.get("/ficha/{Id_Fic}/aprendices")
 def obtener_aprendices(
     Id_Fic: int,
     session: Session = Depends(get_session)
 ):
 
-    ficha = session.get(Fichas, Id_Fic)
-
-    if not ficha:
-        raise HTTPException(
-            status_code=404,
-            detail="Ficha no encontrada"
-        )
+    _verificar_ficha(session, Id_Fic)
 
     aprendices = session.exec(
         select(Aprendiz)
         .where(Aprendiz.Id_Fic == Id_Fic)
-        .order_by(
-            Aprendiz.Ape_Apr,
-            Aprendiz.Nom_Apr
-        )
+        .order_by(Aprendiz.Ape_Apr, Aprendiz.Nom_Apr)
     ).all()
 
     return [
@@ -82,9 +159,7 @@ def obtener_aprendices(
 # OBTENER ASIGNACIONES DEL INSTRUCTOR
 # =========================================================
 
-@Router_asistencia.get(
-    "/instructor/{Id_Ins}/asignaciones"
-)
+@Router_asistencia.get("/instructor/{Id_Ins}/asignaciones")
 def obtener_asignaciones_instructor(
     Id_Ins: int,
     session: Session = Depends(get_session)
@@ -92,58 +167,29 @@ def obtener_asignaciones_instructor(
 
     relaciones = session.exec(
         select(FichaInstructor)
-        .where(
-            FichaInstructor.Id_Ins == Id_Ins
-        )
+        .where(FichaInstructor.Id_Ins == Id_Ins)
     ).all()
 
     resultado = []
 
     for relacion in relaciones:
 
-        ficha = session.get(
-            Fichas,
-            relacion.Id_Fic
-        )
-
-        competencia = session.get(
-            __import__(
-                "models.model",
-                fromlist=["Competencia"]
-            ).Competencia,
-            relacion.Id_Comp
-        )
+        ficha = session.get(Fichas, relacion.Id_Fic)
+        competencia = session.get(Competencia, relacion.Id_Comp)
 
         if not ficha:
             continue
 
         resultado.append({
-
             "Id_Fic": relacion.Id_Fic,
             "Id_Ins": relacion.Id_Ins,
             "Id_Comp": relacion.Id_Comp,
-
-            "Dia": (
-                relacion.Dia.value
-                if relacion.Dia
-                else None
-            ),
-
+            "Dia": relacion.Dia.value if relacion.Dia else None,
             "Num_Fic": ficha.Num_Fic,
-            "Jor_Fic": (
-                ficha.Jor_Fic.value
-                if ficha.Jor_Fic
-                else None
-            ),
-
+            "Jor_Fic": ficha.Jor_Fic.value if ficha.Jor_Fic else None,
             "Fec_inicio_Fic": ficha.Fec_inicio_Fic,
             "Fec_Fin_Fic": ficha.Fec_Fin_Fic,
-
-            "Competencia": (
-                competencia.Nom_Comp
-                if competencia
-                else None
-            )
+            "Competencia": competencia.Nom_Comp if competencia else None,
         })
 
     return resultado
@@ -153,9 +199,7 @@ def obtener_asignaciones_instructor(
 # OBTENER ASISTENCIA DE UNA CLASE
 # =========================================================
 
-@Router_asistencia.get(
-    "/clase/{Id_Fic}/{Id_Ins}/{Id_Comp}/{Dia}/{Fec_Asi}"
-)
+@Router_asistencia.get("/clase/{Id_Fic}/{Id_Ins}/{Id_Comp}/{Dia}/{Fec_Asi}")
 def obtener_asistencia_clase(
     Id_Fic: int,
     Id_Ins: int,
@@ -165,18 +209,8 @@ def obtener_asistencia_clase(
     session: Session = Depends(get_session)
 ):
 
-    # -----------------------------------------------------
-    # Verificar que la asignación exista
-    # -----------------------------------------------------
-
     asignacion = session.get(
-        FichaInstructor,
-        (
-            Id_Fic,
-            Id_Ins,
-            Id_Comp,
-            Dia
-        )
+        FichaInstructor, (Id_Fic, Id_Ins, Id_Comp, Dia)
     )
 
     if not asignacion:
@@ -185,57 +219,14 @@ def obtener_asistencia_clase(
             detail="La asignación de esta clase no existe"
         )
 
-    # -----------------------------------------------------
-    # Verificar ficha
-    # -----------------------------------------------------
-
-    ficha = session.get(
-        Fichas,
-        Id_Fic
-    )
-
-    if not ficha:
-        raise HTTPException(
-            status_code=404,
-            detail="Ficha no encontrada"
-        )
-
-    # -----------------------------------------------------
-    # Verificar fecha
-    # -----------------------------------------------------
-
-    if Fec_Asi < ficha.Fec_inicio_Fic:
-
-        raise HTTPException(
-            status_code=400,
-            detail="La fecha es anterior al inicio de la ficha"
-        )
-
-    if Fec_Asi > ficha.Fec_Fin_Fic:
-
-        raise HTTPException(
-            status_code=400,
-            detail="La fecha es posterior al fin de la ficha"
-        )
-
-    # -----------------------------------------------------
-    # Aprendices
-    # -----------------------------------------------------
+    ficha = _verificar_ficha(session, Id_Fic)
+    _verificar_periodo_ficha(ficha, Fec_Asi)
 
     aprendices = session.exec(
         select(Aprendiz)
-        .where(
-            Aprendiz.Id_Fic == Id_Fic
-        )
-        .order_by(
-            Aprendiz.Ape_Apr,
-            Aprendiz.Nom_Apr
-        )
+        .where(Aprendiz.Id_Fic == Id_Fic)
+        .order_by(Aprendiz.Ape_Apr, Aprendiz.Nom_Apr)
     ).all()
-
-    # -----------------------------------------------------
-    # Asistencias existentes
-    # -----------------------------------------------------
 
     asistencias = session.exec(
         select(Asistencia)
@@ -248,143 +239,123 @@ def obtener_asistencia_clase(
         )
     ).all()
 
-    asistencias_map = {
-        asistencia.Id_Apr: asistencia
-        for asistencia in asistencias
-    }
+    asistencias_map = {a.Id_Apr: a for a in asistencias}
 
     resultado = []
 
     for aprendiz in aprendices:
 
-        asistencia = asistencias_map.get(
-            aprendiz.Id_Apr
-        )
+        asistencia = asistencias_map.get(aprendiz.Id_Apr)
 
         resultado.append({
-
             "Id_Apr": aprendiz.Id_Apr,
-
             "Nom_Apr": aprendiz.Nom_Apr,
-
             "Ape_Apr": aprendiz.Ape_Apr,
-
             "Num_ide_Apr": aprendiz.Num_ide_Apr,
-
-            "Id_Asi": (
-                asistencia.Id_Asi
-                if asistencia
-                else None
-            ),
-
-            "Es_Asi": (
-                asistencia.Es_Asi.value
-                if asistencia
-                else None
-            )
+            "Id_Asi": asistencia.Id_Asi if asistencia else None,
+            "Es_Asi": asistencia.Es_Asi.value if asistencia else None,
         })
 
     return resultado
 
 
 # =========================================================
-# REGISTRAR / ACTUALIZAR ASISTENCIA
+# OBTENER ESTADO / SEMÁFORO DE UN APRENDIZ
 # =========================================================
 
-@Router_asistencia.post(
-    "",
-    status_code=status.HTTP_201_CREATED
-)
-def registrar_asistencia(
-    data: RegistrarAsistenciaRequest,
+@Router_asistencia.get("/aprendiz/{Id_Apr}/estado")
+def obtener_estado_aprendiz(
+    Id_Apr: int,
     session: Session = Depends(get_session)
 ):
 
-    # -----------------------------------------------------
-    # Verificar ficha
-    # -----------------------------------------------------
+    aprendiz = _verificar_aprendiz(session, Id_Apr)
 
-    ficha = session.get(
-        Fichas,
-        data.Id_Fic
-    )
-
-    if not ficha:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Ficha no encontrada"
-        )
-
-    # -----------------------------------------------------
-    # Verificar aprendiz
-    # -----------------------------------------------------
-
-    aprendiz = session.get(
-        Aprendiz,
-        data.Id_Apr
-    )
-
-    if not aprendiz:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Aprendiz no encontrado"
-        )
-
-    # -----------------------------------------------------
-    # El aprendiz debe pertenecer a la ficha
-    # -----------------------------------------------------
-
-    if aprendiz.Id_Fic != data.Id_Fic:
-
+    if not aprendiz.Id_Fic:
         raise HTTPException(
             status_code=400,
-            detail="El aprendiz no pertenece a esta ficha"
+            detail="El aprendiz no pertenece a ninguna ficha"
         )
 
-    # -----------------------------------------------------
-    # Verificar período
-    # -----------------------------------------------------
+    return calcular_estado(session, Id_Apr, aprendiz.Id_Fic)
 
-    if data.Fec_Asi < ficha.Fec_inicio_Fic:
 
+# =========================================================
+# LISTAR FALLAS / NOVEDADES DE UN APRENDIZ
+# =========================================================
+
+@Router_asistencia.get("/aprendiz/{Id_Apr}/novedades")
+def obtener_novedades_aprendiz(
+    Id_Apr: int,
+    session: Session = Depends(get_session)
+):
+
+    aprendiz = _verificar_aprendiz(session, Id_Apr)
+
+    if not aprendiz.Id_Fic:
         raise HTTPException(
             status_code=400,
-            detail="La fecha es anterior al inicio de la ficha"
+            detail="El aprendiz no pertenece a ninguna ficha"
         )
 
-    if data.Fec_Asi > ficha.Fec_Fin_Fic:
+    ficha = _verificar_ficha(session, aprendiz.Id_Fic)
 
-        raise HTTPException(
-            status_code=400,
-            detail="La fecha es posterior al fin de la ficha"
+    registros = session.exec(
+        select(Asistencia)
+        .where(
+            Asistencia.Id_Apr == Id_Apr,
+            Asistencia.Id_Fic == aprendiz.Id_Fic,
+            Asistencia.Es_Asi != EstadoAsistencia.presente,
         )
+        .order_by(Asistencia.Fec_Asi.desc())
+    ).all()
 
-    # -----------------------------------------------------
-    # Verificar asignación
-    # -----------------------------------------------------
+    resultado = []
+
+    for registro in registros:
+
+        competencia = session.get(Competencia, registro.Id_Comp)
+
+        resultado.append({
+            "Id_Asi": registro.Id_Asi,
+            "Fec_Asi": registro.Fec_Asi,
+            "Es_Asi": registro.Es_Asi.value,
+            "Num_Fic": ficha.Num_Fic,
+            "Competencia": competencia.Nom_Comp if competencia else None,
+        })
+
+    return resultado
+
+# =========================================================
+# REGISTRAR / ACTUALIZAR ASISTENCIA
+# =========================================================
+
+@Router_asistencia.post("", status_code=status.HTTP_201_CREATED)
+def registrar_asistencia(
+    data: RegistrarAsistenciaRequest,
+    background: BackgroundTasks,
+    session: Session = Depends(get_session)
+):
+
+    ficha = _verificar_ficha(session, data.Id_Fic)
+    aprendiz = _verificar_aprendiz(session, data.Id_Apr)
+
+    _verificar_pertenencia(aprendiz, data.Id_Fic)
+    _verificar_dia_coincide(data.Fec_Asi, data.Dia)
+    _verificar_periodo_ficha(ficha, data.Fec_Asi)
 
     asignacion = session.get(
         FichaInstructor,
-        (
-            data.Id_Fic,
-            data.Id_Ins,
-            data.Id_Comp,
-            data.Dia
-        )
+        (data.Id_Fic, data.Id_Ins, data.Id_Comp, data.Dia)
     )
 
     if not asignacion:
-
         raise HTTPException(
             status_code=404,
             detail="La asignación de esta competencia no existe"
         )
 
-    # -----------------------------------------------------
-    # Buscar asistencia existente
-    # -----------------------------------------------------
+    _verificar_periodo_competencia(asignacion, data.Fec_Asi)
 
     asistencia = session.exec(
         select(Asistencia)
@@ -398,51 +369,23 @@ def registrar_asistencia(
         )
     ).first()
 
-    # -----------------------------------------------------
-    # ACTUALIZAR
-    # -----------------------------------------------------
+    mensaje = "Asistencia actualizada correctamente"
 
     if asistencia:
-
         asistencia.Es_Asi = data.Es_Asi
+    else:
+        asistencia = Asistencia(**data.model_dump())
+        mensaje = "Asistencia registrada correctamente"
 
-        session.add(asistencia)
-        session.commit()
-        session.refresh(asistencia)
-
-        return {
-            "mensaje": "Asistencia actualizada correctamente",
-            "asistencia": asistencia
-        }
-
-    # -----------------------------------------------------
-    # CREAR
-    # -----------------------------------------------------
-
-    nueva_asistencia = Asistencia(
-
-        Fec_Asi=data.Fec_Asi,
-
-        Es_Asi=data.Es_Asi,
-
-        Id_Apr=data.Id_Apr,
-
-        Id_Fic=data.Id_Fic,
-
-        Id_Ins=data.Id_Ins,
-
-        Id_Comp=data.Id_Comp,
-
-        Dia=data.Dia
-    )
-
-    session.add(nueva_asistencia)
-
+    session.add(asistencia)
     session.commit()
+    session.refresh(asistencia)
 
-    session.refresh(nueva_asistencia)
+    estado = calcular_estado(session, data.Id_Apr, data.Id_Fic)
+    evaluar_y_notificar(session, background, aprendiz, ficha, estado)
 
     return {
-        "mensaje": "Asistencia registrada correctamente",
-        "asistencia": nueva_asistencia
+        "mensaje": mensaje,
+        "asistencia": asistencia,
+        "estado": estado,
     }
