@@ -389,3 +389,39 @@ def registrar_asistencia(
         "asistencia": asistencia,
         "estado": estado,
     }
+    
+
+@Router_asistencia.get("/instructor/{Id_Ins}/alertas")
+def obtener_alertas_instructor(
+    Id_Ins: int,
+    session: Session = Depends(get_session)
+):
+
+    fichas_ids = session.exec(
+        select(FichaInstructor.Id_Fic)
+        .where(FichaInstructor.Id_Ins == Id_Ins)
+        .distinct()
+    ).all()
+
+    total_alertas = 0
+    ya_contados = set()
+
+    for id_fic in fichas_ids:
+
+        aprendices = session.exec(
+            select(Aprendiz).where(Aprendiz.Id_Fic == id_fic)
+        ).all()
+
+        for aprendiz in aprendices:
+
+            if aprendiz.Id_Apr in ya_contados:
+                continue
+
+            estado = calcular_estado(session, aprendiz.Id_Apr, id_fic)
+
+            if estado["deserta_por_racha"] or estado["deserta_por_acumulado"]:
+                total_alertas += 1
+
+            ya_contados.add(aprendiz.Id_Apr)
+
+    return {"total_alertas": total_alertas}

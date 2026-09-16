@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import InstructorNavbar from '../components/navbars/InstructorNavbar.jsx'
 import useCurrentDate from '../hooks/useCurrentDate.js'
 
+const API_BASE = "http://localhost:8000";
+
 export default function InstructorDashboard() {
   const currentDate = useCurrentDate()
 
@@ -13,6 +15,10 @@ export default function InstructorDashboard() {
   const [fichas, setFichas] = useState([])
   const [loadingFichas, setLoadingFichas] = useState(true)
 
+  // NUEVO: alertas reales de deserción
+  const [totalAlertas, setTotalAlertas] = useState(0)
+  const [loadingAlertas, setLoadingAlertas] = useState(true)
+
   useEffect(() => {
     if (!idInstructor) {
       setLoadingFichas(false)
@@ -20,7 +26,7 @@ export default function InstructorDashboard() {
     }
 
     fetch(
-      `http://localhost:8000/asignaciones/instructor/${idInstructor}/fichas`
+      `${API_BASE}/asignaciones/instructor/${idInstructor}/fichas`
     )
       .then((res) => {
         if (!res.ok) {
@@ -39,6 +45,37 @@ export default function InstructorDashboard() {
       })
       .finally(() => {
         setLoadingFichas(false)
+      })
+  }, [idInstructor])
+
+  // -----------------------------------------
+  // CARGAR CONTEO DE ALERTAS
+  // -----------------------------------------
+  useEffect(() => {
+    if (!idInstructor) {
+      setLoadingAlertas(false)
+      return
+    }
+
+    fetch(
+      `${API_BASE}/asistencia/instructor/${idInstructor}/alertas`
+    )
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Error al obtener las alertas')
+        }
+
+        return res.json()
+      })
+      .then((data) => {
+        setTotalAlertas(data.total_alertas || 0)
+      })
+      .catch((err) => {
+        console.error('Error al cargar alertas:', err)
+        setTotalAlertas(0)
+      })
+      .finally(() => {
+        setLoadingAlertas(false)
       })
   }, [idInstructor])
 
@@ -129,7 +166,7 @@ export default function InstructorDashboard() {
                   </div>
 
                   <span className="badge bg-warning text-dark fw-bold rounded-pill">
-                    3 Alertas
+                    {loadingAlertas ? '...' : `${totalAlertas} ${totalAlertas === 1 ? 'Alerta' : 'Alertas'}`}
                   </span>
 
                 </div>
