@@ -289,23 +289,30 @@ def obtener_novedades_aprendiz(
     Id_Apr: int,
     session: Session = Depends(get_session)
 ):
-
+    # Verificar que el aprendiz exista
     aprendiz = _verificar_aprendiz(session, Id_Apr)
 
+    # Verificar que el aprendiz pertenezca a una ficha
     if not aprendiz.Id_Fic:
         raise HTTPException(
             status_code=400,
             detail="El aprendiz no pertenece a ninguna ficha"
         )
 
+    # Verificar que la ficha exista
     ficha = _verificar_ficha(session, aprendiz.Id_Fic)
 
+    # Obtener únicamente fallas, excusas y retardos
     registros = session.exec(
         select(Asistencia)
         .where(
             Asistencia.Id_Apr == Id_Apr,
             Asistencia.Id_Fic == aprendiz.Id_Fic,
-            Asistencia.Es_Asi != EstadoAsistencia.presente,
+            Asistencia.Es_Asi.in_([
+                EstadoAsistencia.falla,
+                EstadoAsistencia.excusa,
+                EstadoAsistencia.retardo,
+            ]),
         )
         .order_by(Asistencia.Fec_Asi.desc())
     ).all()
@@ -314,14 +321,22 @@ def obtener_novedades_aprendiz(
 
     for registro in registros:
 
-        competencia = session.get(Competencia, registro.Id_Comp)
+        # Buscar la competencia asociada
+        competencia = session.get(
+            Competencia,
+            registro.Id_Comp
+        )
 
         resultado.append({
             "Id_Asi": registro.Id_Asi,
             "Fec_Asi": registro.Fec_Asi,
             "Es_Asi": registro.Es_Asi.value,
             "Num_Fic": ficha.Num_Fic,
-            "Competencia": competencia.Nom_Comp if competencia else None,
+            "Competencia": (
+                competencia.Nom_Comp
+                if competencia
+                else None
+            ),
         })
 
     return resultado
