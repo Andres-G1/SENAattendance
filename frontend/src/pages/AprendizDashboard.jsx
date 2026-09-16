@@ -115,36 +115,15 @@ export default function AprendizDashboard() {
 
                     <hr className="text-muted opacity-25 my-4" />
 
-                    <div className={`d-flex justify-content-between align-items-center p-3 rounded-3 ${colores.bg}`}>
-                      <div className="d-flex align-items-center gap-2">
-                        <div
-                          className={`p-2 rounded-circle d-flex align-items-center justify-content-center ${colores.bg} ${colores.text}`}
-                          style={{ width: 32, height: 32 }}
-                        >
-                          <small className="fw-bold">!</small>
-                        </div>
-                        <span className="text-secondary fw-medium small">
-                          Racha actual sin asistir
-                        </span>
-                      </div>
-                      <span className={`badge fs-6 px-3 rounded-pill ${
-                        estado.semaforo === 'ROJO' ? 'bg-danger' :
-                        estado.semaforo === 'AMARILLO' ? 'bg-warning text-dark' :
-                        'bg-success'
-                      }`}>
-                        {estado.racha_dias} día(s)
-                      </span>
-                    </div>
-
                     {estado.deserta_por_racha && (
                       <div className="alert alert-danger mt-3 mb-0 small">
-                        ⚠ Llevas 3 días seguidos sin asistir. Contacta a tu instructor o coordinación cuanto antes.
+                        ⚠ Alcanzaste el máximo de fallas acumuladas permitidas.
                       </div>
                     )}
 
                     {!estado.deserta_por_racha && estado.deserta_por_acumulado && (
                       <div className="alert alert-danger mt-3 mb-0 small">
-                        ⚠ Alcanzaste el máximo de fallas acumuladas permitidas.
+                        ⚠ Alcanzaste el máximo de fallas permitidas.
                       </div>
                     )}
                   </>
