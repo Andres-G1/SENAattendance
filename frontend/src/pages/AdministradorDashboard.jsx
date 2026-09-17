@@ -326,7 +326,7 @@ export default function AdministradorDashboard() {
                 </div>
 
                 <p className="text-muted small mb-4">
-                  Elige qué fichas maneja cada instructor <br></br>y en que ficha estara el Aprendiz.
+                  Elige qué fichas maneja cada instructor y en que ficha estara el Aprendiz.
                 </p>
 
                 <Link
@@ -338,7 +338,7 @@ export default function AdministradorDashboard() {
 <p></p>
 
                 <Link
-                  to="/fichas/asignar"
+                  to="/fichas/AsignarAprendiz"
                   className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2 mt-auto"
                 >
                   Asignar Aprendiz

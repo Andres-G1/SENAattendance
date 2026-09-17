@@ -23,6 +23,12 @@ export const login = async (typeid, id, password) => {
   return response.data;
 };
 
+export const recoverPassword = async (data) => {
+  const response = await axios.post("http://127.0.0.1:8000/users/password", data);
+  return response.data;
+};
+
+
 // =====================================================
 // APRENDICES  (router: /usuarios)
 // =====================================================

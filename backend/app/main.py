@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import crear_tablas
 from routers.login import Router_login
+from routers.recuperarcontraseña import router_recovery
 from routers.asistencia import Router_asistencia
 from routers.ficha import Router_ficha
 from routers.carrera import Router_carrera
@@ -17,6 +18,7 @@ from routers.carga_administradores import Router_carga_administradores
 from routers.carga_aprendices import Router_carga_aprendices
 from routers.configuracion import Router_configuracion
 from jobs_asistencia import scheduler
+from routers.asignacionaprendiz import Router_asignacionesAprendiz
 
 app = FastAPI()
 
@@ -37,6 +39,8 @@ app.add_middleware(
 )
 
 app.include_router(Router_login)
+app.include_router(router_recovery)
+app.include_router(Router_asignacionesAprendiz)
 app.include_router(Router_asistencia)
 app.include_router(Router_ficha)
 app.include_router(Router_carrera)

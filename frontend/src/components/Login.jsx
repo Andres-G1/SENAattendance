@@ -66,7 +66,7 @@ export default function Login({ onLoginSuccess }) {
       <nav className="login-navbar">
         <div className="nav-links">
           <a href="/" style={{ color: "rgb(0, 201, 90)" }}>Inicio</a>
-          <a href="/users/password">Recuperar contraseña</a>
+          <a href="/password">Recuperar contraseña</a>
         </div>
         <div className="titulo">
           <img

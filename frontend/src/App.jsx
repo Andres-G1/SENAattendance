@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Footer from "./components/footer/Footer.jsx";
 
 import Login from "./components/Login";
+import PasswordRecovery from "./components/PasswordRecovery";
+
 import RutaProtegida from "./components/RutaProtegida";
 import "./hooks/useCurrentDate"
 import AprendizDashboard from "./pages/AprendizDashboard";
@@ -16,6 +18,8 @@ import CreateC from "./pages/Carrera/Create";
 import EditC from "./pages/Carrera/Edit";
 import DeleteC from "./pages/Carrera/Delete";
 
+
+import AsignarAprendiz from "./pages/Ficha/AsignarAprendiz.jsx";
 import ConfigFicha from "./pages/Ficha/ConfigFicha";
 import CreateF from "./pages/Ficha/Create";
 import EditF from "./pages/Ficha/Edit";
@@ -67,6 +71,12 @@ return (
           path="/"
           element={<Login />}
         />
+
+        <Route
+          path="/password"
+          element={<PasswordRecovery />}
+        />
+
 
         {/* ==============================
             APRENDIZ
@@ -235,6 +245,15 @@ return (
           element={
             <RutaProtegida rolPermitido="Coordinador">
               <CreateF />
+            </RutaProtegida>
+          }
+        />
+
+          <Route
+          path="/fichas/AsignarAprendiz"
+          element={
+            <RutaProtegida rolPermitido="Coordinador">
+              <AsignarAprendiz />
             </RutaProtegida>
           }
         />
