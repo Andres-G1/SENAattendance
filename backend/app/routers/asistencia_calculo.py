@@ -3,7 +3,6 @@ from sqlmodel import Session, select
 
 from models.model import Asistencia, EstadoAsistencia
 
-
 def calcular_estado(session: Session, id_apr: int, id_fic: int) -> dict:
 
     registros = session.exec(
@@ -25,7 +24,10 @@ def calcular_estado(session: Session, id_apr: int, id_fic: int) -> dict:
         if r.Es_Asi == EstadoAsistencia.excusa
     )
 
-    acumulado = max(0, fallas - excusas)
+    # El acumulado es directamente el conteo de fallas: una excusa
+    # ya excluye ese día de "fallas" por definición (es el mismo
+    # registro, solo con otro estado), así que no se resta aparte.
+    acumulado = fallas
 
     dias = defaultdict(list)
 
@@ -55,7 +57,7 @@ def calcular_estado(session: Session, id_apr: int, id_fic: int) -> dict:
     return {
         "acumulado": acumulado,
         "fallas_brutas": fallas,
-        "excusas": excusas,
+        "excusas": excusas,  
         "racha_dias": racha,
         "semaforo": semaforo,
         "deserta_por_acumulado": acumulado >= 5,
