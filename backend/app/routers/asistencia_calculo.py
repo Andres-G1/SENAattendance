@@ -37,7 +37,6 @@ def calcular_estado(session: Session, id_apr: int, id_fic: int) -> dict:
     racha = 0
 
     for fecha in sorted(dias):
-
         estados_del_dia = dias[fecha]
 
         dia_perdido = all(
@@ -54,10 +53,24 @@ def calcular_estado(session: Session, id_apr: int, id_fic: int) -> dict:
     else:
         semaforo = "VERDE"
 
+
+    print("========== DEBUG ASISTENCIA ==========")
+    print("ID APRENDIZ:", id_apr)
+    print("REGISTROS:")
+
+    for r in registros:
+        print(r.Fec_Asi, r.Es_Asi)
+
+    print("RACHA CALCULADA:", racha)
+    print("ACUMULADO:", acumulado)
+    print("DESERTA POR RACHA:", racha >= 3)
+    print("======================================")
+
+
     return {
         "acumulado": acumulado,
         "fallas_brutas": fallas,
-        "excusas": excusas,  
+        "excusas": excusas,
         "racha_dias": racha,
         "semaforo": semaforo,
         "deserta_por_acumulado": acumulado >= 5,

@@ -9,6 +9,7 @@ from database import get_session
 from models.model import (
     Asistencia,
     Aprendiz,
+    Instructor,
     Fichas,
     FichaInstructor,
     Competencia,
@@ -440,3 +441,119 @@ def obtener_alertas_instructor(
             ya_contados.add(aprendiz.Id_Apr)
 
     return {"total_alertas": total_alertas}
+
+# =========================================================
+# REVISAR ASISTENCIA GENERAL DE UNA FICHA
+# =========================================================
+
+# =========================================================
+# REVISAR ASISTENCIA GENERAL DE UNA FICHA
+# =========================================================
+
+@Router_asistencia.get("/instructor/{Id_Ins}/revisar/{Id_Fic}")
+def revisar_asistencia_ficha(
+    Id_Ins: int,
+    Id_Fic: int,
+    session: Session = Depends(get_session)
+):
+    # Verificar que la ficha exista
+    ficha = _verificar_ficha(session, Id_Fic)
+
+    # Verificar que el instructor tenga al menos una asignación
+    # dentro de esta ficha
+    asignacion_instructor = session.exec(
+        select(FichaInstructor)
+        .where(
+            FichaInstructor.Id_Ins == Id_Ins,
+            FichaInstructor.Id_Fic == Id_Fic
+        )
+    ).first()
+
+    if not asignacion_instructor:
+        raise HTTPException(
+            status_code=403,
+            detail="No tienes asignación en esta ficha"
+        )
+
+    # Traer TODAS las asistencias de la ficha
+    # sin importar qué instructor las registró
+    registros = session.exec(
+        select(Asistencia)
+        .where(Asistencia.Id_Fic == Id_Fic)
+        .order_by(Asistencia.Fec_Asi.desc())
+    ).all()
+
+    resultado = []
+
+    for registro in registros:
+
+        # Buscar aprendiz
+        aprendiz = session.get(
+            Aprendiz,
+            registro.Id_Apr
+        )
+
+        # Buscar competencia
+        competencia = session.get(
+            Competencia,
+            registro.Id_Comp
+        )
+
+        # Buscar instructor que registró la asistencia
+        instructor = session.get(
+            Instructor,
+            registro.Id_Ins
+        )
+
+        resultado.append({
+            "Id_Asi": registro.Id_Asi,
+
+            # Fecha
+            "Fec_Asi": registro.Fec_Asi,
+
+            # Aprendiz
+            "Id_Apr": registro.Id_Apr,
+            "Aprendiz": (
+                f"{aprendiz.Nom_Apr} {aprendiz.Ape_Apr}"
+                if aprendiz else "Aprendiz no encontrado"
+            ),
+            "Num_ide_Apr": (
+                aprendiz.Num_ide_Apr
+                if aprendiz else None
+            ),
+
+            # Ficha
+            "Id_Fic": registro.Id_Fic,
+            "Num_Fic": ficha.Num_Fic,
+
+            # Instructor que tomó la asistencia
+            "Id_Ins": registro.Id_Ins,
+            "Instructor": (
+                f"{instructor.Nom_Ins} {instructor.Ape_Ins}"
+                if instructor else "Instructor no encontrado"
+            ),
+
+            # Competencia
+            "Id_Comp": registro.Id_Comp,
+            "Competencia": (
+                competencia.Nom_Comp
+                if competencia
+                else "Competencia no encontrada"
+            ),
+
+            # Día
+            "Dia": (
+                registro.Dia.value
+                if registro.Dia
+                else None
+            ),
+
+            # Estado
+            "Estado": (
+                registro.Es_Asi.value
+                if registro.Es_Asi
+                else None
+            ),
+        })
+
+    return resultado

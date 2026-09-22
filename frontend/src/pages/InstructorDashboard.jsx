@@ -225,7 +225,7 @@ export default function InstructorDashboard() {
                       <div className="d-flex justify-content-between align-items-center mb-1">
 
                         <h5 className="fw-bold text-dark mb-0">
-                          Revisar Asistencias
+                          Tomar Asistencias
                         </h5>
 
                         <span className="text-primary small fw-medium">
@@ -233,6 +233,7 @@ export default function InstructorDashboard() {
                         </span>
 
                       </div>
+                      
 
                       <p className="text-muted small mb-0">
                         Consulta el consolidado de ingresos, gestiona
@@ -244,6 +245,52 @@ export default function InstructorDashboard() {
 
                   </div>
 
+                </Link>
+                <Link
+                  to="/instructor/revisar-asistencia"
+                  className="card text-decoration-none bg-white border-0 shadow-sm p-4 rounded-4 card-hover-premium flex-grow-1"
+                >
+                  <div className="d-flex align-items-start gap-3">
+
+                    <div className="p-3 rounded-3 bg-success-subtle text-success border border-success-subtle">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                      </svg>
+                    </div>
+
+                    <div className="flex-grow-1">
+                      <div className="d-flex justify-content-between align-items-center mb-1">
+
+                        <h5 className="fw-bold text-dark mb-0">
+                          Revisar Asistencia
+                        </h5>
+
+                        <span className="text-success small fw-medium">
+                          Consultar →
+                        </span>
+
+                      </div>
+
+                      <p className="text-muted small mb-0">
+                        Consulta la asistencia de tus fichas en otros días,
+                        competencias e instructores, siempre que tengas
+                        asignación en la ficha.
+                      </p>
+
+                    </div>
+
+                  </div>
                 </Link>
 
               </div>

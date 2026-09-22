@@ -12,6 +12,7 @@ import InstructorDashboard from "./pages/InstructorDashboard";
 import AdministradorDashboard from "./pages/AdministradorDashboard";
 
 import InstructorAsistencia from "./pages/Instructor/InstructorAsistencia";
+import InstructorAsistenciaRevisar from "./pages/Instructor/InstructorAsistenciaRevisar";
 
 import ConfigCarrera from "./pages/Carrera/ConfigCarrera";
 import CreateC from "./pages/Carrera/Create";
@@ -161,6 +162,14 @@ return (
             <RutaProtegida rolPermitido="Instructor">
               <InstructorAsistencia />
             </RutaProtegida>
+          }
+        />
+        <Route
+        path="/instructor/revisar-asistencia"
+        element={
+          <RutaProtegida rolPermitido="Instructor">
+            <InstructorAsistenciaRevisar/>
+          </RutaProtegida>
           }
         />
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import AprendizNavbar from '../components/navbars/AprendizNavbar.jsx'
 import useCurrentDate from '../hooks/useCurrentDate.js'
 import FallasNovedades from './Aprendiz/FallasNovedades.jsx'
+import CargaPagina from "../components/CargaPagina.jsx";
 
 const API_BASE = "http://localhost:8000";
 
