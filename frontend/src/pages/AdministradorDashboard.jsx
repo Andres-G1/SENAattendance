@@ -15,7 +15,7 @@ export default function AdministradorDashboard() {
       <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
 
       <div className="bg-light min-vh-100 py-5">
-        <main className="container" style={{ maxWidth: 950 }}>
+        <main className="container" style={{ maxWidth: 950, display: 'flex', flexDirection: 'column' }}>
 
           {/* =====================================================
               BIENVENIDA
@@ -36,11 +36,11 @@ export default function AdministradorDashboard() {
           {/* =====================================================
               GESTIÓN DE USUARIOS
           ====================================================== */}
-          <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted">
+          <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted" style={{ order: 2 }}>
             Gestión de Usuarios
           </h4>
 
-          <div className="row g-4 mb-5">
+          <div className="row g-4 mb-5" style={{ order: 2 }}>
 
             {/* ---------------- GESTIÓN DE USUARIOS ---------------- */}
             <div className="col-12 col-md-6">
@@ -164,11 +164,11 @@ export default function AdministradorDashboard() {
           {/* =====================================================
               GESTIÓN DE FICHAS
           ====================================================== */}
-          <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted">
+          <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted" style={{ order: 1 }}>
             Gestión de Fichas
           </h4>
 
-          <div className="row g-4 mb-5">
+          <div className="row g-4 mb-5" style={{ order: 1 }}>
 
             {/* ---------------- GESTIÓN DE FICHAS ---------------- */}
             <div className="col-12 col-md-6">
@@ -290,11 +290,11 @@ export default function AdministradorDashboard() {
           {/* =====================================================
               ASIGNACIÓN DE FICHAS
           ====================================================== */}
-          <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted">
+          <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted" style={{ order: 3 }}>
             Asignación de Fichas
           </h4>
 
-          <div className="row g-4 mb-5">
+          <div className="row g-4 mb-5" style={{ order: 3 }}>
             <div className="col-12 col-md-6">
               <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
 

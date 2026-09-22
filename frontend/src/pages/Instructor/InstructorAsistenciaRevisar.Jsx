@@ -1,9 +1,14 @@
+
 import { useEffect, useMemo, useState } from "react";
 
 import InstructorNavbar from "/src/components/navbars/InstructorNavbar.jsx";
 import useCurrentDate from "/src/hooks/useCurrentDate.js";
 
 const API_BASE = "http://localhost:8000";
+
+// =========================================================
+// COMPONENTE
+// =========================================================
 
 export default function InstructorAsistenciaRevisar() {
   const currentDate = useCurrentDate();
@@ -28,15 +33,13 @@ export default function InstructorAsistenciaRevisar() {
 
   const [error, setError] = useState("");
 
-  // Búsqueda por documento
   const [documentoBusqueda, setDocumentoBusqueda] =
     useState("");
 
-  // Día actual
   const [diaActual, setDiaActual] = useState(0);
 
   // =========================================================
-  // CARGAR FICHAS DEL INSTRUCTOR
+  // CARGAR FICHAS
   // =========================================================
 
   useEffect(() => {
@@ -50,27 +53,17 @@ export default function InstructorAsistenciaRevisar() {
     )
       .then((res) => {
         if (!res.ok) {
-          throw new Error(
-            "Error al obtener las fichas"
-          );
+          throw new Error("Error al obtener las fichas");
         }
 
         return res.json();
       })
       .then((data) => {
-        console.log(
-          "Fichas del instructor:",
-          data
-        );
-
         setFichas(data);
       })
       .catch((err) => {
-        console.error("Error:", err);
-
-        setError(
-          "No fue posible cargar las fichas."
-        );
+        console.error(err);
+        setError("No fue posible cargar las fichas.");
       })
       .finally(() => {
         setLoadingFichas(false);
@@ -83,16 +76,12 @@ export default function InstructorAsistenciaRevisar() {
 
   const consultarAsistencia = () => {
     if (!fichaSeleccionada) {
-      setError(
-        "Selecciona una ficha primero."
-      );
-
+      setError("Selecciona una ficha primero.");
       return;
     }
 
     setError("");
     setLoadingAsistencias(true);
-
     setDocumentoBusqueda("");
     setDiaActual(0);
 
@@ -109,15 +98,10 @@ export default function InstructorAsistenciaRevisar() {
         return res.json();
       })
       .then((data) => {
-        console.log(
-          "Asistencia encontrada:",
-          data
-        );
-
         setAsistencias(data);
       })
       .catch((err) => {
-        console.error("Error:", err);
+        console.error(err);
 
         setAsistencias([]);
 
@@ -131,44 +115,25 @@ export default function InstructorAsistenciaRevisar() {
   };
 
   // =========================================================
-  // OBTENER DÍAS DISPONIBLES
+  // DÍAS DISPONIBLES
   // =========================================================
 
   const diasDisponibles = useMemo(() => {
     const fechas = [
       ...new Set(
         asistencias
-          .map(
-            (registro) => registro.Fec_Asi
-          )
+          .map((registro) => registro.Fec_Asi)
           .filter(Boolean)
       ),
     ];
 
     return fechas.sort(
-      (a, b) =>
-        new Date(b) - new Date(a)
+      (a, b) => new Date(b) - new Date(a)
     );
   }, [asistencias]);
 
   // =========================================================
-  // CORREGIR DÍA ACTUAL SI CAMBIA LA INFORMACIÓN
-  // =========================================================
-
-  useEffect(() => {
-    if (
-      diaActual >= diasDisponibles.length &&
-      diasDisponibles.length > 0
-    ) {
-      setDiaActual(0);
-    }
-  }, [
-    diasDisponibles,
-    diaActual,
-  ]);
-
-  // =========================================================
-  // FECHA ACTUAL SELECCIONADA
+  // FECHA SELECCIONADA
   // =========================================================
 
   const fechaSeleccionada =
@@ -179,23 +144,18 @@ export default function InstructorAsistenciaRevisar() {
   // =========================================================
 
   const formatearFecha = (fecha) => {
-    if (!fecha) {
-      return "Sin fecha";
-    }
+    if (!fecha) return "Sin fecha";
 
     const fechaLocal = new Date(
       `${fecha}T00:00:00`
     );
 
-    return fechaLocal.toLocaleDateString(
-      "es-CO",
-      {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }
-    );
+    return fechaLocal.toLocaleDateString("es-CO", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   };
 
   // =========================================================
@@ -207,26 +167,18 @@ export default function InstructorAsistenciaRevisar() {
       return [];
     }
 
-    return asistencias.filter(
-      (registro) => {
-        const mismaFecha =
-          registro.Fec_Asi ===
-          fechaSeleccionada;
+    return asistencias.filter((registro) => {
+      const mismaFecha =
+        registro.Fec_Asi === fechaSeleccionada;
 
-        const mismoDocumento =
-          !documentoBusqueda ||
-          String(
-            registro.Num_ide_Apr || ""
-          ).includes(
-            documentoBusqueda
-          );
-
-        return (
-          mismaFecha &&
-          mismoDocumento
+      const mismoDocumento =
+        !documentoBusqueda ||
+        String(registro.Num_ide_Apr || "").includes(
+          documentoBusqueda
         );
-      }
-    );
+
+      return mismaFecha && mismoDocumento;
+    });
   }, [
     asistencias,
     fechaSeleccionada,
@@ -234,113 +186,77 @@ export default function InstructorAsistenciaRevisar() {
   ]);
 
   // =========================================================
-  // CAMBIAR DE DÍA
+  // CAMBIAR DÍA
   // =========================================================
 
   const cambiarDia = (direccion) => {
     setDiaActual((actual) => {
-      const nuevo =
-        actual + direccion;
+      const nuevo = actual + direccion;
 
       if (nuevo < 0) {
         return 0;
       }
 
-      if (
-        nuevo >=
-        diasDisponibles.length
-      ) {
-        return (
-          diasDisponibles.length - 1
-        );
+      if (nuevo >= diasDisponibles.length) {
+        return diasDisponibles.length - 1;
       }
 
-      // Al cambiar de día mantenemos
-      // la búsqueda por documento
       return nuevo;
     });
   };
 
   // =========================================================
-  // OBTENER ESTILO DEL ESTADO
+  // ESTADO
   // =========================================================
 
   const obtenerEstado = (estado) => {
     if (!estado) {
       return {
         texto: "Sin estado",
-        clase:
-          "bg-secondary-subtle text-secondary",
-        icono: "•",
+        clase: "bg-secondary-subtle text-secondary",
       };
     }
 
-    const estadoNormalizado =
-      estado.toLowerCase();
+    const normalizado = estado.toLowerCase();
 
-    if (
-      estadoNormalizado.includes(
-        "presente"
-      )
-    ) {
+    if (normalizado.includes("presente")) {
       return {
         texto: "Presente",
-        clase:
-          "bg-success-subtle text-success",
-        icono: "✓",
+        clase: "bg-success-subtle text-success",
       };
     }
 
     if (
-      estadoNormalizado.includes(
-        "retardo"
-      ) ||
-      estadoNormalizado.includes(
-        "retraso"
-      )
+      normalizado.includes("retardo") ||
+      normalizado.includes("retraso")
     ) {
       return {
         texto: "Retardo",
         clase:
           "bg-warning-subtle text-warning-emphasis",
-        icono: "⏱",
       };
     }
 
-    if (
-      estadoNormalizado.includes(
-        "excusa"
-      )
-    ) {
+    if (normalizado.includes("excusa")) {
       return {
         texto: "Excusa",
-        clase:
-          "bg-info-subtle text-info-emphasis",
-        icono: "📝",
+        clase: "bg-info-subtle text-info-emphasis",
       };
     }
 
     if (
-      estadoNormalizado.includes(
-        "falla"
-      ) ||
-      estadoNormalizado.includes(
-        "inasistencia"
-      )
+      normalizado.includes("falla") ||
+      normalizado.includes("inasistencia")
     ) {
       return {
         texto: "Falla",
-        clase:
-          "bg-danger-subtle text-danger",
-        icono: "✕",
+        clase: "bg-danger-subtle text-danger",
       };
     }
 
     return {
       texto: estado,
-      clase:
-        "bg-secondary-subtle text-secondary",
-      icono: "•",
+      clase: "bg-secondary-subtle text-secondary",
     };
   };
 
@@ -351,493 +267,346 @@ export default function InstructorAsistenciaRevisar() {
   return (
     <>
       <InstructorNavbar
-        user={{
-          Nom_Ins: firstName,
-        }}
+        user={{ Nom_Ins: firstName }}
       />
 
       <div
-        className="min-vh-100 py-5"
-        style={{
-          backgroundColor: "#f5f7fa",
-        }}
+        className="bg-light min-vh-100 py-5"
       >
         <main
           className="container"
-          style={{
-            maxWidth: 1150,
-          }}
+          style={{ maxWidth: "1000px" }}
         >
-
           {/* =================================================
               ENCABEZADO
           ================================================= */}
 
           <div className="mb-4">
+            <h1 className="fw-bold text-dark">
+              Revisar asistencia
+            </h1>
 
-            <div className="d-flex align-items-center gap-3">
+            <p className="text-muted mb-1">
+              Consulta la asistencia registrada en
+              las fichas asignadas.
+            </p>
 
-              <div
-                className="rounded-4 d-flex align-items-center justify-content-center"
-                style={{
-                  width: 55,
-                  height: 55,
-                  backgroundColor:
-                    "#e8f5e9",
-                  fontSize: 26,
-                }}
-              >
-                📋
-              </div>
-
-              <div>
-                <h1 className="fw-bold text-dark mb-1">
-                  Revisar Asistencia
-                </h1>
-
-                <p className="text-muted mb-0">
-                  Consulta la asistencia de tus
-                  fichas por día.
-                </p>
-              </div>
-
-            </div>
-
-            <small className="text-muted d-block mt-2">
+            <small className="text-muted">
               {currentDate}
             </small>
-
           </div>
 
           {/* =================================================
-              SELECCIONAR FICHA
+              CUADRO PRINCIPAL
           ================================================= */}
 
-          <div className="card border-0 shadow-sm rounded-4 p-4 mb-4">
+          <div
+            className="bg-white rounded-4 p-4 shadow-sm"
+            style={{
+              border: "2px solid #00851d",
+            }}
+          >
+            {/* =================================================
+                SELECCIÓN DE FICHA
+            ================================================= */}
 
-            <div className="d-flex align-items-center gap-2 mb-3">
+            <div className="mb-4">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <h5 className="fw-bold mb-1">
+                    Consultar asistencia
+                  </h5>
 
-              <span
-                style={{
-                  fontSize: 20,
-                }}
-              >
-                📚
-              </span>
+                  <p className="text-muted small mb-0">
+                    Selecciona una ficha para revisar
+                    sus registros de asistencia.
+                  </p>
+                </div>
 
-              <h5 className="fw-bold mb-0">
-                Seleccionar ficha
-              </h5>
-
-            </div>
-
-            <div className="row g-3 align-items-end">
-
-              <div className="col-12 col-md-8">
-
-                <label className="form-label fw-medium">
-                  Ficha
-                </label>
-
-                <select
-                  className="form-select form-select-lg"
-                  value={
-                    fichaSeleccionada
-                  }
-                  onChange={(e) => {
-                    setFichaSeleccionada(
-                      e.target.value
-                    );
-
-                    setAsistencias([]);
-
-                    setDocumentoBusqueda("");
-
-                    setDiaActual(0);
-
-                    setError("");
+                <span
+                  className="badge rounded-pill"
+                  style={{
+                    backgroundColor: "#E6F4D7",
+                    color: "#1B5E20",
                   }}
-                  disabled={
-                    loadingFichas
-                  }
                 >
+                  {fichas.length} fichas
+                </span>
+              </div>
 
-                  <option value="">
-                    {loadingFichas
-                      ? "Cargando fichas..."
-                      : "Selecciona una ficha"}
-                  </option>
+              <div className="row g-3 align-items-end">
+                <div className="col-12 col-md-8">
+                  <label className="form-label fw-semibold">
+                    Ficha
+                  </label>
 
-                  {fichas.map(
-                    (ficha) => (
+                  <select
+                    className="form-select"
+                    value={fichaSeleccionada}
+                    onChange={(e) => {
+                      setFichaSeleccionada(
+                        e.target.value
+                      );
+
+                      setAsistencias([]);
+                      setDocumentoBusqueda("");
+                      setDiaActual(0);
+                      setError("");
+                    }}
+                    disabled={loadingFichas}
+                  >
+                    <option value="">
+                      {loadingFichas
+                        ? "Cargando fichas..."
+                        : "Selecciona una ficha"}
+                    </option>
+
+                    {fichas.map((ficha) => (
                       <option
-                        key={
-                          ficha.Id_Fic
-                        }
-                        value={
-                          ficha.Id_Fic
-                        }
+                        key={ficha.Id_Fic}
+                        value={ficha.Id_Fic}
                       >
                         {ficha.Num_Fic ||
                           ficha.Id_Fic}
                       </option>
-                    )
-                  )}
+                    ))}
+                  </select>
+                </div>
 
-                </select>
-
+                <div className="col-12 col-md-4">
+                  <button
+                    type="button"
+                    className="btn text-white fw-semibold w-100"
+                    style={{
+                      backgroundColor: "#00851d",
+                    }}
+                    onClick={consultarAsistencia}
+                    disabled={
+                      !fichaSeleccionada ||
+                      loadingAsistencias
+                    }
+                  >
+                    {loadingAsistencias
+                      ? "Consultando..."
+                      : "Consultar asistencia"}
+                  </button>
+                </div>
               </div>
 
-              <div className="col-12 col-md-4">
-
-                <button
-                  type="button"
-                  className="btn btn-success btn-lg w-100"
-                  onClick={
-                    consultarAsistencia
-                  }
-                  disabled={
-                    !fichaSeleccionada ||
-                    loadingAsistencias
-                  }
-                >
-                  {loadingAsistencias
-                    ? "Consultando..."
-                    : "🔍 Consultar asistencia"}
-                </button>
-
-              </div>
-
+              {error && (
+                <div className="alert alert-danger mt-3 mb-0">
+                  {error}
+                </div>
+              )}
             </div>
 
-            {error && (
-              <div className="alert alert-danger mt-3 mb-0 rounded-3">
-                {error}
-              </div>
-            )}
-
-          </div>
-
-          {/* =================================================
-              CONTENIDO
-          ================================================= */}
-
-          <div className="card border-0 shadow-sm rounded-4 p-4">
-
-            {/* SIN FICHA */}
+            {/* =================================================
+                ESTADO INICIAL
+            ================================================= */}
 
             {!fichaSeleccionada && (
-              <div className="text-center py-5">
-
-                <div
-                  className="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle"
-                  style={{
-                    width: 85,
-                    height: 85,
-                    backgroundColor:
-                      "#f1f3f5",
-                    fontSize: 38,
-                  }}
-                >
-                  📋
-                </div>
-
-                <h5 className="fw-bold">
+              <div className="border rounded-3 text-center py-5">
+                <h6 className="fw-bold text-dark">
                   Selecciona una ficha
-                </h5>
+                </h6>
 
-                <p className="text-muted mb-0">
-                  Selecciona una ficha para
-                  consultar su asistencia.
+                <p className="text-muted small mb-0">
+                  Aquí aparecerá el historial de
+                  asistencia.
                 </p>
-
               </div>
             )}
 
-            {/* CARGANDO */}
+            {/* =================================================
+                CARGANDO
+            ================================================= */}
 
             {loadingAsistencias && (
-              <div className="text-center py-5">
-
+              <div className="border rounded-3 text-center py-5">
                 <div
-                  className="spinner-border text-success mb-3"
+                  className="spinner-border"
+                  style={{
+                    color: "#00851d",
+                  }}
                   role="status"
-                >
-                  <span className="visually-hidden">
-                    Cargando...
-                  </span>
-                </div>
+                />
 
-                <p className="text-muted mb-0">
+                <p className="text-muted mt-3 mb-0">
                   Consultando asistencia...
                 </p>
-
               </div>
             )}
 
-            {/* SIN REGISTROS */}
+            {/* =================================================
+                SIN REGISTROS
+            ================================================= */}
 
             {fichaSeleccionada &&
               !loadingAsistencias &&
               asistencias.length === 0 && (
-                <div className="text-center py-5">
-
-                  <div
-                    style={{
-                      fontSize: 45,
-                    }}
-                  >
-                    📭
-                  </div>
-
-                  <h5 className="fw-bold mt-3">
+                <div className="border rounded-3 text-center py-5">
+                  <h6 className="fw-bold">
                     No hay registros
-                  </h5>
+                  </h6>
 
-                  <p className="text-muted mb-0">
-                    Esta ficha no tiene
-                    asistencias registradas.
+                  <p className="text-muted small mb-0">
+                    No existen asistencias registradas
+                    para esta ficha.
                   </p>
-
                 </div>
               )}
 
             {/* =================================================
-                CONTENIDO DE ASISTENCIAS
+                RESULTADOS
             ================================================= */}
 
             {fichaSeleccionada &&
               !loadingAsistencias &&
               asistencias.length > 0 && (
                 <>
-
                   {/* =================================================
-                      BUSCADOR POR DOCUMENTO
+                      BUSCADOR
                   ================================================= */}
 
-                  <div
-                    className="p-3 rounded-4 mb-4"
-                    style={{
-                      backgroundColor:
-                        "#f8f9fa",
-                      border:
-                        "1px solid #e9ecef",
-                    }}
-                  >
-
-                    <label className="form-label fw-bold">
-                      🔎 Buscar aprendiz por
-                      número de documento
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold">
+                      Buscar por documento
                     </label>
 
-                    <div className="input-group input-group-lg">
-
-                      <span className="input-group-text bg-white">
-                        🪪
-                      </span>
-
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Ej: 1023456789"
-                        value={
-                          documentoBusqueda
-                        }
-                        onChange={(e) =>
-                          setDocumentoBusqueda(
-                            e.target.value
-                          )
-                        }
-                      />
-
-                      {documentoBusqueda && (
-                        <button
-                          type="button"
-                          className="btn btn-outline-secondary"
-                          onClick={() =>
+                    <div className="row">
+                      <div className="col-12 col-md-6">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Número de documento"
+                          value={documentoBusqueda}
+                          onChange={(e) =>
                             setDocumentoBusqueda(
-                              ""
+                              e.target.value
                             )
                           }
-                        >
-                          Limpiar
-                        </button>
-                      )}
-
+                        />
+                      </div>
                     </div>
-
-                    <small className="text-muted">
-                      Escribe el número de documento
-                      completo o una parte de él.
-                    </small>
-
                   </div>
 
                   {/* =================================================
-                      NAVEGADOR DE DÍAS
+                      NAVEGACIÓN DE FECHA
                   ================================================= */}
 
                   <div
-                    className="rounded-4 p-4 mb-4"
+                    className="rounded-3 p-3 mb-4"
                     style={{
                       background:
-                        "linear-gradient( #006b18 0%, #00851d 55%, #0a9f2e 100%)",
-                      color: "white",
+                        "linear-gradient(#006b18 0%, #00851d 55%, #0a9f2e 100%)",
                     }}
                   >
-
-                    <div className="d-flex align-items-center justify-content-between gap-3">
-
-                      {/* BOTÓN ANTERIOR */}
-
+                    <div className="d-flex align-items-center justify-content-between">
                       <button
                         type="button"
-                        className="btn btn-light rounded-circle d-flex align-items-center justify-content-center"
-                        style={{
-                          width: 48,
-                          height: 48,
-                          flexShrink: 0,
-                        }}
+                        className="btn btn-outline-light"
                         onClick={() =>
                           cambiarDia(-1)
                         }
-                        disabled={
-                          diaActual === 0
-                        }
+                        disabled={diaActual === 0}
                       >
-                        ←
+                        ← Anterior
                       </button>
 
-                      {/* FECHA */}
-
-                      <div className="text-center">
-
+                      <div className="text-center text-white">
                         <div
-                          className="small opacity-75 mb-1"
+                          className="small"
+                          style={{
+                            opacity: 0.9,
+                          }}
                         >
-                          Día de asistencia
+                          Día {diaActual + 1} de{" "}
+                          {diasDisponibles.length}
                         </div>
 
-                        <h4 className="fw-bold text-capitalize mb-1">
+                        <div className="fw-bold text-capitalize">
                           {formatearFecha(
                             fechaSeleccionada
                           )}
-                        </h4>
-
-                        <div className="small opacity-75">
-                          Día{" "}
-                          {diaActual + 1} de{" "}
-                          {
-                            diasDisponibles.length
-                          }
                         </div>
-
                       </div>
-
-                      {/* BOTÓN SIGUIENTE */}
 
                       <button
                         type="button"
-                        className="btn btn-light rounded-circle d-flex align-items-center justify-content-center"
-                        style={{
-                          width: 48,
-                          height: 48,
-                          flexShrink: 0,
-                        }}
+                        className="btn btn-outline-light"
                         onClick={() =>
                           cambiarDia(1)
                         }
                         disabled={
                           diaActual ===
-                          diasDisponibles.length -
-                            1
+                          diasDisponibles.length - 1
                         }
                       >
-                        →
+                        Siguiente →
                       </button>
-
                     </div>
-
                   </div>
 
                   {/* =================================================
-                      RESUMEN DEL DÍA
+                      CONTADOR
                   ================================================= */}
 
-                  <div className="d-flex flex-wrap gap-2 mb-4">
-
-                    <span className="badge bg-light text-dark border rounded-pill px-3 py-2">
-                      {" "}
-                      {
-                        asistenciasDelDia.length
-                      }{" "}
-                      registros
-                    </span>
-
-                    {documentoBusqueda && (
-                      <span className="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
-                         Documento:{" "}
-                        {
-                          documentoBusqueda
-                        }
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                      <span className="fw-semibold">
+                        Registros del día
                       </span>
-                    )}
 
+                      <div className="text-muted small">
+                        Asistencia registrada en esta fecha
+                      </div>
+                    </div>
+
+                    <span
+                      className="badge rounded-pill"
+                      style={{
+                        backgroundColor: "#E6F4D7",
+                        color: "#1B5E20",
+                      }}
+                    >
+                      {asistenciasDelDia.length}
+                    </span>
                   </div>
 
                   {/* =================================================
                       TABLA
                   ================================================= */}
 
-                  {asistenciasDelDia.length >
-                  0 ? (
-                    <div
-                      className="table-responsive rounded-4"
-                      style={{
-                        border:
-                          "1px solid #e9ecef",
-                      }}
-                    >
-
-                      <table className="table align-middle mb-0">
-
-                        <thead
-                          style={{
-                            backgroundColor:
-                              "#f8f9fa",
-                          }}
-                        >
-
+                  {asistenciasDelDia.length > 0 ? (
+                    <div className="table-responsive border rounded-3">
+                      <table className="table table-hover align-middle mb-0">
+                        <thead className="table-light">
                           <tr>
-
-                            <th className="px-4 py-3">
+                            <th className="px-3">
                               Aprendiz
                             </th>
 
-                            <th className="py-3">
+                            <th>
+                              Documento
+                            </th>
+
+                            <th>
                               Competencia
                             </th>
 
-                            <th className="py-3">
+                            <th>
                               Instructor
                             </th>
 
-                            <th className="py-3 text-center">
+                            <th className="text-center">
                               Estado
                             </th>
-
                           </tr>
-
                         </thead>
 
                         <tbody>
-
                           {asistenciasDelDia.map(
-                            (
-                              registro,
-                              index
-                            ) => {
-
+                            (registro, index) => {
                               const estado =
                                 obtenerEstado(
                                   registro.Estado
@@ -847,136 +616,54 @@ export default function InstructorAsistenciaRevisar() {
                                 <tr
                                   key={
                                     registro.Id_Asi ||
-                                    `${registro.Fec_Asi}-${registro.Id_Apr}-${index}`
+                                    index
                                   }
                                 >
-
-                                  {/* APRENDIZ */}
-
-                                  <td className="px-4">
-
-                                    <div className="d-flex align-items-center gap-3">
-
-                                      <div
-                                        className="rounded-circle d-flex align-items-center justify-content-center"
-                                        style={{
-                                          width: 42,
-                                          height: 42,
-                                          backgroundColor:
-                                            "#e9ecef",
-                                          fontSize:
-                                            18,
-                                          flexShrink: 0,
-                                        }}
-                                      >
-                                        👤
-                                      </div>
-
-                                      <div>
-
-                                        <div className="fw-semibold">
-                                          {registro.Aprendiz ||
-                                            "Sin nombre"}
-                                        </div>
-
-                                        <small className="text-muted">
-                                          CC{" "}
-                                          {registro.Num_ide_Apr ||
-                                            "No disponible"}
-                                        </small>
-
-                                      </div>
-
-                                    </div>
-
+                                  <td className="px-3 fw-semibold">
+                                    {registro.Aprendiz ||
+                                      "-"}
                                   </td>
 
-                                  {/* COMPETENCIA */}
+                                  <td className="text-muted">
+                                    {registro.Num_ide_Apr ||
+                                      "-"}
+                                  </td>
 
                                   <td>
-
-                                    <span className="fw-medium">
-                                      {registro.Competencia ||
-                                        "Sin competencia"}
-                                    </span>
-
+                                    {registro.Competencia ||
+                                      "-"}
                                   </td>
-
-                                  {/* INSTRUCTOR */}
 
                                   <td>
-
-                                    <div className="d-flex align-items-center gap-2">
-
-                                      <span>
-                                        
-                                      </span>
-
-                                      <span>
-                                        {registro.Instructor ||
-                                          "Sin instructor"}
-                                      </span>
-
-                                    </div>
-
+                                    {registro.Instructor ||
+                                      "-"}
                                   </td>
-
-                                  {/* ESTADO */}
 
                                   <td className="text-center">
-
                                     <span
                                       className={`badge rounded-pill px-3 py-2 ${estado.clase}`}
                                     >
-                                      {
-                                        estado.icono
-                                      }{" "}
-                                      {
-                                        estado.texto
-                                      }
+                                      {estado.texto}
                                     </span>
-
                                   </td>
-
                                 </tr>
                               );
                             }
                           )}
-
                         </tbody>
-
                       </table>
-
                     </div>
                   ) : (
-                    <div className="text-center py-5">
-
-                      <div
-                        style={{
-                          fontSize: 45,
-                        }}
-                      >
-                    
-                      </div>
-
-                      <h5 className="fw-bold mt-3">
-                        No hay resultados
-                      </h5>
-
-                      <p className="text-muted mb-0">
-                        No se encontró asistencia
-                        para ese documento en
-                        este día.
+                    <div className="border rounded-3 text-center py-4">
+                      <p className="text-muted small mb-0">
+                        No hay asistencia para el
+                        documento buscado en este día.
                       </p>
-
                     </div>
                   )}
-
                 </>
               )}
-
           </div>
-
         </main>
       </div>
     </>

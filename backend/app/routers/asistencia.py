@@ -165,7 +165,6 @@ def obtener_asignaciones_instructor(
     Id_Ins: int,
     session: Session = Depends(get_session)
 ):
-
     relaciones = session.exec(
         select(FichaInstructor)
         .where(FichaInstructor.Id_Ins == Id_Ins)
@@ -174,9 +173,11 @@ def obtener_asignaciones_instructor(
     resultado = []
 
     for relacion in relaciones:
-
         ficha = session.get(Fichas, relacion.Id_Fic)
-        competencia = session.get(Competencia, relacion.Id_Comp)
+        competencia = session.get(
+            Competencia,
+            relacion.Id_Comp
+        )
 
         if not ficha:
             continue
@@ -185,12 +186,41 @@ def obtener_asignaciones_instructor(
             "Id_Fic": relacion.Id_Fic,
             "Id_Ins": relacion.Id_Ins,
             "Id_Comp": relacion.Id_Comp,
-            "Dia": relacion.Dia.value if relacion.Dia else None,
+
+            "Dia": (
+                relacion.Dia.value
+                if relacion.Dia
+                else None
+            ),
+
             "Num_Fic": ficha.Num_Fic,
-            "Jor_Fic": ficha.Jor_Fic.value if ficha.Jor_Fic else None,
+
+            "Jor_Fic": (
+                ficha.Jor_Fic.value
+                if ficha.Jor_Fic
+                else None
+            ),
+
+            # =========================================
+            # PERÍODO DE LA FICHA
+            # =========================================
             "Fec_inicio_Fic": ficha.Fec_inicio_Fic,
             "Fec_Fin_Fic": ficha.Fec_Fin_Fic,
-            "Competencia": competencia.Nom_Comp if competencia else None,
+
+            # =========================================
+            # PERÍODO DE LA COMPETENCIA
+            # =========================================
+            "Fec_Inicio_Comp": relacion.Fec_Inicio_Comp,
+            "Fec_Fin_Comp": relacion.Fec_Fin_Comp,
+
+            # =========================================
+            # COMPETENCIA
+            # =========================================
+            "Competencia": (
+                competencia.Nom_Comp
+                if competencia
+                else None
+            ),
         })
 
     return resultado
