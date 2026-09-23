@@ -11,8 +11,8 @@ import AprendizDashboard from "./pages/AprendizDashboard";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import AdministradorDashboard from "./pages/AdministradorDashboard";
 
-import InstructorAsistencia from "./pages/Instructor/InstructorAsistencia";
 import InstructorAsistenciaRevisar from "./pages/Instructor/InstructorAsistenciaRevisar";
+import InstructorAsistencia from "./pages/Instructor/InstructorAsistencia";
 
 import ConfigCarrera from "./pages/Carrera/ConfigCarrera";
 import CreateC from "./pages/Carrera/Create";
