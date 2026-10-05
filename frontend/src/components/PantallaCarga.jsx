@@ -1,6 +1,6 @@
 export default function PantallaCarga({
   texto = "Cargando...",
-  logoSrc = "/logo-sena.png",
+  logoSrc = "/Senalogo.png",
 }) {
   return (
     <div
