@@ -1,17 +1,15 @@
 import { useState, useRef } from "react";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar";
-import {
-  cargarAprendices,
-  cargarInstructores,
-  cargarAdministradores,
-} from "../../services/api";
+import { Link } from "react-router-dom";
+import { cargarInstructores,cargarAdministradores,} 
+from "../../services/api";
 
 const CATEGORIES = [
   {
     key: "aprendices",
     label: "Aprendices",
-    hint: "Listado de aprendices para registrar o actualizar (.csv, .xlsx)",
-    uploadFn: cargarAprendices,
+    hint: "Elige una ficha y sube el listado de sus aprendices (.csv, .xlsx)",
+    to: "/administrador/aprendices/fichas",
   },
   {
     key: "instructores",
@@ -64,6 +62,16 @@ function UploadCard({ category, file, status, resultado, error, onPick, onClear,
 
       <p className="text-muted small mb-4">{category.hint}</p>
 
+      {category.to ? (
+        <Link
+          to={category.to}
+          className="btn rounded-3 w-100 fw-semibold py-2 shadow-sm text-white"
+          style={{ backgroundColor: "#00851d" }}
+        >
+          Elegir ficha
+        </Link>
+      ) : (
+      <>
       <input
         ref={inputRef}
         type="file"
@@ -136,6 +144,8 @@ function UploadCard({ category, file, status, resultado, error, onPick, onClear,
             </button>
           )}
         </div>
+      )}
+      </>
       )}
 
       {resultado?.errores?.length > 0 && (
@@ -228,7 +238,6 @@ function CargaUsuarios() {
               instructores o administradores automáticamente.
             </p>
           </div>
-
           <div className="d-flex flex-column gap-4">
             {CATEGORIES.map((category) => (
               <UploadCard

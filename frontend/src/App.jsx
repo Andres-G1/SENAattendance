@@ -40,6 +40,7 @@ const CargaUsuarios = lazy(() => import("./pages/Coordinador/CargaUsuarios"));
 const CargarAdministradores = lazy(() => import("./pages/Coordinador/CargarAdministradores"));
 const CargarInstructores = lazy(() => import("./pages/Coordinador/CargarInstructores"));
 const CargarAprendices = lazy(() => import("./pages/Coordinador/CargarAprendices"));
+const SeleccionarFichaAprendices = lazy(() => import("./pages/Coordinador/SeleccionarFichaAprendices"));
 const SubirArchivosMenu = lazy(() => import("./pages/CargaArchivos/SubirArchivosMenu"));
 
 const Aprendices = lazy(() => import("./pages/Coordinador/Aprendiz"));
@@ -375,13 +376,26 @@ function App() {
                   }
                 />
 
+                {/* Subir aprendices: 1) elegir ficha  2) subir archivo plano en esa ficha */}
                 <Route
-                  path="/administrador/aprendices/cargar"
+                  path="/administrador/aprendices/fichas"
+                  element={
+                    <RutaProtegida rolPermitido="Coordinador">
+                      <SeleccionarFichaAprendices />
+                    </RutaProtegida>
+                  }
+                />
+                <Route
+                  path="/administrador/aprendices/fichas/:idFicha/cargar"
                   element={
                     <RutaProtegida rolPermitido="Coordinador">
                       <CargarAprendices />
                     </RutaProtegida>
                   }
+                />
+                <Route
+                  path="/administrador/aprendices/cargar"
+                  element={<Navigate to="/administrador/aprendices/fichas" replace />}
                 />
                 <Route
                   path="/administrador/administradores/cargar"
