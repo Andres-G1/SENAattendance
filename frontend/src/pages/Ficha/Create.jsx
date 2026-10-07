@@ -10,7 +10,6 @@ export default function Create() {
     Num_Fic: "",
     Fec_inicio_Fic: "",
     Fec_Fin_Fic: "",
-    Jor_Fic: "",
   });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -48,7 +47,7 @@ export default function Create() {
           Num_Fic: Number(form.Num_Fic),
           Fec_inicio_Fic: form.Fec_inicio_Fic,
           Fec_Fin_Fic: form.Fec_Fin_Fic,
-          Jor_Fic: form.Jor_Fic,
+        
         }),
       });
 
@@ -116,7 +115,7 @@ export default function Create() {
             <div className="row">
               <div className="col-md-6 mb-3">
                 <label htmlFor="fec_inicio" className="form-label">
-                  Fecha de Inicio
+                  Fecha de Inicio Etapa Lectiva
                 </label>
                 <input
                   type="date"
@@ -130,7 +129,7 @@ export default function Create() {
               </div>
               <div className="col-md-6 mb-3">
                 <label htmlFor="fec_fin" className="form-label">
-                  Fecha de Fin
+                  Fecha de Fin Etapa Lectiva
                 </label>
                 <input
                   type="date"
@@ -144,26 +143,6 @@ export default function Create() {
               </div>
             </div>
 
-            <div className="mb-4">
-              <label htmlFor="jornada" className="form-label">
-                Jornada
-              </label>
-              <select
-                name="Jor_Fic"
-                id="jornada"
-                className="form-select"
-                value={form.Jor_Fic}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  -- Selecciona la jornada --
-                </option>
-                <option value="Mañana">Mañana</option>
-                <option value="Tarde">Tarde</option>
-                <option value="Noche">Noche</option>
-              </select>
-            </div>
 
             {error && (
               <div className="alert alert-danger" role="alert">
