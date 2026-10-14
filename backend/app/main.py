@@ -19,6 +19,7 @@ from routers.carga_aprendices import Router_carga_aprendices
 from routers.configuracion import Router_configuracion
 from jobs_asistencia import scheduler
 from routers.asignacionaprendiz import Router_asignacionesAprendiz
+from routers.resultados_aprendizaje import Router_resultados_aprendizaje
 
 app = FastAPI()
 
@@ -51,6 +52,7 @@ app.include_router(Router_carga_instructores)
 app.include_router(Router_carga_administradores)
 app.include_router(Router_carga_aprendices)
 app.include_router(Router_configuracion)
+app.include_router(Router_resultados_aprendizaje)
 
 
 @app.on_event("startup")
