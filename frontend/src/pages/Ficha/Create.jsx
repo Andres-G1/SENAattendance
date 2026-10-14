@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
 
 const API_URL = "http://localhost:8000"; // ajusta según tu configuración
 
@@ -13,6 +14,9 @@ export default function Create() {
   });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
 
   useEffect(() => {
     cargarCarreras();
@@ -63,6 +67,8 @@ export default function Create() {
   }
 
   return (
+    <>
+      <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
     <main className="container my-5">
       <div
         className="page-card card shadow-sm"
@@ -166,5 +172,6 @@ export default function Create() {
         </div>
       </div>
     </main>
+    </>
   );
 }

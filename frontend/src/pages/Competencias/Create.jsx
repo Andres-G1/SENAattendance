@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { crearCompetencia } from "../../services/api";
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
 
 export default function CreateCompetencia() {
   const navigate = useNavigate();
 
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
+
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
 
   const [formulario, setFormulario] = useState({
     Nom_Comp: "",
@@ -57,6 +61,9 @@ export default function CreateCompetencia() {
   };
 
   return (
+    
+    <>
+      <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
     <main className="container my-5">
       <div className="page-card card shadow-sm" style={{ maxWidth: "700px", margin: "0 auto" }}>
         <div className="card-header bg-success text-white py-3">
@@ -121,5 +128,6 @@ export default function CreateCompetencia() {
         </div>
       </div>
     </main>
+    </>
   );
 }

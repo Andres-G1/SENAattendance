@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
 
 const API_URL = "http://localhost:8000"; // ajusta según tu configuración
 
@@ -11,6 +12,9 @@ export default function Delete() {
   const [carrera, setCarrera] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
 
   useEffect(() => {
     cargarDatos();
@@ -60,10 +64,12 @@ export default function Delete() {
   if (error && !ficha) return <div className="alert alert-danger m-4">{error}</div>;
 
   return (
+    <>
+      <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
     <main className="container my-5">
       <div className="page-card card shadow-sm text-dark">
         <div className="card-header bg-danger text-white py-3">
-          <h1 className="h5 mb-0">Eliminar Token</h1>
+          <h1 className="h5 mb-0">Desactivar Token</h1>
           <small className="text-light">
             {carrera?.Nom_Car} · {ficha?.Num_Fic}
           </small>
@@ -85,7 +91,7 @@ export default function Delete() {
           <form onSubmit={handleDelete}>
             <div className="d-flex gap-2 flex-wrap">
               <button className="btn btn-danger" type="submit">
-                Eliminar definitivamente
+                Desactivar Definitivamente
               </button>
               <button
                 type="button"
@@ -99,5 +105,6 @@ export default function Delete() {
         </div>
       </div>
     </main>
+    </>
   );
 }

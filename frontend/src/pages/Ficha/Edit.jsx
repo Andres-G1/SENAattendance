@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
 
 const API_URL = "http://localhost:8000"; // ajusta según tu configuración
 
@@ -13,10 +14,12 @@ export default function Edit() {
     Num_Fic: "",
     Fec_inicio_Fic: "",
     Fec_Fin_Fic: "",
-    Jor_Fic: "",
   });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
 
   useEffect(() => {
     cargarDatos();
@@ -43,7 +46,6 @@ export default function Edit() {
         Num_Fic: dataFicha.Num_Fic,
         Fec_inicio_Fic: dataFicha.Fec_inicio_Fic,
         Fec_Fin_Fic: dataFicha.Fec_Fin_Fic,
-        Jor_Fic: dataFicha.Jor_Fic,
       });
     } catch (err) {
       setError(err.message);
@@ -88,6 +90,8 @@ export default function Edit() {
   if (cargando) return <p className="text-center my-4">Cargando ficha...</p>;
 
   return (
+    <>
+      <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
     <main className="container my-5">
       <div
         className="page-card card shadow-sm"
@@ -166,24 +170,6 @@ export default function Edit() {
                   required
                 />
               </div>
-
-              <div className="col-md-12">
-                <label htmlFor="jornada" className="form-label">
-                  Jornada
-                </label>
-                <select
-                  name="Jor_Fic"
-                  id="jornada"
-                  className="form-select"
-                  value={form.Jor_Fic}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="Mañana">Mañana</option>
-                  <option value="Tarde">Tarde</option>
-                  <option value="Noche">Noche</option>
-                </select>
-              </div>
             </div>
 
             {error && (
@@ -208,5 +194,6 @@ export default function Edit() {
         </div>
       </div>
     </main>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { listarCompetencias, actualizarCompetencia } from "../../services/api";
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
 
 export default function EditCompetencia() {
   const { id } = useParams();
@@ -9,6 +10,9 @@ export default function EditCompetencia() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
+
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
 
   const [formulario, setFormulario] = useState({
     Nom_Comp: "",
@@ -94,6 +98,9 @@ export default function EditCompetencia() {
   }
 
   return (
+    <>
+      <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
+
     <main className="container my-5">
       <div className="card shadow-sm" style={{ maxWidth: "700px", margin: "0 auto" }}>
         <div className="card-header bg-warning text-dark py-3">
@@ -155,5 +162,6 @@ export default function EditCompetencia() {
         </div>
       </div>
     </main>
+  </>
   );
 }
