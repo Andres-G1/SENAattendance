@@ -138,6 +138,19 @@ export const eliminarCompetencia = async (id) => {
   const response = await api.delete(`/competencias/${id}`);
   return response.data;
 };
+
+export const listarResultadosAprendizaje = async (idCompetencia) => {
+  const response = await api.get("/resultados-aprendizaje/", {
+    params: { Id_Comp: idCompetencia },
+  });
+  return response.data;
+};
+
+export const crearResultadoAprendizaje = async (datos) => {
+  const response = await api.post("/resultados-aprendizaje/", datos);
+  return response.data;
+};
+
 export default api;
 
 export const cargarAprendices = async (archivo) => {
