@@ -231,6 +231,13 @@ export default function AdministradorDashboard() {
                     Gestionar Competencias
                   </Link>
 
+                  <Link
+                    to="/administrador/resultados-aprendizaje"
+                    className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
+                  >
+                    Gestionar Resultados de Aprendizaje
+                  </Link>
+
                 </div>
               </div>
             </div>

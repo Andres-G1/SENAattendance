@@ -151,6 +151,16 @@ export const crearResultadoAprendizaje = async (datos) => {
   return response.data;
 };
 
+export const desactivarResultadoAprendizaje = async (id) => {
+  const response = await api.patch(`/resultados-aprendizaje/${id}/desactivar`);
+  return response.data;
+};
+
+export const activarResultadoAprendizaje = async (id) => {
+  const response = await api.patch(`/resultados-aprendizaje/${id}/activar`);
+  return response.data;
+};
+
 export default api;
 
 export const cargarAprendices = async (archivo) => {
