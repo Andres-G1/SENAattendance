@@ -59,6 +59,7 @@ const EditarAdministrador = lazy(() => import("./pages/Coordinador/EditarAdminis
 const ConfirmarAdministrador = lazy(() => import("./pages/Coordinador/ConfirmarAdministrador"));
 
 const ConfigResultado = lazy(() => import ("./pages/ResultadoAprendizaje/ConfigResultado.jsx"))
+const CrearResultado = lazy(() => import( "./pages/ResultadoAprendizaje/Create.jsx"))
 
 const ConfigCompetencia = lazy(() => import("./pages/Competencias/ConfigCompetencias"));
 const CreateCompetencia = lazy(() => import("./pages/Competencias/Create"));
@@ -121,6 +122,14 @@ function App() {
                 element={
                   <RutaProtegida rolPermitido="Coordinador">
                     <ConfigResultado/>
+                  </RutaProtegida>
+                }
+                />
+
+                <Route path="/administrador/resultados-aprendizaje/crear"
+                element={
+                  <RutaProtegida rolPermitido= "Coordinador">
+                    <CrearResultado/>
                   </RutaProtegida>
                 }
                 />
