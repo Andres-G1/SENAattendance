@@ -37,7 +37,7 @@ export default function AdministradorDashboard() {
               GESTIÓN DE USUARIOS
           ====================================================== */}
           <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted" style={{ order: 2 }}>
-            Gestión de Usuarios
+          Usuarios
           </h4>
 
           <div className="row g-4 mb-5" style={{ order: 2 }}>
@@ -165,7 +165,7 @@ export default function AdministradorDashboard() {
               GESTIÓN DE FICHAS
           ====================================================== */}
           <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted" style={{ order: 1 }}>
-            Gestión de Fichas
+            Académico
           </h4>
 
           <div className="row g-4 mb-5" style={{ order: 1 }}>
@@ -199,7 +199,7 @@ export default function AdministradorDashboard() {
                   </div>
 
                   <h5 className="fw-bold text-dark mb-0">
-                    Gestión de Fichas
+                    Gestión Académica
                   </h5>
 
                 </div>
@@ -299,7 +299,7 @@ export default function AdministradorDashboard() {
               ASIGNACIÓN DE FICHAS
           ====================================================== */}
           <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted" style={{ order: 3 }}>
-            Asignación de Fichas
+           Grupos
           </h4>
 
           <div className="row g-4 mb-5" style={{ order: 3 }}>
@@ -328,7 +328,7 @@ export default function AdministradorDashboard() {
                   </div>
 
                   <h5 className="fw-bold text-dark mb-0">
-                    Asignación de Fichas
+                    Gestion de Grupos
                   </h5>
 
                 </div>
@@ -357,7 +357,7 @@ export default function AdministradorDashboard() {
           </div>
                     
           <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted" style={{ order: 3 }}>
-            Revision Asistencia
+           Asistencia
           </h4>
 
           <div className="row g-4 mb-5" style={{ order: 3 }}>
@@ -386,7 +386,7 @@ export default function AdministradorDashboard() {
                   </div>
 
                   <h5 className="fw-bold text-dark mb-0">
-                    Revision Asistencia
+                    Gestion Asistencia
                   </h5>
 
                 </div>

@@ -82,6 +82,11 @@ export default function CoordinadorNavbar({ user }) {
                   </Link>
                 </li>
                 <li>
+                  <Link className="dropdown-item" to="/administrador/resultado">
+                    Gestionar Resultados de Aprendizaje
+                  </Link>
+                </li>
+                <li>
                   <hr className="dropdown-divider" />
                 </li>
                 <li>
@@ -139,7 +144,7 @@ export default function CoordinadorNavbar({ user }) {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                Gestion Grupos
+              Grupos
               </a>
               <ul className="dropdown-menu" aria-labelledby="navGrupos">
                 <li>
@@ -148,6 +153,25 @@ export default function CoordinadorNavbar({ user }) {
                   </Link>
                   <Link className="dropdown-item" to="/fichas/AsignarAprendiz">
                     Asignación de Aprendiz/ficha
+                  </Link>
+                </li>
+              </ul>
+            </li>
+             <li className="nav-item dropdown">
+              <a
+                className="nav-link dropdown-toggle active px-3 py-2"
+                href="#"
+                id="navGrupos"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+              Asistencia
+              </a>
+              <ul className="dropdown-menu" aria-labelledby="navGrupos">
+                <li>
+                  <Link className="dropdown-item" to="/Coordinador/CoordianadorAsistencia">
+                    Revisar Asistencia
                   </Link>
                 </li>
               </ul>

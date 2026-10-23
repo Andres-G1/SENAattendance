@@ -107,15 +107,6 @@ export default function ResultadosAprendizaje() {
             <h3 className="h5 mb-0 text-secondary">
               Resultados por Competencia
             </h3>
-
-            <button
-              type="button"
-              className="btn btn-outline-success btn-sm"
-              onClick={cargarDatos}
-              disabled={cargando}
-            >
-              Actualizar
-            </button>
           </div>
 
           {cargando ? (

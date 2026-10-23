@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -30,7 +31,21 @@ class ResultadoAprendizajeCreateRequest(BaseModel):
 
 
 # =========================================================
-# REPRESENTAR RESULTADO
+# REQUEST PARA ACTUALIZAR RESULTADO DE APRENDIZAJE
+# =========================================================
+
+class ResultadoAprendizajeUpdateRequest(BaseModel):
+    Nom_RA: Optional[str] = Field(
+        default=None,
+        min_length=1,
+        max_length=150,
+    )
+    Des_RA: Optional[str] = None
+    Id_Comp: Optional[int] = None
+
+
+# =========================================================
+# REPRESENTAR RESULTADO DE APRENDIZAJE
 # =========================================================
 
 def _representar_resultado(resultado, nombre_competencia):
@@ -40,6 +55,8 @@ def _representar_resultado(resultado, nombre_competencia):
         "Des_RA": resultado.Des_RA,
         "Id_Comp": resultado.Id_Comp,
         "Nom_Comp": nombre_competencia,
+        "Fec_Cre": resultado.Fec_Cre,
+        "Fec_Mod": resultado.Fec_Mod,
     }
 
 
@@ -78,6 +95,34 @@ def listar_resultados_aprendizaje(
 
 
 # =========================================================
+# CONSULTAR RESULTADO DE APRENDIZAJE POR ID
+# =========================================================
+
+@Router_resultados_aprendizaje.get("/{Id_RA}")
+def obtener_resultado_aprendizaje(
+    Id_RA: int,
+    session: Session = Depends(get_session),
+):
+    resultado = session.get(ResultadoAprendizaje, Id_RA)
+
+    if resultado is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="El resultado de aprendizaje no existe",
+        )
+
+    competencia = session.get(
+        Competencia,
+        resultado.Id_Comp,
+    )
+
+    return _representar_resultado(
+        resultado,
+        competencia.Nom_Comp if competencia else None,
+    )
+
+
+# =========================================================
 # CREAR RESULTADO DE APRENDIZAJE
 # =========================================================
 
@@ -89,7 +134,6 @@ def crear_resultado_aprendizaje(
     data: ResultadoAprendizajeCreateRequest,
     session: Session = Depends(get_session),
 ):
-    # Validar que la competencia exista
     competencia = session.get(
         Competencia,
         data.Id_Comp,
@@ -109,16 +153,14 @@ def crear_resultado_aprendizaje(
             detail="El nombre del resultado de aprendizaje es obligatorio",
         )
 
-    # Crear resultado asociado únicamente a la competencia
     resultado = ResultadoAprendizaje(
         Nom_RA=nombre,
         Des_RA=data.Des_RA,
         Id_Comp=data.Id_Comp,
     )
 
-    session.add(resultado)
-
     try:
+        session.add(resultado)
         session.commit()
         session.refresh(resultado)
 
@@ -129,6 +171,91 @@ def crear_resultado_aprendizaje(
     return _representar_resultado(
         resultado,
         competencia.Nom_Comp,
+    )
+
+
+# =========================================================
+# ACTUALIZAR RESULTADO DE APRENDIZAJE
+# =========================================================
+
+@Router_resultados_aprendizaje.put("/{Id_RA}")
+def actualizar_resultado_aprendizaje(
+    Id_RA: int,
+    data: ResultadoAprendizajeUpdateRequest,
+    session: Session = Depends(get_session),
+):
+    resultado = session.get(
+        ResultadoAprendizaje,
+        Id_RA,
+    )
+
+    if resultado is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="El resultado de aprendizaje no existe",
+        )
+
+    cambios = data.model_dump(exclude_unset=True)
+
+    # Actualizar nombre
+    if "Nom_RA" in cambios:
+        nombre = cambios["Nom_RA"]
+
+        if nombre is None or not nombre.strip():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="El nombre del resultado es obligatorio",
+            )
+
+        resultado.Nom_RA = nombre.strip()
+
+    # Actualizar descripción
+    if "Des_RA" in cambios:
+        resultado.Des_RA = cambios["Des_RA"]
+
+    # Actualizar competencia
+    if "Id_Comp" in cambios:
+        id_comp = cambios["Id_Comp"]
+
+        if id_comp is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Debes seleccionar una competencia",
+            )
+
+        competencia_nueva = session.get(
+            Competencia,
+            id_comp,
+        )
+
+        if competencia_nueva is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="La competencia indicada no existe",
+            )
+
+        resultado.Id_Comp = id_comp
+
+    # Actualizar fecha de modificación
+    resultado.Fec_Mod = datetime.utcnow()
+
+    try:
+        session.add(resultado)
+        session.commit()
+        session.refresh(resultado)
+
+    except Exception:
+        session.rollback()
+        raise
+
+    competencia = session.get(
+        Competencia,
+        resultado.Id_Comp,
+    )
+
+    return _representar_resultado(
+        resultado,
+        competencia.Nom_Comp if competencia else None,
     )
 
 

@@ -63,9 +63,6 @@ export default function AprendizDashboard() {
         <main className="container" style={{ maxWidth: 950 }}>
           <div className="row align-items-center mb-5">
             <div className="col-12 col-md-8 text-center text-md-start">
-              <span className="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-semibold mb-2">
-                Panel de Consulta
-              </span>
               <h1 className="fw-bold text-dark display-6 mb-1">¡Buen día Aprendiz, {firstName}!</h1>
               <p className="text-muted mb-0">{currentDate}</p>
             </div>
@@ -157,12 +154,11 @@ export default function AprendizDashboard() {
                     </div>
                     <div className="flex-grow-1">
                       <div className="d-flex justify-content-between align-items-center mb-1">
-                        <h5 className="fw-bold text-dark mb-0">Mis Asistencias</h5>
+                        <h5 className="fw-bold text-dark mb-0">Revisar Asistencia</h5>
                         <span className="text-success small fw-medium">Ver Todo &rarr;</span>
                       </div>
                       <p className="text-muted small mb-0">
-                        Revisa el calendario detallado, horas acumuladas y las bitácoras de los días en
-                        formación.
+                        Revisar asistencias de cada clase.
                       </p>
                     </div>
                   </div>
