@@ -58,8 +58,8 @@ function obtenerEstado(estado) {
 export default function CoordinadorAsistencia() {
   const currentDate = useCurrentDate();
 
-  const nombreCompleto = localStorage.getItem("firstName") || "";
-  const firstName = nombreCompleto.split(" ")[0];
+  const nombreCompleto = localStorage.getItem('firstName') || '';
+  const firstName = nombreCompleto.split(' ')[0];
 
   // =========================================================
   // ESTADOS
@@ -237,7 +237,7 @@ export default function CoordinadorAsistencia() {
 
   return (
     <>
-      <CoordinadorNavbar user={{ Nom_Cor: firstName }} />
+      <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
 
       <div className="bg-light min-vh-100 py-5">
         <main className="container" style={{ maxWidth: "1100px" }}>
