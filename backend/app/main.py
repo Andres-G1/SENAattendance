@@ -1,13 +1,10 @@
-import os
-from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import DATABASE_URL, crear_tablas
-from seed import seed_demo_users
+from database import crear_tablas
 from routers.login import Router_login
 from routers.recuperarcontraseña import router_recovery
 from routers.asistencia import Router_asistencia
@@ -61,6 +58,4 @@ app.include_router(Router_resultados_aprendizaje)
 @app.on_event("startup")
 def on_startup():
     crear_tablas()
-    if DATABASE_URL.startswith("sqlite") and os.getenv("FASTAPI_ENV") == "development":
-        seed_demo_users()
     scheduler.start()

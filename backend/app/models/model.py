@@ -434,18 +434,15 @@ class ResultadoAprendizaje(SQLModel, table=True):
 
     Des_RA: Optional[str] = None
 
-    Id_Fic: Optional[int] = Field(
+    Id_Fic: int = Field(
         foreign_key="Fichas.Id_Fic",
-        default=None,
-        nullable=True
+        nullable=False
     )
 
     Id_Comp: int = Field(
         foreign_key="competencia.Id_Comp",
         nullable=False
     )
-
-    Es_RA: bool = Field(default=True, nullable=False)
 
     Fec_Cre: datetime = Field(
         default_factory=datetime.utcnow

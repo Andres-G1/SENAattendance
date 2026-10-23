@@ -59,7 +59,6 @@ const EditarAdministrador = lazy(() => import("./pages/Coordinador/EditarAdminis
 const ConfirmarAdministrador = lazy(() => import("./pages/Coordinador/ConfirmarAdministrador"));
 
 const ConfigCompetencia = lazy(() => import("./pages/Competencias/ConfigCompetencias"));
-const ResultadosAprendizaje = lazy(() => import("./pages/Competencias/ResultadosAprendizaje"));
 const CreateCompetencia = lazy(() => import("./pages/Competencias/Create"));
 const EditCompetencia = lazy(() => import("./pages/Competencias/Edit"));
 const ConfirmarCompetencia = lazy(() => import("./pages/Competencias/ConfirmarCompetencias"));
@@ -532,15 +531,6 @@ function App() {
                   element={
                     <RutaProtegida rolPermitido="Coordinador">
                       <ConfigCompetencia />
-                    </RutaProtegida>
-                  }
-                />
-
-                <Route
-                  path="/administrador/resultados-aprendizaje"
-                  element={
-                    <RutaProtegida rolPermitido="Coordinador">
-                      <ResultadosAprendizaje />
                     </RutaProtegida>
                   }
                 />

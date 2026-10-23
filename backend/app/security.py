@@ -1,5 +1,4 @@
 import os
-import secrets
 from hmac import compare_digest
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
@@ -26,9 +25,7 @@ def verificar_contraseña(contraseña_plana: str, contraseña_hash: str) -> bool
 
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY and os.getenv("FASTAPI_ENV") == "development":
-    SECRET_KEY = secrets.token_urlsafe(32)
-elif not SECRET_KEY:
+if not SECRET_KEY:
     raise RuntimeError("Falta la variable SECRET_KEY en el archivo .env")
 ALGORITHM = "HS256"
 EXPIRACION_MINUTOS = 60 * 8
