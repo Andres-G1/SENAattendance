@@ -9,30 +9,10 @@ const API_BASE = "http://localhost:8000";
 // =====================================================
 
 const ESTADOS = [
-  {
-    valor: "presente",
-    nombre: "Presente",
-    color: "#198754",
-    texto: "#fff",
-  },
-  {
-    valor: "retardo",
-    nombre: "Retardo",
-    color: "#ffc107",
-    texto: "#000",
-  },
-  {
-    valor: "falla",
-    nombre: "Falla",
-    color: "#dc3545",
-    texto: "#fff",
-  },
-  {
-    valor: "excusa",
-    nombre: "Excusa",
-    color: "#0dcaf0",
-    texto: "#000",
-  },
+  { valor: "presente", nombre: "Presente", color: "#198754", texto: "#fff" },
+  { valor: "retardo", nombre: "Retardo", color: "#ffc107", texto: "#000" },
+  { valor: "falla", nombre: "Falla", color: "#dc3545", texto: "#fff" },
+  { valor: "excusa", nombre: "Excusa", color: "#0dcaf0", texto: "#000" },
 ];
 
 const A_BACKEND = {
@@ -54,18 +34,9 @@ const DESDE_BACKEND = {
 // =====================================================
 
 const COLOR_SEMAFORO = {
-  ROJO: {
-    fondo: "#dc3545",
-    texto: "#fff",
-  },
-  AMARILLO: {
-    fondo: "#ffc107",
-    texto: "#000",
-  },
-  VERDE: {
-    fondo: "#198754",
-    texto: "#fff",
-  },
+  ROJO: { fondo: "#dc3545", texto: "#fff" },
+  AMARILLO: { fondo: "#ffc107", texto: "#000" },
+  VERDE: { fondo: "#198754", texto: "#fff" },
 };
 
 // =====================================================
@@ -90,12 +61,7 @@ function obtenerDiaSemana(fecha) {
   if (!fecha) return "";
 
   const [anio, mes, dia] = fecha.split("-");
-
-  const fechaLocal = new Date(
-    Number(anio),
-    Number(mes) - 1,
-    Number(dia)
-  );
+  const fechaLocal = new Date(Number(anio), Number(mes) - 1, Number(dia));
 
   return DIAS_SEMANA[fechaLocal.getDay()];
 }
@@ -120,128 +86,79 @@ function convertirAISO(fecha) {
   return `${anio}-${mes}-${dia}`;
 }
 
-// Obtiene la fecha de hoy
 function obtenerFechaHoy() {
   return convertirAISO(new Date());
 }
 
-// Obtiene el índice del día de la semana
 function obtenerIndiceDia(dia) {
   const diaNormalizado = normalizarDia(dia);
 
   return DIAS_SEMANA.findIndex(
-    (diaSemana) =>
-      normalizarDia(diaSemana) === diaNormalizado
+    (diaSemana) => normalizarDia(diaSemana) === diaNormalizado
   );
 }
 
 // =====================================================
-// FUNCIONES PARA EL PERÍODO DE LA COMPETENCIA
+// FUNCIONES PARA EL PERÍODO DEL RESULTADO DE APRENDIZAJE
 // =====================================================
 
-// Convierte cualquier formato de fecha recibido
-// por el backend a YYYY-MM-DD
 function soloFecha(valor) {
   if (!valor) return "";
 
   return valor.toString().slice(0, 10);
 }
 
-// Suma o resta días a una fecha YYYY-MM-DD
 function sumarDias(fecha, cantidad) {
   if (!fecha) return "";
 
   const [anio, mes, dia] = fecha.split("-");
+  const fechaLocal = new Date(Number(anio), Number(mes) - 1, Number(dia));
 
-  const fechaLocal = new Date(
-    Number(anio),
-    Number(mes) - 1,
-    Number(dia)
-  );
-
-  fechaLocal.setDate(
-    fechaLocal.getDate() + cantidad
-  );
+  fechaLocal.setDate(fechaLocal.getDate() + cantidad);
 
   return convertirAISO(fechaLocal);
 }
 
-// Obtiene las fechas de inicio y fin
-// de la competencia seleccionada
+// Fechas de inicio y fin del resultado de aprendizaje seleccionado
 function obtenerLimitesPeriodo(asignacion) {
   if (!asignacion) {
-    return {
-      inicio: "",
-      fin: "",
-    };
+    return { inicio: "", fin: "" };
   }
 
   return {
-    inicio: soloFecha(
-      asignacion.Fec_Inicio_Comp
-    ),
-    fin: soloFecha(
-      asignacion.Fec_Fin_Comp
-    ),
+    inicio: soloFecha(asignacion.Fec_Inicio_RA),
+    fin: soloFecha(asignacion.Fec_Fin_RA),
   };
 }
 
 // =====================================================
 // FECHA INICIAL
 // =====================================================
-
-// Busca la fecha más reciente correspondiente
-// al día de la clase, pero respetando el período
-// de la competencia.
-//
-// Ejemplo:
-// Competencia: 01/09/2026 - 30/10/2026
-// Día: martes
-//
-// Si hoy es martes 22/09/2026:
-// devuelve 22/09/2026.
-//
-// Si hoy es 29/09/2026:
-// devuelve 29/09/2026.
-//
-// Si el período ya terminó:
-// devuelve el último martes que esté dentro
-// del período.
-//
-// Si todavía no ha comenzado:
-// devuelve la primera fecha válida solamente
-// si no es futura.
+// Busca la fecha más reciente que coincida con el día de la
+// clase, respetando el período del resultado de aprendizaje.
 
 function obtenerFechaInicial(asignacion) {
-  const indicePermitido =
-    obtenerIndiceDia(asignacion?.Dia);
+  const indicePermitido = obtenerIndiceDia(asignacion?.Dia);
 
   if (indicePermitido === -1) {
     return "";
   }
 
-  const { inicio, fin } =
-    obtenerLimitesPeriodo(asignacion);
-
+  const { inicio, fin } = obtenerLimitesPeriodo(asignacion);
   const hoy = obtenerFechaHoy();
 
-  // Si no existen fechas del período,
-  // conserva el comportamiento anterior.
+  // Si no existen fechas del período, conserva el comportamiento anterior.
   if (!inicio && !fin) {
     const diaHoy = new Date().getDay();
 
-    let diferencia =
-      diaHoy - indicePermitido;
+    let diferencia = diaHoy - indicePermitido;
 
     if (diferencia < 0) {
       diferencia += 7;
     }
 
     const fechaInicial = new Date();
-
-    fechaInicial.setDate(
-      fechaInicial.getDate() - diferencia
-    );
+    fechaInicial.setDate(fechaInicial.getDate() - diferencia);
 
     return convertirAISO(fechaInicial);
   }
@@ -253,29 +170,22 @@ function obtenerFechaInicial(asignacion) {
     limiteSuperior = fin;
   }
 
-  // Si la competencia todavía no empieza,
-  // no mostramos una fecha futura.
+  // Si el resultado de aprendizaje todavía no empieza, no hay fecha.
   if (inicio && inicio > hoy) {
     return "";
   }
 
-  // Buscamos hacia atrás hasta 6 días
-  // para encontrar el día correspondiente.
+  // Buscamos hacia atrás hasta 6 días.
   for (let i = 0; i <= 6; i++) {
-    const fechaCandidata =
-      sumarDias(limiteSuperior, -i);
+    const fechaCandidata = sumarDias(limiteSuperior, -i);
 
-    if (
-      inicio &&
-      fechaCandidata < inicio
-    ) {
+    if (inicio && fechaCandidata < inicio) {
       break;
     }
 
     if (
-      normalizarDia(
-        obtenerDiaSemana(fechaCandidata)
-      ) === normalizarDia(asignacion.Dia)
+      normalizarDia(obtenerDiaSemana(fechaCandidata)) ===
+      normalizarDia(asignacion.Dia)
     ) {
       return fechaCandidata;
     }
@@ -288,25 +198,13 @@ function obtenerFechaInicial(asignacion) {
 // CAMBIAR SEMANA
 // =====================================================
 
-function cambiarFechaPorSemana(
-  fechaActual,
-  cantidadSemanas
-) {
+function cambiarFechaPorSemana(fechaActual, cantidadSemanas) {
   if (!fechaActual) return "";
 
-  const [anio, mes, dia] =
-    fechaActual.split("-");
+  const [anio, mes, dia] = fechaActual.split("-");
+  const fecha = new Date(Number(anio), Number(mes) - 1, Number(dia));
 
-  const fecha = new Date(
-    Number(anio),
-    Number(mes) - 1,
-    Number(dia)
-  );
-
-  fecha.setDate(
-    fecha.getDate() +
-      cantidadSemanas * 7
-  );
+  fecha.setDate(fecha.getDate() + cantidadSemanas * 7);
 
   return convertirAISO(fecha);
 }
@@ -318,24 +216,15 @@ function cambiarFechaPorSemana(
 function formatearFecha(fecha) {
   if (!fecha) return "";
 
-  const [anio, mes, dia] =
-    fecha.split("-");
+  const [anio, mes, dia] = fecha.split("-");
+  const fechaLocal = new Date(Number(anio), Number(mes) - 1, Number(dia));
 
-  const fechaLocal = new Date(
-    Number(anio),
-    Number(mes) - 1,
-    Number(dia)
-  );
-
-  return fechaLocal.toLocaleDateString(
-    "es-CO",
-    {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }
-  );
+  return fechaLocal.toLocaleDateString("es-CO", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 // =====================================================
@@ -343,51 +232,36 @@ function formatearFecha(fecha) {
 // =====================================================
 
 export default function InstructorAsistencia() {
-  const nombreCompleto =
-    localStorage.getItem("firstName") || "";
-
-  const firstName =
-    nombreCompleto.split(" ")[0];
-
-  const idInstructor =
-    localStorage.getItem("user_id");
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
+  const idInstructor = localStorage.getItem("user_id");
 
   // =====================================================
   // ESTADOS
   // =====================================================
 
-  const [asignaciones, setAsignaciones] =
-    useState([]);
+  const [asignaciones, setAsignaciones] = useState([]);
+  const [fichaSeleccionada, setFichaSeleccionada] = useState(null);
+  const [selectedAsignacion, setSelectedAsignacion] = useState(null);
+  const [fecha, setFecha] = useState("");
+  const [mostrarCalendario, setMostrarCalendario] = useState(false);
+  const [aprendices, setAprendices] = useState([]);
+  const [estados, setEstados] = useState({});
+  const [estadosAprendices, setEstadosAprendices] = useState({});
+  const [cargandoAsignaciones, setCargandoAsignaciones] = useState(true);
+  const [cargandoAprendices, setCargandoAprendices] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const [mensaje, setMensaje] = useState(null);
 
-  const [fichaSeleccionada, setFichaSeleccionada] =
-    useState(null);
-
-  const [selectedAsignacion, setSelectedAsignacion] =
-    useState(null);
-
-  const [fecha, setFecha] =
-    useState("");
-
-  const [aprendices, setAprendices] =
-    useState([]);
-
-  const [estados, setEstados] =
-    useState({});
-
-  const [estadosAprendices, setEstadosAprendices] =
-    useState({});
-
-  const [cargandoAsignaciones, setCargandoAsignaciones] =
-    useState(true);
-
-  const [cargandoAprendices, setCargandoAprendices] =
-    useState(false);
-
-  const [guardando, setGuardando] =
-    useState(false);
-
-  const [mensaje, setMensaje] =
-    useState(null);
+  // Limpia todo lo relacionado con la clase seleccionada
+  function limpiarClase() {
+    setFecha("");
+    setMostrarCalendario(false);
+    setAprendices([]);
+    setEstados({});
+    setEstadosAprendices({});
+    setMensaje(null);
+  }
 
   // =====================================================
   // OBTENER FICHAS DEL INSTRUCTOR
@@ -399,24 +273,16 @@ export default function InstructorAsistencia() {
       return;
     }
 
-    fetch(
-      `${API_BASE}/asistencia/instructor/${idInstructor}/asignaciones`
-    )
+    fetch(`${API_BASE}/asistencia/instructor/${idInstructor}/asignaciones`)
       .then((res) => {
         if (!res.ok) {
-          throw new Error(
-            "No se pudieron cargar las fichas"
-          );
+          throw new Error("No se pudieron cargar las fichas");
         }
 
         return res.json();
       })
       .then((data) => {
-        console.log(
-          "Asignaciones:",
-          data
-        );
-
+        console.log("Asignaciones:", data);
         setAsignaciones(data);
       })
       .catch((error) => {
@@ -424,8 +290,7 @@ export default function InstructorAsistencia() {
 
         setMensaje({
           tipo: "error",
-          texto:
-            "No se pudieron cargar las fichas asignadas.",
+          texto: "No se pudieron cargar las fichas asignadas.",
         });
       })
       .finally(() => {
@@ -439,19 +304,13 @@ export default function InstructorAsistencia() {
 
   const fichas = [];
 
-  asignaciones.forEach(
-    (asignacion) => {
-      const existe = fichas.some(
-        (ficha) =>
-          ficha.Id_Fic ===
-          asignacion.Id_Fic
-      );
+  asignaciones.forEach((asignacion) => {
+    const existe = fichas.some((ficha) => ficha.Id_Fic === asignacion.Id_Fic);
 
-      if (!existe) {
-        fichas.push(asignacion);
-      }
+    if (!existe) {
+      fichas.push(asignacion);
     }
-  );
+  });
 
   // =====================================================
   // SELECCIONAR FICHA
@@ -460,125 +319,67 @@ export default function InstructorAsistencia() {
   function seleccionarFicha(ficha) {
     setFichaSeleccionada(ficha);
     setSelectedAsignacion(null);
-    setFecha("");
-    setAprendices([]);
-    setEstados({});
-    setEstadosAprendices({});
-    setMensaje(null);
+    limpiarClase();
   }
 
   // =====================================================
   // ASIGNACIONES DE LA FICHA
   // =====================================================
 
-  const asignacionesFicha =
-    fichaSeleccionada
-      ? asignaciones.filter(
-          (asignacion) =>
-            asignacion.Id_Fic ===
-            fichaSeleccionada.Id_Fic
-        )
-      : [];
+  const asignacionesFicha = fichaSeleccionada
+    ? asignaciones.filter(
+        (asignacion) => asignacion.Id_Fic === fichaSeleccionada.Id_Fic
+      )
+    : [];
 
   // =====================================================
   // SELECCIONAR CLASE
   // =====================================================
 
-  function seleccionarAsignacion(
-    asignacion
-  ) {
-    setSelectedAsignacion(
-      asignacion
-    );
+  function seleccionarAsignacion(asignacion) {
+    setSelectedAsignacion(asignacion);
+    limpiarClase();
 
-    // La fecha se obtiene automáticamente
-    // respetando el período de la competencia.
-    const fechaInicial =
-      obtenerFechaInicial(
-        asignacion
-      );
-
-    setFecha(fechaInicial);
-
-    setAprendices([]);
-    setEstados({});
-    setEstadosAprendices({});
-    setMensaje(null);
+    // La fecha se obtiene automáticamente, respetando el período
+    setFecha(obtenerFechaInicial(asignacion));
   }
 
   // =====================================================
-  // CAMBIAR DÍA DE ASISTENCIA
+  // CAMBIAR DÍA CON LOS BOTONES ANTERIOR / SIGUIENTE
   // =====================================================
 
   function cambiarDia(direccion) {
-    if (
-      !selectedAsignacion ||
-      !fecha
-    ) {
+    if (!selectedAsignacion || !fecha) {
       return;
     }
 
-    const nuevaFecha =
-      cambiarFechaPorSemana(
-        fecha,
-        direccion
-      );
+    const nuevaFecha = cambiarFechaPorSemana(fecha, direccion);
+    const { inicio, fin } = obtenerLimitesPeriodo(selectedAsignacion);
 
-    const {
-      inicio,
-      fin,
-    } = obtenerLimitesPeriodo(
-      selectedAsignacion
-    );
-
-    // No permitir fechas anteriores
-    // al inicio de la competencia.
-    if (
-      inicio &&
-      nuevaFecha < inicio
-    ) {
+    if (inicio && nuevaFecha < inicio) {
       setMensaje({
         tipo: "error",
         texto:
-          "No puedes retroceder más. Esta fecha está fuera del período de la competencia.",
+          "No puedes retroceder más. Esta fecha está fuera del período del resultado de aprendizaje.",
       });
 
       return;
     }
 
-    // No permitir fechas posteriores
-    // al final de la competencia.
-    if (
-      fin &&
-      nuevaFecha > fin
-    ) {
+    if (fin && nuevaFecha > fin) {
       setMensaje({
         tipo: "error",
         texto:
-          "No puedes avanzar más. Esta fecha está fuera del período de la competencia.",
+          "No puedes avanzar más. Esta fecha está fuera del período del resultado de aprendizaje.",
       });
 
       return;
     }
 
-    // También verificamos que siga siendo
-    // el día de formación correcto.
-    const diaNuevaFecha =
-      normalizarDia(
-        obtenerDiaSemana(
-          nuevaFecha
-        )
-      );
+    const diaNuevaFecha = normalizarDia(obtenerDiaSemana(nuevaFecha));
+    const diaPermitido = normalizarDia(selectedAsignacion.Dia);
 
-    const diaPermitido =
-      normalizarDia(
-        selectedAsignacion.Dia
-      );
-
-    if (
-      diaNuevaFecha !==
-      diaPermitido
-    ) {
+    if (diaNuevaFecha !== diaPermitido) {
       return;
     }
 
@@ -587,22 +388,53 @@ export default function InstructorAsistencia() {
   }
 
   // =====================================================
+  // ELEGIR FECHA DESDE EL CALENDARIO
+  // =====================================================
+
+  function elegirFechaCalendario(valor) {
+    // El usuario borró la fecha del input: no cambiamos nada
+    if (!valor || !selectedAsignacion) {
+      return;
+    }
+
+    const { inicio, fin } = obtenerLimitesPeriodo(selectedAsignacion);
+
+    if ((inicio && valor < inicio) || (fin && valor > fin)) {
+      setMensaje({
+        tipo: "error",
+        texto:
+          "La fecha elegida está fuera del período del resultado de aprendizaje.",
+      });
+
+      return;
+    }
+
+    const diaElegido = obtenerDiaSemana(valor);
+
+    if (normalizarDia(diaElegido) !== normalizarDia(selectedAsignacion.Dia)) {
+      setMensaje({
+        tipo: "error",
+        texto: `La fecha elegida es ${diaElegido}, pero esta clase corresponde al día ${selectedAsignacion.Dia}.`,
+      });
+
+      return;
+    }
+
+    setMensaje(null);
+    setFecha(valor);
+  }
+
+  // =====================================================
   // CARGAR APRENDICES CUANDO CAMBIA LA FECHA
   // =====================================================
 
   useEffect(() => {
-    if (
-      !selectedAsignacion ||
-      !fecha
-    ) {
+    if (!selectedAsignacion || !fecha) {
       return;
     }
 
     cargarClase();
-  }, [
-    fecha,
-    selectedAsignacion,
-  ]);
+  }, [fecha, selectedAsignacion]);
 
   // =====================================================
   // CARGAR APRENDICES + ASISTENCIA EXISTENTE
@@ -617,89 +449,60 @@ export default function InstructorAsistencia() {
         `${API_BASE}/asistencia/clase/` +
         `${selectedAsignacion.Id_Fic}/` +
         `${selectedAsignacion.Id_Ins}/` +
-        `${selectedAsignacion.Id_Comp}/` +
-        `${encodeURIComponent(
-          selectedAsignacion.Dia
-        )}/` +
+        `${selectedAsignacion.Id_RA}/` +
+        `${encodeURIComponent(selectedAsignacion.Dia)}/` +
         `${fecha}`;
 
-      console.log(
-        "Cargando:",
-        url
-      );
+      console.log("Cargando:", url);
 
-      const response =
-        await fetch(url);
+      const response = await fetch(url);
 
       if (!response.ok) {
         let error;
 
         try {
-          error =
-            await response.json();
+          error = await response.json();
         } catch {
           error = {};
         }
 
-        throw new Error(
-          error.detail ||
-            "No se pudo cargar la clase."
-        );
+        throw new Error(error.detail || "No se pudo cargar la clase.");
       }
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       setAprendices(data);
 
-      // =================================================
-      // CARGAR ESTADOS EXISTENTES
-      // =================================================
-
+      // Estados existentes
       const nuevosEstados = {};
 
       data.forEach((aprendiz) => {
-        nuevosEstados[
-          aprendiz.Id_Apr
-        ] =
-          DESDE_BACKEND[
-            aprendiz.Es_Asi
-          ] || "presente";
+        nuevosEstados[aprendiz.Id_Apr] =
+          DESDE_BACKEND[aprendiz.Es_Asi] || "presente";
       });
 
       setEstados(nuevosEstados);
 
-      // =================================================
-      // CARGAR SEMÁFOROS
-      // =================================================
-
+      // Semáforos
       const nuevosSemaforos = {};
 
       await Promise.all(
-        data.map(
-          async (aprendiz) => {
-            try {
-              const res =
-                await fetch(
-                  `${API_BASE}/asistencia/aprendiz/${aprendiz.Id_Apr}/estado`
-                );
+        data.map(async (aprendiz) => {
+          try {
+            const res = await fetch(
+              `${API_BASE}/asistencia/aprendiz/${aprendiz.Id_Apr}/estado`
+            );
 
-              if (res.ok) {
-                nuevosSemaforos[
-                  aprendiz.Id_Apr
-                ] =
-                  await res.json();
-              }
-            } catch {
-              // No interrumpe la carga
+            if (res.ok) {
+              nuevosSemaforos[aprendiz.Id_Apr] = await res.json();
             }
+          } catch {
+            // No interrumpe la carga
           }
-        )
+        })
       );
 
-      setEstadosAprendices(
-        nuevosSemaforos
-      );
+      setEstadosAprendices(nuevosSemaforos);
     } catch (error) {
       console.error(error);
 
@@ -720,10 +523,7 @@ export default function InstructorAsistencia() {
   // CAMBIAR ESTADO DE UN APRENDIZ
   // =====================================================
 
-  function cambiarEstado(
-    Id_Apr,
-    estado
-  ) {
+  function cambiarEstado(Id_Apr, estado) {
     setEstados((prev) => ({
       ...prev,
       [Id_Apr]: estado,
@@ -736,173 +536,98 @@ export default function InstructorAsistencia() {
 
   async function guardarAsistencia() {
     if (!selectedAsignacion) {
-      setMensaje({
-        tipo: "error",
-        texto:
-          "Selecciona una clase.",
-      });
-
+      setMensaje({ tipo: "error", texto: "Selecciona una clase." });
       return;
     }
 
     if (!fecha) {
       setMensaje({
         tipo: "error",
-        texto:
-          "No se pudo determinar la fecha de asistencia.",
+        texto: "No se pudo determinar la fecha de asistencia.",
       });
-
       return;
     }
 
-    // =================================================
-    // VALIDAR PERÍODO DE LA COMPETENCIA
-    // =================================================
+    // Validar período del resultado de aprendizaje
+    const { inicio, fin } = obtenerLimitesPeriodo(selectedAsignacion);
 
-    const {
-      inicio,
-      fin,
-    } = obtenerLimitesPeriodo(
-      selectedAsignacion
-    );
-
-    if (
-      (inicio && fecha < inicio) ||
-      (fin && fecha > fin)
-    ) {
+    if ((inicio && fecha < inicio) || (fin && fecha > fin)) {
       setMensaje({
         tipo: "error",
         texto:
-          "No puedes registrar asistencia fuera del período de la competencia.",
+          "No puedes registrar asistencia fuera del período del resultado de aprendizaje.",
       });
-
       return;
     }
 
-    // =================================================
-    // VALIDAR DÍA
-    // =================================================
+    // Validar día
+    const diaSeleccionado = normalizarDia(obtenerDiaSemana(fecha));
+    const diaPermitido = normalizarDia(selectedAsignacion.Dia);
 
-    const diaSeleccionado =
-      normalizarDia(
-        obtenerDiaSemana(fecha)
-      );
-
-    const diaPermitido =
-      normalizarDia(
-        selectedAsignacion.Dia
-      );
-
-    if (
-      diaSeleccionado !==
-      diaPermitido
-    ) {
+    if (diaSeleccionado !== diaPermitido) {
       setMensaje({
         tipo: "error",
-        texto:
-          `No puedes registrar asistencia porque esta clase corresponde al día ${selectedAsignacion.Dia}.`,
+        texto: `No puedes registrar asistencia porque esta clase corresponde al día ${selectedAsignacion.Dia}.`,
       });
-
       return;
     }
 
     setGuardando(true);
     setMensaje(null);
 
-    const nuevosSemaforos = {
-      ...estadosAprendices,
-    };
+    const nuevosSemaforos = { ...estadosAprendices };
 
     try {
-      for (
-        const aprendiz of aprendices
-      ) {
-        const estado =
-          estados[
-            aprendiz.Id_Apr
-          ];
+      for (const aprendiz of aprendices) {
+        const estado = estados[aprendiz.Id_Apr];
 
         if (!estado) {
           continue;
         }
 
-        const response =
-          await fetch(
-            `${API_BASE}/asistencia`,
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body: JSON.stringify({
-                Fec_Asi: fecha,
-
-                Es_Asi:
-                  A_BACKEND[estado],
-
-                Id_Apr:
-                  aprendiz.Id_Apr,
-
-                Id_Fic:
-                  selectedAsignacion.Id_Fic,
-
-                Id_Ins:
-                  selectedAsignacion.Id_Ins,
-
-                Id_Comp:
-                  selectedAsignacion.Id_Comp,
-
-                Dia:
-                  selectedAsignacion.Dia,
-              }),
-            }
-          );
+        const response = await fetch(`${API_BASE}/asistencia`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            Fec_Asi: fecha,
+            Es_Asi: A_BACKEND[estado],
+            Id_Apr: aprendiz.Id_Apr,
+            Id_Fic: selectedAsignacion.Id_Fic,
+            Id_Ins: selectedAsignacion.Id_Ins,
+            Id_RA: selectedAsignacion.Id_RA,
+            Dia: selectedAsignacion.Dia,
+          }),
+        });
 
         if (!response.ok) {
           let error;
 
           try {
-            error =
-              await response.json();
+            error = await response.json();
           } catch {
             error = {};
           }
 
-          throw new Error(
-            error.detail ||
-              "Error guardando asistencia."
-          );
+          throw new Error(error.detail || "Error guardando asistencia.");
         }
 
-        const resultado =
-          await response.json();
+        const resultado = await response.json();
 
         if (resultado.estado) {
-          nuevosSemaforos[
-            aprendiz.Id_Apr
-          ] =
-            resultado.estado;
+          nuevosSemaforos[aprendiz.Id_Apr] = resultado.estado;
         }
       }
 
-      setEstadosAprendices(
-        nuevosSemaforos
-      );
+      setEstadosAprendices(nuevosSemaforos);
 
       setMensaje({
         tipo: "exito",
-        texto:
-          "Asistencia guardada correctamente.",
+        texto: "Asistencia guardada correctamente.",
       });
     } catch (error) {
       console.error(error);
 
-      setEstadosAprendices(
-        nuevosSemaforos
-      );
+      setEstadosAprendices(nuevosSemaforos);
 
       setMensaje({
         tipo: "error",
@@ -920,12 +645,11 @@ export default function InstructorAsistencia() {
   function volverAFichas() {
     setFichaSeleccionada(null);
     setSelectedAsignacion(null);
-    setFecha("");
-    setAprendices([]);
-    setEstados({});
-    setEstadosAprendices({});
-    setMensaje(null);
+    limpiarClase();
   }
+
+  // Límites para el calendario
+  const limitesActuales = obtenerLimitesPeriodo(selectedAsignacion);
 
   // =====================================================
   // RENDER
@@ -933,37 +657,22 @@ export default function InstructorAsistencia() {
 
   return (
     <>
-      <InstructorNavbar
-        user={{
-          Nom_Ins: firstName,
-        }}
-      />
+      <InstructorNavbar user={{ Nom_Ins: firstName }} />
 
       <div className="bg-light min-vh-100 py-5">
-        <main
-          className="container"
-          style={{
-            maxWidth: 1000,
-          }}
-        >
-          {/* ================================================= */}
+        <main className="container" style={{ maxWidth: 1000 }}>
           {/* ENCABEZADO */}
-          {/* ================================================= */}
 
           <div className="mb-4">
-            <h1 className="fw-bold text-dark">
-              Control de Asistencia
-            </h1>
+            <h1 className="fw-bold text-dark">Control de Asistencia</h1>
 
             <p className="text-muted mb-0">
-              Selecciona una ficha para registrar
-              la asistencia de sus aprendices.
+              Selecciona una ficha para registrar la asistencia de sus
+              aprendices.
             </p>
           </div>
 
-          {/* ================================================= */}
           {/* MENSAJES */}
-          {/* ================================================= */}
 
           {mensaje && (
             <div
@@ -984,31 +693,20 @@ export default function InstructorAsistencia() {
           {!fichaSeleccionada && (
             <div
               className="bg-white rounded-4 p-4 shadow-sm"
-              style={{
-                border:
-                  "2px solid #00851d",
-              }}
+              style={{ border: "2px solid #00851d" }}
             >
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                  <h5 className="fw-bold mb-1">
-                    Mis fichas
-                  </h5>
+                  <h5 className="fw-bold mb-1">Mis fichas</h5>
 
                   <p className="text-muted small mb-0">
-                    Selecciona la ficha en la que
-                    deseas tomar asistencia.
+                    Selecciona la ficha en la que deseas tomar asistencia.
                   </p>
                 </div>
 
                 <span
                   className="badge rounded-pill"
-                  style={{
-                    backgroundColor:
-                      "#E6F4D7",
-                    color:
-                      "#1B5E20",
-                  }}
+                  style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
                 >
                   {fichas.length} fichas
                 </span>
@@ -1018,15 +716,10 @@ export default function InstructorAsistencia() {
                 <div className="text-center py-5">
                   <div
                     className="spinner-border"
-                    style={{
-                      color:
-                        "#00851d",
-                    }}
+                    style={{ color: "#00851d" }}
                   />
 
-                  <p className="text-muted mt-3 mb-0">
-                    Cargando fichas...
-                  </p>
+                  <p className="text-muted mt-3 mb-0">Cargando fichas...</p>
                 </div>
               ) : fichas.length === 0 ? (
                 <div className="text-center py-5">
@@ -1036,109 +729,60 @@ export default function InstructorAsistencia() {
                 </div>
               ) : (
                 <div className="row g-3">
-                  {fichas.map(
-                    (ficha) => (
-                      <div
-                        key={
-                          ficha.Id_Fic
-                        }
-                        className="col-12 col-md-6"
+                  {fichas.map((ficha) => (
+                    <div key={ficha.Id_Fic} className="col-12 col-md-6">
+                      <button
+                        type="button"
+                        className="w-100 text-start bg-white rounded-4 p-4"
+                        onClick={() => seleccionarFicha(ficha)}
+                        style={{ border: "1px solid #ddd", transition: "0.2s" }}
                       >
-                        <button
-                          type="button"
-                          className="w-100 text-start bg-white rounded-4 p-4"
-                          onClick={() =>
-                            seleccionarFicha(
-                              ficha
-                            )
-                          }
-                          style={{
-                            border:
-                              "1px solid #ddd",
-                            transition:
-                              "0.2s",
-                          }}
-                        >
-                          <div className="d-flex align-items-center gap-3">
-                            <div
-                              className="p-3 rounded-3"
-                              style={{
-                                backgroundColor:
-                                  "#E6F4D7",
-                                color:
-                                  "#1B5E20",
-                              }}
+                        <div className="d-flex align-items-center gap-3">
+                          <div
+                            className="p-3 rounded-3"
+                            style={{
+                              backgroundColor: "#E6F4D7",
+                              color: "#1B5E20",
+                            }}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <rect
-                                  x="3"
-                                  y="4"
-                                  width="18"
-                                  height="18"
-                                  rx="2"
-                                />
+                              <rect x="3" y="4" width="18" height="18" rx="2" />
+                              <line x1="16" y1="2" x2="16" y2="6" />
+                              <line x1="8" y1="2" x2="8" y2="6" />
+                              <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                          </div>
 
-                                <line
-                                  x1="16"
-                                  y1="2"
-                                  x2="16"
-                                  y2="6"
-                                />
-
-                                <line
-                                  x1="8"
-                                  y1="2"
-                                  x2="8"
-                                  y2="6"
-                                />
-
-                                <line
-                                  x1="3"
-                                  y1="10"
-                                  x2="21"
-                                  y2="10"
-                                />
-                              </svg>
+                          <div className="flex-grow-1">
+                            <div className="fw-bold fs-5 text-dark">
+                              Ficha {ficha.Num_Fic || ficha.Id_Fic}
                             </div>
 
-                            <div className="flex-grow-1">
-                              <div className="fw-bold fs-5 text-dark">
-                                Ficha{" "}
-                                {ficha.Num_Fic ||
-                                  ficha.Id_Fic}
-                              </div>
+                            <div className="text-muted small mt-1">
+                              Jornada: {ficha.Jor_Fic || "No definida"}
+                            </div>
 
-                              <div className="text-muted small mt-1">
-                                Jornada:{" "}
-                                {ficha.Jor_Fic ||
-                                  "No definida"}
-                              </div>
-
-                              <div
-                                className="small mt-1"
-                                style={{
-                                  color:
-                                    "#00851d",
-                                }}
-                              >
-                                Ver clases →
-                              </div>
+                            <div
+                              className="small mt-1"
+                              style={{ color: "#00851d" }}
+                            >
+                              Ver clases →
                             </div>
                           </div>
-                        </button>
-                      </div>
-                    )
-                  )}
+                        </div>
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -1148,163 +792,116 @@ export default function InstructorAsistencia() {
           {/* PASO 2 - CLASES */}
           {/* ================================================= */}
 
-          {fichaSeleccionada &&
-            !selectedAsignacion && (
-              <div>
-                <button
-                  type="button"
-                  className="btn btn-link text-decoration-none px-0 mb-3"
-                  onClick={
-                    volverAFichas
-                  }
-                >
-                  ← Volver a mis fichas
-                </button>
+          {fichaSeleccionada && !selectedAsignacion && (
+            <div>
+              <button
+                type="button"
+                className="btn btn-link text-decoration-none px-0 mb-3"
+                onClick={volverAFichas}
+              >
+                ← Volver a mis fichas
+              </button>
 
-                <div
-                  className="bg-white rounded-4 p-4 shadow-sm"
-                  style={{
-                    border:
-                      "2px solid #00851d",
-                  }}
-                >
-                  <div className="d-flex align-items-center gap-3 mb-4">
-                    <div
-                      className="p-3 rounded-3"
-                      style={{
-                        backgroundColor:
-                          "#E6F4D7",
-                        color:
-                          "#1B5E20",
-                      }}
+              <div
+                className="bg-white rounded-4 p-4 shadow-sm"
+                style={{ border: "2px solid #00851d" }}
+              >
+                <div className="d-flex align-items-center gap-3 mb-4">
+                  <div
+                    className="p-3 rounded-3"
+                    style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect
-                          x="3"
-                          y="4"
-                          width="18"
-                          height="18"
-                          rx="2"
-                        />
-
-                        <line
-                          x1="16"
-                          y1="2"
-                          x2="16"
-                          y2="6"
-                        />
-
-                        <line
-                          x1="8"
-                          y1="2"
-                          x2="8"
-                          y2="6"
-                        />
-
-                        <line
-                          x1="3"
-                          y1="10"
-                          x2="21"
-                          y2="10"
-                        />
-                      </svg>
-                    </div>
-
-                    <div>
-                      <h4 className="fw-bold mb-1">
-                        Ficha{" "}
-                        {fichaSeleccionada.Num_Fic ||
-                          fichaSeleccionada.Id_Fic}
-                      </h4>
-
-                      <p className="text-muted mb-0">
-                        Selecciona la clase que
-                        corresponde al día de formación.
-                      </p>
-                    </div>
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
                   </div>
 
-                  <div className="d-flex flex-column gap-3">
-                    {asignacionesFicha.map(
-                      (asignacion) => (
-                        <button
-                          type="button"
-                          key={
-                            `${asignacion.Id_Fic}-` +
-                            `${asignacion.Id_Ins}-` +
-                            `${asignacion.Id_Comp}-` +
-                            `${asignacion.Dia}`
-                          }
-                          className="w-100 text-start bg-white rounded-3 p-3"
-                          onClick={() =>
-                            seleccionarAsignacion(
-                              asignacion
-                            )
-                          }
-                          style={{
-                            border:
-                              "1px solid #ddd",
-                          }}
-                        >
-                          <div className="row align-items-center">
-                            <div className="col-md-8">
-                              <div className="fw-bold text-dark">
-                                {asignacion.Competencia ||
-                                  `Competencia ${asignacion.Id_Comp}`}
-                              </div>
+                  <div>
+                    <h4 className="fw-bold mb-1">
+                      Ficha {fichaSeleccionada.Num_Fic || fichaSeleccionada.Id_Fic}
+                    </h4>
 
-                              <div className="text-muted small mt-1">
-                                Día de formación:{" "}
-                                <span
-                                  className="fw-semibold"
-                                  style={{
-                                    color:
-                                      "#1B5E20",
-                                  }}
-                                >
-                                  {asignacion.Dia}
-                                </span>
-                              </div>
-
-                              {asignacion.Jor_Fic && (
-                                <div className="text-muted small">
-                                  Jornada:{" "}
-                                  {asignacion.Jor_Fic}
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="col-md-4 text-md-end mt-2 mt-md-0">
-                              <span
-                                className="badge rounded-pill"
-                                style={{
-                                  backgroundColor:
-                                    "#E6F4D7",
-                                  color:
-                                    "#1B5E20",
-                                }}
-                              >
-                                Registrar →
-                              </span>
-                            </div>
-                          </div>
-                        </button>
-                      )
-                    )}
+                    <p className="text-muted mb-0">
+                      Selecciona la clase que corresponde al día de formación.
+                    </p>
                   </div>
                 </div>
+
+                <div className="d-flex flex-column gap-3">
+                  {asignacionesFicha.map((asignacion) => (
+                    <button
+                      type="button"
+                      key={
+                        `${asignacion.Id_Fic}-` +
+                        `${asignacion.Id_Ins}-` +
+                        `${asignacion.Id_RA}-` +
+                        `${asignacion.Dia}`
+                      }
+                      className="w-100 text-start bg-white rounded-3 p-3"
+                      onClick={() => seleccionarAsignacion(asignacion)}
+                      style={{ border: "1px solid #ddd" }}
+                    >
+                      <div className="row align-items-center">
+                        <div className="col-md-8">
+                          <div className="fw-bold text-dark">
+                            {asignacion.ResultadoAprendizaje ||
+                              `Resultado de aprendizaje ${asignacion.Id_RA}`}
+                          </div>
+
+                          {asignacion.Competencia && (
+                            <div className="text-muted small mt-1">
+                              Competencia: {asignacion.Competencia}
+                            </div>
+                          )}
+
+                          <div className="text-muted small mt-1">
+                            Día de formación:{" "}
+                            <span
+                              className="fw-semibold"
+                              style={{ color: "#1B5E20" }}
+                            >
+                              {asignacion.Dia}
+                            </span>
+                          </div>
+
+                          {asignacion.Jor_Fic && (
+                            <div className="text-muted small">
+                              Jornada: {asignacion.Jor_Fic}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="col-md-4 text-md-end mt-2 mt-md-0">
+                          <span
+                            className="badge rounded-pill"
+                            style={{
+                              backgroundColor: "#E6F4D7",
+                              color: "#1B5E20",
+                            }}
+                          >
+                            Registrar →
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
+          )}
 
           {/* ================================================= */}
           {/* PASO 3 - ASISTENCIA */}
@@ -1317,76 +914,60 @@ export default function InstructorAsistencia() {
                 className="btn btn-link text-decoration-none px-0 mb-3"
                 onClick={() => {
                   setSelectedAsignacion(null);
-                  setFecha("");
-                  setAprendices([]);
-                  setEstados({});
-                  setEstadosAprendices({});
-                  setMensaje(null);
+                  limpiarClase();
                 }}
               >
                 ← Volver a las clases
               </button>
 
-              {/* ================================================= */}
               {/* INFORMACIÓN + BARRA DE FECHA */}
-              {/* ================================================= */}
 
               <div
                 className="bg-white rounded-4 p-4 shadow-sm mb-4"
-                style={{
-                  border:
-                    "2px solid #00851d",
-                }}
+                style={{ border: "2px solid #00851d" }}
               >
-                <h5 className="fw-bold mb-4">
-                  Registrar asistencia
-                </h5>
+                <h5 className="fw-bold mb-4">Registrar asistencia</h5>
 
                 <div
                   className="p-3 rounded-3 mb-4"
-                  style={{
-                    backgroundColor:
-                      "#E6F4D7",
-                  }}
+                  style={{ backgroundColor: "#E6F4D7" }}
                 >
                   <div className="fw-bold text-dark fs-5">
-                    Ficha{" "}
-                    {selectedAsignacion.Num_Fic ||
-                      selectedAsignacion.Id_Fic}
+                    Ficha {selectedAsignacion.Num_Fic || selectedAsignacion.Id_Fic}
                   </div>
 
                   <div className="small text-muted mt-1">
-                    Competencia:{" "}
+                    Resultado de aprendizaje:{" "}
                     <span className="fw-medium text-dark">
-                      {selectedAsignacion.Competencia ||
-                        `Competencia ${selectedAsignacion.Id_Comp}`}
+                      {selectedAsignacion.ResultadoAprendizaje ||
+                        `Resultado de aprendizaje ${selectedAsignacion.Id_RA}`}
                     </span>
                   </div>
 
+                  {selectedAsignacion.Competencia && (
+                    <div className="small text-muted">
+                      Competencia:{" "}
+                      <span className="fw-medium text-dark">
+                        {selectedAsignacion.Competencia}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="small text-muted">
                     Día de formación:{" "}
-                    <span
-                      className="fw-semibold"
-                      style={{
-                        color:
-                          "#1B5E20",
-                      }}
-                    >
+                    <span className="fw-semibold" style={{ color: "#1B5E20" }}>
                       {selectedAsignacion.Dia}
                     </span>
                   </div>
 
                   {selectedAsignacion.Jor_Fic && (
                     <div className="small text-muted">
-                      Jornada:{" "}
-                      {selectedAsignacion.Jor_Fic}
+                      Jornada: {selectedAsignacion.Jor_Fic}
                     </div>
                   )}
                 </div>
 
-                {/* ================================================= */}
                 {/* BARRA PARA CAMBIAR FECHA */}
-                {/* ================================================= */}
 
                 <div
                   className="rounded-3 p-3"
@@ -1399,36 +980,25 @@ export default function InstructorAsistencia() {
                     <button
                       type="button"
                       className="btn btn-outline-light"
-                      onClick={() =>
-                        cambiarDia(-1)
-                      }
+                      onClick={() => cambiarDia(-1)}
                     >
                       ← Anterior
                     </button>
 
                     <div className="text-center text-white flex-grow-1">
-                      <div
-                        className="small"
-                        style={{
-                          opacity: 0.9,
-                        }}
-                      >
+                      <div className="small" style={{ opacity: 0.9 }}>
                         Día de formación
                       </div>
 
                       <div className="fw-bold text-capitalize">
-                        {formatearFecha(
-                          fecha
-                        )}
+                        {formatearFecha(fecha) || "Sin fecha disponible"}
                       </div>
                     </div>
 
                     <button
                       type="button"
                       className="btn btn-outline-light"
-                      onClick={() =>
-                        cambiarDia(1)
-                      }
+                      onClick={() => cambiarDia(1)}
                     >
                       Siguiente →
                     </button>
@@ -1436,40 +1006,80 @@ export default function InstructorAsistencia() {
                 </div>
 
                 <div className="form-text mt-2">
-                  Puedes cambiar únicamente entre las
-                  fechas correspondientes al día de
-                  formación de esta clase.
+                  Puedes cambiar únicamente entre las fechas correspondientes
+                  al día de formación de esta clase.
+                </div>
+
+                {/* ================================================= */}
+                {/* APARTADO OPCIONAL: ELEGIR DESDE EL CALENDARIO */}
+                {/* ================================================= */}
+
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-success"
+                    onClick={() => setMostrarCalendario((prev) => !prev)}
+                  >
+                    {mostrarCalendario
+                      ? "Ocultar calendario"
+                      : "📅 Elegir fecha desde el calendario"}
+                  </button>
+
+                  {mostrarCalendario && (
+                    <div
+                      className="rounded-3 p-3 mt-3"
+                      style={{
+                        border: "1px dashed #00851d",
+                        backgroundColor: "#f8fdf5",
+                      }}
+                    >
+                      <label
+                        htmlFor="fecha-calendario"
+                        className="form-label fw-semibold mb-1"
+                      >
+                        Fecha de la clase
+                      </label>
+
+                      <input
+                        id="fecha-calendario"
+                        type="date"
+                        className="form-control"
+                        style={{ maxWidth: 240 }}
+                        value={fecha}
+                        min={limitesActuales.inicio || undefined}
+                        max={limitesActuales.fin || undefined}
+                        onChange={(e) => elegirFechaCalendario(e.target.value)}
+                      />
+
+                      <div className="form-text">
+                        Solo se aceptan fechas dentro del período del resultado
+                        de aprendizaje
+                        {limitesActuales.inicio && limitesActuales.fin
+                          ? ` (${limitesActuales.inicio} a ${limitesActuales.fin})`
+                          : ""}{" "}
+                        que caigan en <strong>{selectedAsignacion.Dia}</strong>.
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* ================================================= */}
               {/* LISTA DE APRENDICES */}
-              {/* ================================================= */}
 
               {fecha && (
                 <div className="bg-white rounded-4 p-4 shadow-sm">
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                      <h5 className="fw-bold mb-1">
-                        Aprendices
-                      </h5>
+                      <h5 className="fw-bold mb-1">Aprendices</h5>
 
                       <p className="text-muted small mb-0">
-                        Fecha:{" "}
-                        {formatearFecha(
-                          fecha
-                        )}
+                        Fecha: {formatearFecha(fecha)}
                       </p>
                     </div>
 
                     <span
                       className="badge rounded-pill"
-                      style={{
-                        backgroundColor:
-                          "#E6F4D7",
-                        color:
-                          "#1B5E20",
-                      }}
+                      style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
                     >
                       {aprendices.length} aprendices
                     </span>
@@ -1479,205 +1089,131 @@ export default function InstructorAsistencia() {
                     <div className="text-center py-5">
                       <div
                         className="spinner-border"
-                        style={{
-                          color:
-                            "#00851d",
-                        }}
+                        style={{ color: "#00851d" }}
                       />
 
-                      <p className="text-muted mt-3">
-                        Cargando aprendices...
-                      </p>
+                      <p className="text-muted mt-3">Cargando aprendices...</p>
                     </div>
                   ) : aprendices.length === 0 ? (
                     <div className="text-center py-5 text-muted">
-                      No hay aprendices
-                      registrados en esta ficha.
+                      No hay aprendices registrados en esta ficha.
                     </div>
                   ) : (
                     <div className="d-flex flex-column gap-2">
-                      {aprendices.map(
-                        (aprendiz) => {
-                          const semaforo =
-                            estadosAprendices[
-                              aprendiz.Id_Apr
-                            ];
+                      {aprendices.map((aprendiz) => {
+                        const semaforo = estadosAprendices[aprendiz.Id_Apr];
 
-                          const colores =
-                            semaforo
-                              ? COLOR_SEMAFORO[
-                                  semaforo.semaforo
-                                ]
-                              : null;
+                        const colores = semaforo
+                          ? COLOR_SEMAFORO[semaforo.semaforo]
+                          : null;
 
-                          return (
-                            <div
-                              key={
-                                aprendiz.Id_Apr
-                              }
-                              className="border rounded-3 p-3"
-                            >
-                              <div className="row align-items-center">
-                                {/* APRENDIZ */}
+                        return (
+                          <div
+                            key={aprendiz.Id_Apr}
+                            className="border rounded-3 p-3"
+                          >
+                            <div className="row align-items-center">
+                              {/* APRENDIZ */}
 
-                                <div className="col-md-5">
-                                  <div className="fw-bold d-flex align-items-center flex-wrap gap-2">
-                                    {
-                                      aprendiz.Nom_Apr
-                                    }{" "}
-                                    {
-                                      aprendiz.Ape_Apr
-                                    }
+                              <div className="col-md-5">
+                                <div className="fw-bold d-flex align-items-center flex-wrap gap-2">
+                                  {aprendiz.Nom_Apr} {aprendiz.Ape_Apr}
 
-                                    {semaforo &&
-                                      colores && (
-                                        <span
-                                          className="badge rounded-pill"
-                                          style={{
-                                            backgroundColor:
-                                              colores.fondo,
-                                            color:
-                                              colores.texto,
-                                            fontWeight:
-                                              600,
-                                          }}
-                                          title={
-                                            `Fallas brutas: ${semaforo.fallas_brutas} · ` +
-                                            `Excusas: ${semaforo.excusas} · ` +
-                                            `Racha actual: ${semaforo.racha_dias} día(s)`
-                                          }
-                                        >
-                                          {
-                                            semaforo.acumulado
-                                          }{" "}
-                                          fallas
-                                        </span>
-                                      )}
-                                  </div>
-
-                                  <div className="text-muted small">
-                                    Documento:{" "}
-                                    {
-                                      aprendiz.Num_ide_Apr
-                                    }
-                                  </div>
-
-                                  {semaforo &&
-                                    semaforo.deserta_por_racha && (
-                                      <div
-                                        className="small mt-1 fw-semibold"
-                                        style={{
-                                          color:
-                                            "#dc3545",
-                                        }}
-                                      >
-                                        3 fallas
-                                        seguidas
-                                        — riesgo
-                                        de
-                                        deserción
-                                      </div>
-                                    )}
-
-                                  {semaforo &&
-                                    !semaforo.deserta_por_racha &&
-                                    semaforo.deserta_por_acumulado && (
-                                      <div
-                                        className="small mt-1 fw-semibold"
-                                        style={{
-                                          color:
-                                            "#dc3545",
-                                        }}
-                                      >
-                                        Fallas
-                                        acumuladas
-                                        al máximo
-                                        — riesgo
-                                        de
-                                        deserción
-                                      </div>
-                                    )}
+                                  {semaforo && colores && (
+                                    <span
+                                      className="badge rounded-pill"
+                                      style={{
+                                        backgroundColor: colores.fondo,
+                                        color: colores.texto,
+                                        fontWeight: 600,
+                                      }}
+                                      title={
+                                        `Fallas brutas: ${semaforo.fallas_brutas} · ` +
+                                        `Excusas: ${semaforo.excusas} · ` +
+                                        `Racha actual: ${semaforo.racha_dias} día(s)`
+                                      }
+                                    >
+                                      {semaforo.acumulado} fallas
+                                    </span>
+                                  )}
                                 </div>
 
-                                {/* ESTADOS */}
+                                <div className="text-muted small">
+                                  Documento: {aprendiz.Num_ide_Apr}
+                                </div>
 
-                                <div className="col-md-7">
-                                  <div className="d-flex flex-wrap gap-2">
-                                    {ESTADOS.map(
-                                      (estado) => {
-                                        const activo =
-                                          estados[
-                                            aprendiz.Id_Apr
-                                          ] ===
-                                          estado.valor;
-
-                                        return (
-                                          <button
-                                            key={
-                                              `${aprendiz.Id_Apr}-` +
-                                              `${estado.valor}`
-                                            }
-                                            type="button"
-                                            className="btn btn-sm"
-                                            onClick={() =>
-                                              cambiarEstado(
-                                                aprendiz.Id_Apr,
-                                                estado.valor
-                                              )
-                                            }
-                                            style={{
-                                              backgroundColor:
-                                                activo
-                                                  ? estado.color
-                                                  : "#f1f1f1",
-
-                                              color:
-                                                activo
-                                                  ? estado.texto
-                                                  : "#333",
-
-                                              border:
-                                                "1px solid #ddd",
-
-                                              fontWeight:
-                                                activo
-                                                  ? "600"
-                                                  : "400",
-                                            }}
-                                          >
-                                            {
-                                              estado.nombre
-                                            }
-                                          </button>
-                                        );
-                                      }
-                                    )}
+                                {semaforo && semaforo.deserta_por_racha && (
+                                  <div
+                                    className="small mt-1 fw-semibold"
+                                    style={{ color: "#dc3545" }}
+                                  >
+                                    3 fallas seguidas — riesgo de deserción
                                   </div>
+                                )}
+
+                                {semaforo &&
+                                  !semaforo.deserta_por_racha &&
+                                  semaforo.deserta_por_acumulado && (
+                                    <div
+                                      className="small mt-1 fw-semibold"
+                                      style={{ color: "#dc3545" }}
+                                    >
+                                      Fallas acumuladas al máximo — riesgo de
+                                      deserción
+                                    </div>
+                                  )}
+                              </div>
+
+                              {/* ESTADOS */}
+
+                              <div className="col-md-7">
+                                <div className="d-flex flex-wrap gap-2">
+                                  {ESTADOS.map((estado) => {
+                                    const activo =
+                                      estados[aprendiz.Id_Apr] === estado.valor;
+
+                                    return (
+                                      <button
+                                        key={`${aprendiz.Id_Apr}-${estado.valor}`}
+                                        type="button"
+                                        className="btn btn-sm"
+                                        onClick={() =>
+                                          cambiarEstado(
+                                            aprendiz.Id_Apr,
+                                            estado.valor
+                                          )
+                                        }
+                                        style={{
+                                          backgroundColor: activo
+                                            ? estado.color
+                                            : "#f1f1f1",
+                                          color: activo ? estado.texto : "#333",
+                                          border: "1px solid #ddd",
+                                          fontWeight: activo ? "600" : "400",
+                                        }}
+                                      >
+                                        {estado.nombre}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             </div>
-                          );
-                        }
-                      )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
-                  {/* ================================================= */}
                   {/* GUARDAR */}
-                  {/* ================================================= */}
 
                   {aprendices.length > 0 && (
                     <button
                       type="button"
                       className="btn text-white fw-semibold w-100 mt-4 py-2"
-                      style={{
-                        backgroundColor:
-                          "#00851d",
-                      }}
+                      style={{ backgroundColor: "#00851d" }}
                       disabled={guardando}
-                      onClick={
-                        guardarAsistencia
-                      }
+                      onClick={guardarAsistencia}
                     >
                       {guardando ? (
                         <>

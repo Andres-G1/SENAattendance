@@ -21,8 +21,10 @@ const AprendizDashboard = lazy(() => import("./pages/AprendizDashboard"));
 const InstructorDashboard = lazy(() => import("./pages/InstructorDashboard"));
 const AdministradorDashboard = lazy(() => import("./pages/AdministradorDashboard"));
 
-const InstructorAsistenciaRevisar = lazy(() => import("./pages/Instructor/InstructorAsistenciaRevisar"));
 const InstructorAsistencia = lazy(() => import("./pages/Instructor/InstructorAsistencia"));
+const InstructorAsistenciaRevisar = lazy(() => import("./pages/Instructor/InstructorAsistenciaRevisar"));
+const AprendizAsistencia = lazy(() => import("./pages/Aprendiz/AprendizAsistencia.jsx"))
+const CoordinadorAsistencia = lazy(() => import ("./pages/Coordinador/CoordianadorAsistencia.jsx"))
 
 const ConfigCarrera = lazy(() => import("./pages/Carrera/ConfigCarrera"));
 const CreateC = lazy(() => import("./pages/Carrera/Create"));
@@ -57,6 +59,11 @@ const Administradores = lazy(() => import("./pages/Coordinador/Administradores")
 const CrearAdministrador = lazy(() => import("./pages/Coordinador/CrearAdministrador"));
 const EditarAdministrador = lazy(() => import("./pages/Coordinador/EditarAdministrador"));
 const ConfirmarAdministrador = lazy(() => import("./pages/Coordinador/ConfirmarAdministrador"));
+
+const ConfigResultado = lazy(() => import ("./pages/ResultadoAprendizaje/ConfigResultado.jsx"))
+const CrearResultado = lazy(() => import( "./pages/ResultadoAprendizaje/Create.jsx"))
+const EditarResultado = lazy(() => import( "./pages/ResultadoAprendizaje/Edit.jsx"))
+const EliminarResultado = lazy(() => import( "./pages/ResultadoAprendizaje/Delete.jsx"))
 
 const ConfigCompetencia = lazy(() => import("./pages/Competencias/ConfigCompetencias"));
 const CreateCompetencia = lazy(() => import("./pages/Competencias/Create"));
@@ -114,6 +121,38 @@ function App() {
                 <Route path="/" element={<Login />} />
 
                 <Route path="/password" element={<PasswordRecovery />} />
+
+                <Route path="/administrador/resultado" 
+                element={
+                  <RutaProtegida rolPermitido="Coordinador">
+                    <ConfigResultado/>
+                  </RutaProtegida>
+                }
+                />
+
+                <Route path="/administrador/resultados-aprendizaje/crear"
+                element={
+                  <RutaProtegida rolPermitido= "Coordinador">
+                    <CrearResultado/>
+                  </RutaProtegida>
+                }
+                />
+
+                <Route path="/administrador/resultados-aprendizaje/editar/:id"
+                element={
+                  <RutaProtegida rolPermitido= "Coordinador">
+                    <EditarResultado/>
+                  </RutaProtegida>
+                }
+                />
+
+                <Route path="/administrador/resultados-aprendizaje/eliminar/:id"
+                element={
+                  <RutaProtegida rolPermitido= "Coordinador">
+                    <EliminarResultado/>
+                  </RutaProtegida>
+                }
+                />
 
                 {/* ==============================
                     APRENDIZ
@@ -558,6 +597,27 @@ function App() {
                   element={
                     <RutaProtegida rolPermitido="Coordinador">
                       <ConfirmarCompetencia />
+                    </RutaProtegida>
+                  }
+                />
+
+
+                {/*Asistencia */}
+
+                <Route
+                  path="/Aprendiz/AprendizAsistencia"
+                  element={
+                    <RutaProtegida rolPermitido="Aprendiz">
+                      <AprendizAsistencia/>
+                    </RutaProtegida>
+                  }
+                />  
+                
+                <Route
+                  path="/Coordinador/CoordianadorAsistencia"
+                  element={
+                    <RutaProtegida rolPermitido="Coordinador">
+                      <CoordinadorAsistencia/>
                     </RutaProtegida>
                   }
                 />

@@ -3,7 +3,14 @@ from typing import Optional, List
 from enum import Enum
 
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import Column, ForeignKeyConstraint, Enum as SQLEnum, UniqueConstraint, Index
+from sqlalchemy import (
+    Column,
+    ForeignKeyConstraint,
+    Enum as SQLEnum,
+    UniqueConstraint,
+    Index,
+    CheckConstraint,
+)
 from sqlalchemy.orm import foreign
 
 # =========================================================
@@ -87,6 +94,10 @@ class Carrera(SQLModel, table=True):
 # =========================================================
 # FICHAS
 # =========================================================
+# =========================================================
+# FICHAS
+# =========================================================
+
 class Fichas(SQLModel, table=True):
     __tablename__ = "Fichas"
 
@@ -104,22 +115,34 @@ class Fichas(SQLModel, table=True):
     Fec_Fin_Fic: date = Field(nullable=False)
     Num_Fic: int = Field(nullable=False, unique=True)
     Jor_Fic: Jornada = Field(nullable=False)
-    Fec_Cre: datetime = Field(default_factory=datetime.utcnow)
-    Fec_Mod: datetime = Field(default_factory=datetime.utcnow)
 
-    # -----------------------------------------
-    # RELACIONES
-    # -----------------------------------------
-
-    carrera: Optional[Carrera] = Relationship(back_populates="fichas")
-    aprendices: List["Aprendiz"] = Relationship(back_populates="ficha")
-    resultados_aprendizaje: List["ResultadoAprendizaje"] = Relationship(back_populates="ficha")
-    asistencias: List["Asistencia"] = Relationship(
-        sa_relationship_kwargs={
-            "primaryjoin": "Fichas.Id_Fic == foreign(Asistencia.Id_Fic)"
-        }
+    Fec_Cre: datetime = Field(
+        default_factory=datetime.utcnow
     )
 
+    Fec_Mod: datetime = Field(
+        default_factory=datetime.utcnow
+    )
+
+    # Relaciones
+    carrera: Optional["Carrera"] = Relationship(
+        back_populates="fichas"
+    )
+
+    aprendices: List["Aprendiz"] = Relationship(
+        back_populates="ficha"
+    )
+
+    fichas_asignadas: List["FichaInstructor"] = Relationship(
+        back_populates="ficha"
+    )
+
+    asistencias: List["Asistencia"] = Relationship(
+        sa_relationship_kwargs={
+            "primaryjoin": "Fichas.Id_Fic == foreign(Asistencia.Id_Fic)",
+            "viewonly": True
+        }
+    )
 # =========================================================
 # COMPETENCIA
 # =========================================================
@@ -348,7 +371,6 @@ class Aprendiz(SQLModel, table=True):
         back_populates="aprendiz"
     )
 
-
 # =========================================================
 # FICHA_INSTRUCTOR
 # =========================================================
@@ -356,9 +378,12 @@ class Aprendiz(SQLModel, table=True):
 class FichaInstructor(SQLModel, table=True):
     __tablename__ = "Ficha_Instructor"
 
-    # -----------------------------------------
-    # LLAVE COMPUESTA
-    # -----------------------------------------
+    __table_args__ = (
+        CheckConstraint(
+            "Fec_Fin_RA >= Fec_Inicio_RA",
+            name="chk_fechas_resultado"
+        ),
+    )
 
     Id_Fic: int = Field(
         foreign_key="Fichas.Id_Fic",
@@ -370,8 +395,8 @@ class FichaInstructor(SQLModel, table=True):
         primary_key=True
     )
 
-    Id_Comp: int = Field(
-        foreign_key="competencia.Id_Comp",
+    Id_RA: int = Field(
+        foreign_key="ResultadoAprendizaje.Id_RA",
         primary_key=True
     )
 
@@ -380,8 +405,7 @@ class FichaInstructor(SQLModel, table=True):
             SQLEnum(
                 DiaSemana,
                 values_callable=lambda enum_class: [
-                    member.value
-                    for member in enum_class
+                    member.value for member in enum_class
                 ],
                 name="diasemana"
             ),
@@ -390,30 +414,18 @@ class FichaInstructor(SQLModel, table=True):
         )
     )
 
-    # -----------------------------------------
-    # PERÍODO DE LA COMPETENCIA
-    # -----------------------------------------
+    Fec_Inicio_RA: date = Field(nullable=False)
+    Fec_Fin_RA: date = Field(nullable=False)
 
-    Fec_Inicio_Comp: date = Field(
-        nullable=False
-    )
-
-    Fec_Fin_Comp: date = Field(
-        nullable=False
-    )
-
-    # -----------------------------------------
-    # RELACIONES
-    # -----------------------------------------
-
-    ficha: Optional[Fichas] = Relationship()
-
-    instructor: Optional[Instructor] = Relationship(
+    ficha: Optional["Fichas"] = Relationship(
         back_populates="fichas_asignadas"
     )
 
-    competencia: Optional[Competencia] = Relationship()
+    instructor: Optional["Instructor"] = Relationship(
+        back_populates="fichas_asignadas"
+    )
 
+    resultado_aprendizaje: Optional["ResultadoAprendizaje"] = Relationship()
 
 # =========================================================
 # RESULTADO DE APRENDIZAJE
@@ -432,12 +444,7 @@ class ResultadoAprendizaje(SQLModel, table=True):
         nullable=False
     )
 
-    Des_RA: Optional[str] = None
-
-    Id_Fic: int = Field(
-        foreign_key="Fichas.Id_Fic",
-        nullable=False
-    )
+    Des_RA: Optional[str] = Field(default=None)
 
     Id_Comp: int = Field(
         foreign_key="competencia.Id_Comp",
@@ -445,21 +452,18 @@ class ResultadoAprendizaje(SQLModel, table=True):
     )
 
     Fec_Cre: datetime = Field(
-        default_factory=datetime.utcnow
+        default_factory=datetime.utcnow,
+        nullable=False
     )
 
     Fec_Mod: datetime = Field(
-        default_factory=datetime.utcnow
+        default_factory=datetime.utcnow,
+        nullable=False
     )
 
-    ficha: Optional[Fichas] = Relationship(
+    competencia: Optional["Competencia"] = Relationship(
         back_populates="resultados_aprendizaje"
     )
-
-    competencia: Optional[Competencia] = Relationship(
-        back_populates="resultados_aprendizaje"
-    )
-
 
 # =========================================================
 # ASISTENCIA
@@ -470,50 +474,83 @@ class Asistencia(SQLModel, table=True):
 
     __table_args__ = (
         ForeignKeyConstraint(
-            ["Id_Fic", "Id_Ins", "Id_Comp", "Dia"],
-            ["Ficha_Instructor.Id_Fic", "Ficha_Instructor.Id_Ins", "Ficha_Instructor.Id_Comp", "Ficha_Instructor.Dia"],
+            ["Id_Fic", "Id_Ins", "Id_RA", "Dia"],
+            [
+                "Ficha_Instructor.Id_Fic",
+                "Ficha_Instructor.Id_Ins",
+                "Ficha_Instructor.Id_RA",
+                "Ficha_Instructor.Dia",
+            ],
+            name="fk_asistencia_ficha_instructor",
         ),
         UniqueConstraint(
-            "Fec_Asi", "Id_Apr", "Id_Fic", "Id_Ins", "Id_Comp", "Dia",
-            name="uq_asistencia_sesion"
+            "Fec_Asi",
+            "Id_Apr",
+            "Id_Fic",
+            "Id_Ins",
+            "Id_RA",
+            "Dia",
+            name="uq_asistencia_sesion",
         ),
-        Index("ix_asistencia_apr_fic_fec", "Id_Apr", "Id_Fic", "Fec_Asi"),
-        {"extend_existing": True}
+        Index(
+            "ix_asistencia_apr_fic_fec",
+            "Id_Apr",
+            "Id_Fic",
+            "Fec_Asi",
+        ),
+        {"extend_existing": True},
     )
 
-    Id_Asi: Optional[int] = Field(default=None, primary_key=True)
+    Id_Asi: Optional[int] = Field(
+        default=None,
+        primary_key=True,
+    )
+
     Fec_Asi: date = Field(nullable=False)
+
     Es_Asi: EstadoAsistencia = Field(
         sa_column=Column(
             SQLEnum(
                 EstadoAsistencia,
                 values_callable=lambda enum_class: [
                     member.value for member in enum_class
-                ]
+                ],
             ),
-            nullable=False
+            nullable=False,
         )
     )
-    Id_Apr: int = Field(foreign_key="Aprendiz.Id_Apr", nullable=False)
+
+    Id_Apr: int = Field(
+        foreign_key="Aprendiz.Id_Apr",
+        nullable=False,
+    )
 
     Id_Fic: int = Field(nullable=False)
     Id_Ins: int = Field(nullable=False)
-    Id_Comp: int = Field(nullable=False)
+    Id_RA: int = Field(nullable=False)
 
     Dia: DiaSemana = Field(
         sa_column=Column(
             SQLEnum(
                 DiaSemana,
-                values_callable=lambda enum_class: [member.value for member in enum_class]
+                values_callable=lambda enum_class: [
+                    member.value for member in enum_class
+                ],
             ),
-            nullable=False
+            nullable=False,
         )
     )
 
-    Fec_Cre: datetime = Field(default_factory=datetime.utcnow)
+    Fec_Cre: datetime = Field(
+        default_factory=datetime.utcnow,
+        nullable=False,
+    )
 
-    aprendiz: Optional[Aprendiz] = Relationship(back_populates="asistencias")
-    ficha_instructor: Optional[FichaInstructor] = Relationship()
+    aprendiz: Optional["Aprendiz"] = Relationship(
+        back_populates="asistencias"
+    )
+
+    ficha_instructor: Optional["FichaInstructor"] = Relationship()
 
 # =========================================================
 # NOTIFICACION

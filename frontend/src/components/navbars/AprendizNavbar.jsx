@@ -45,11 +45,16 @@ export default function CoordinadorNavbar({ user }) {
 
         <div className="collapse navbar-collapse" id="navAprendiz">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
-            <li className="nav-item">
-              <Link className="nav-link active px-3 py-2" to="/aprendiz">
-                Inicio
-              </Link>
-            </li>
+              <li className="nav-item">
+                <Link className="nav-link active px-3 py-2" to="/instructor">
+                  Inicio
+                </Link>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link active px-3 py-2" href="/Aprendiz/AprendizAsistencia">
+                  Revisar Asistencia
+                </a>
+              </li>
           </ul>
 
           <div className="dropdown">
