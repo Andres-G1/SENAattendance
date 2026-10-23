@@ -61,32 +61,36 @@ export default function CambiarContrasena() {
   };
 
   return (
-    <main className="config-page">
-      <section className="config-card">
-        <p className="config-eyebrow">Configuración de cuenta</p>
-        <h2>Cambiar contraseña</h2>
-        <p className="config-description">
-        Usa los mismos datos del usuario que inició sesión.
-        </p>
+    <div className="account-page">
+      <main className="config-page">
+        <section className="config-card">
+          <p className="config-eyebrow">Configuración de cuenta</p>
+          <h2>Cambiar contraseña</h2>
+          <p className="config-description">
+            Usa los mismos datos del usuario que inició sesión.
+          </p>
 
-        <div className="session-details" aria-label="Datos de sesión">
-          <span>Cuenta autenticada</span>
-          <span>Datos protegidos</span>
-        </div>
+          <div className="session-details" aria-label="Datos de sesión">
+            <span>Cuenta autenticada</span>
+            <span>Datos protegidos</span>
+          </div>
 
-        <form onSubmit={onSubmit} className="config-form">
-          <label>Contraseña actual<input type="password" name="contraseña_actual" value={form.contraseña_actual} onChange={onChange} placeholder="Ingresa tu contraseña actual" required /></label>
+          <form onSubmit={onSubmit} className="config-form">
+            <label className="config-field-wide">Contraseña actual<input type="password" name="contraseña_actual" value={form.contraseña_actual} onChange={onChange} placeholder="Ingresa tu contraseña actual" autoComplete="current-password" required /></label>
 
-          <label>Nueva contraseña<input type="password" name="contraseña_nueva" value={form.contraseña_nueva} onChange={onChange} placeholder="Ingresa una nueva contraseña" required /></label>
+            <label className="config-field-wide">Nueva contraseña<input type="password" name="contraseña_nueva" value={form.contraseña_nueva} onChange={onChange} placeholder="Ingresa una nueva contraseña" autoComplete="new-password" required /></label>
 
-          <button type="submit" disabled={loading}>{loading ? "Guardando..." : "Actualizar contraseña"}</button>
-        </form>
+            <div className="config-actions config-field-wide">
+              <button type="submit" disabled={loading}>{loading ? "Guardando..." : "Actualizar contraseña"}</button>
+            </div>
+          </form>
 
-        {error ? <p className="form-message form-error">{error}</p> : null}
-        {success ? <p className="form-message form-success">{success}</p> : null}
+          {error ? <p className="form-message form-error" role="alert">{error}</p> : null}
+          {success ? <p className="form-message form-success" role="status">{success}</p> : null}
 
-        <Link className="back-link" to="/">Volver al inicio de sesión</Link>
-      </section>
-    </main>
+          <Link className="back-link" to="/">Volver al inicio de sesión</Link>
+        </section>
+      </main>
+    </div>
   );
 }

@@ -65,7 +65,7 @@ export default function CarreraAlter() {
     <main className="container my-5">
       <div className="page-card card shadow-sm">
         <div className="card-header bg-warning text-dark py-3">
-          <h1 className="h5 mb-0">Modificar Carrera</h1>
+          <h1 className="h5 mb-0">Modificar programa de formación</h1>
           <small className="text-muted">{form.Nom_Car}</small>
         </div>
         <div className="card-body p-4">
@@ -73,7 +73,7 @@ export default function CarreraAlter() {
             <div className="row g-3">
               <div className="col-md-12">
                 <label htmlFor="Nom_Car" className="form-label">
-                  Nombre de Carrera
+                  Nombre del programa de formación
                 </label>
                 <input
                   type="text"

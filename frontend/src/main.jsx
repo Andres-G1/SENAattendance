@@ -6,6 +6,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 
 import './styles/base.css'
 import './styles/navbar.css'
+import './styles/app-theme.css'
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

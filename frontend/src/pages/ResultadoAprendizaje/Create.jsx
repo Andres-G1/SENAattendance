@@ -185,7 +185,7 @@ export default function CrearResultadoAprendizaje() {
               <div className="d-flex gap-2">
                 <button
                   type="submit"
-                  className="btn btn-success"
+                  className="btn btn-success action-create"
                   disabled={cargando || competencias.length === 0}
                 >
                   {cargando

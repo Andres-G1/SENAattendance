@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import AprendizNavbar from "/src/components/navbars/AprendizNavbar.jsx";
+import DateCalendar from "/src/components/DateCalendar.jsx";
 import useCurrentDate from "/src/hooks/useCurrentDate.js";
 
 const API_BASE = "http://localhost:8000";
@@ -24,31 +25,31 @@ function formatearFecha(fecha) {
 
 function obtenerEstado(estado) {
   if (!estado) {
-    return { texto: "Sin estado", clase: "bg-secondary-subtle text-secondary" };
+    return { texto: "Sin estado", clase: "attendance-status--unknown" };
   }
 
   const normalizado = estado.toLowerCase();
 
   if (normalizado.includes("presente")) {
-    return { texto: "Presente", clase: "bg-success-subtle text-success" };
+    return { texto: "Presente", clase: "attendance-status--present" };
   }
 
   if (normalizado.includes("retardo") || normalizado.includes("retraso")) {
     return {
       texto: "Retardo",
-      clase: "bg-warning-subtle text-warning-emphasis",
+      clase: "attendance-status--late",
     };
   }
 
   if (normalizado.includes("excusa")) {
-    return { texto: "Excusa", clase: "bg-info-subtle text-info-emphasis" };
+    return { texto: "Excusa", clase: "attendance-status--excused" };
   }
 
   if (normalizado.includes("falla") || normalizado.includes("inasistencia")) {
-    return { texto: "Falla", clase: "bg-danger-subtle text-danger" };
+    return { texto: "Falla", clase: "attendance-status--absent" };
   }
 
-  return { texto: estado, clase: "bg-secondary-subtle text-secondary" };
+  return { texto: estado, clase: "attendance-status--unknown" };
 }
 
 // =========================================================
@@ -316,14 +317,14 @@ export default function AprendizAsistencia() {
                       "linear-gradient(#006b18 0%, #00851d 55%, #0a9f2e 100%)",
                   }}
                 >
-                  <div className="d-flex align-items-center justify-content-between">
+                  <div className="attendance-date-controls d-flex align-items-center justify-content-between">
                     <button
                       type="button"
-                      className="btn btn-outline-light"
+                      className="btn btn-date-nav btn-date-nav--previous"
                       onClick={() => cambiarDia(-1)}
                       disabled={diaActual === 0}
                     >
-                      ← Más reciente
+                      Más reciente
                     </button>
 
                     <div className="text-center text-white">
@@ -338,11 +339,11 @@ export default function AprendizAsistencia() {
 
                     <button
                       type="button"
-                      className="btn btn-outline-light"
+                      className="btn btn-date-nav btn-date-nav--next"
                       onClick={() => cambiarDia(1)}
                       disabled={diaActual === diasDisponibles.length - 1}
                     >
-                      Más antiguo →
+                      Más antiguo
                     </button>
                   </div>
                 </div>
@@ -352,7 +353,7 @@ export default function AprendizAsistencia() {
                 <div className="mb-4">
                   <button
                     type="button"
-                    className="btn btn-sm btn-outline-success"
+                    className="attendance-calendar-toggle btn btn-sm btn-outline-success"
                     onClick={() => {
                       setMostrarCalendario((prev) => !prev);
                       setErrorCalendario("");
@@ -360,33 +361,20 @@ export default function AprendizAsistencia() {
                   >
                     {mostrarCalendario
                       ? "Ocultar calendario"
-                      : "📅 Elegir fecha desde el calendario"}
+                      : "Elegir fecha desde el calendario"}
                   </button>
 
                   {mostrarCalendario && (
-                    <div
-                      className="rounded-3 p-3 mt-3"
-                      style={{
-                        border: "1px dashed #00851d",
-                        backgroundColor: "#f8fdf5",
-                      }}
-                    >
-                      <label
-                        htmlFor="fecha-calendario"
-                        className="form-label fw-semibold mb-1"
-                      >
+                    <div className="attendance-calendar-panel rounded-3 p-3 mt-3">
+                      <p className="form-label fw-semibold mb-1">
                         Fecha de la asistencia
-                      </label>
+                      </p>
 
-                      <input
-                        id="fecha-calendario"
-                        type="date"
-                        className="form-control"
-                        style={{ maxWidth: 240 }}
+                      <DateCalendar
                         value={fechaSeleccionada || ""}
-                        min={diasDisponibles[diasDisponibles.length - 1]}
-                        max={diasDisponibles[0]}
-                        onChange={(e) => elegirFechaCalendario(e.target.value)}
+                        availableDates={diasDisponibles}
+                        ariaLabel="Fechas con asistencia registrada"
+                        onChange={elegirFechaCalendario}
                       />
 
                       <div className="form-text">

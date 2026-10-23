@@ -81,10 +81,10 @@ export default function Administradores() {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="h5 mb-0">Lista de Administradores</h2>
             <button
-              className="btn btn-success btn-sm"
+              className="btn btn-success btn-sm action-create"
               onClick={() => navigate("/administrador/administradores/crear")}
             >
-              + Crear nuevo usuario
+              Crear nuevo usuario
             </button>
           </div>
 

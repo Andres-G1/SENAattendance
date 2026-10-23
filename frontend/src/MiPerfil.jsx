@@ -50,32 +50,53 @@ export default function MiPerfil() {
     <div className="account-page">
       <CuentaNavbar role={role} name={firstName} />
       <main className="config-page">
-      <section className="config-card profile-card">
-        <header className="profile-header">
-          <div className="profile-avatar">{initials}</div>
-          <div>
-            <h2>Mi perfil</h2>
-            <p className="config-description">Aquí puedes revisar tus datos principales y tu información de acceso.</p>
+        <section className="config-card profile-card">
+          <header className="profile-header">
+            <div className="profile-avatar">{initials}</div>
+            <div className="profile-heading">
+              <h2>Mi perfil</h2>
+              <p className="config-description">
+                Aquí puedes revisar tus datos principales y tu información de
+                acceso.
+              </p>
+            </div>
+            <span className="role-badge">{role}</span>
+          </header>
+
+          <div className="profile-details" aria-label="Datos del perfil">
+            <div>
+              <span>Nombre completo</span>
+              <strong>{profile.nombreCompleto}</strong>
+            </div>
+            <div>
+              <span>Tipo de documento</span>
+              <strong>{profile.documento}</strong>
+            </div>
+            <div>
+              <span>Correo electrónico</span>
+              <strong>{profile.correo}</strong>
+            </div>
+            <div>
+              <span>Número de identificación</span>
+              <strong>{profile.numero}</strong>
+            </div>
+            {role.toLowerCase() === "aprendiz" && (
+              <div>
+                <span>Ficha o token</span>
+                <strong>{profile.ficha}</strong>
+              </div>
+            )}
           </div>
-        </header>
 
-        <div className="profile-details" aria-label="Datos del perfil">
-          <div><span>Nombre completo</span><strong>{profile.nombreCompleto}</strong></div>
-          <div><span>Tipo de documento</span><strong>{profile.documento}</strong></div>
-          <div><span>Correo electrónico</span><strong>{profile.correo}</strong></div>
-          <div><span>Número de identificación</span><strong>{profile.numero}</strong></div>
-          {role.toLowerCase() === "aprendiz" && (
-            <div><span>Ficha o token</span><strong>{profile.ficha}</strong></div>
-          )}
-        </div>
-
-        <div className="profile-actions profile-actions-end">
-          <Link className="config-action" to="/config/modulo_config">
-            Actualizar datos
+          <div className="profile-actions profile-actions-end">
+            <Link className="config-action" to="/config/modulo_config">
+              Actualizar datos
+            </Link>
+          </div>
+          <Link className="profile-back-link" to={dashboard}>
+            Volver al inicio
           </Link>
-        </div>
-        <Link className="profile-back-link" to={dashboard}>Volver al inicio</Link>
-      </section>
+        </section>
       </main>
     </div>
   );

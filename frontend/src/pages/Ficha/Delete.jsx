@@ -77,7 +77,7 @@ export default function Delete() {
         <div className="card-body p-4">
           <p className="lead">¿Estás seguro de que deseas eliminar este token?</p>
           <div className="mb-4">
-            <strong>Carrera:</strong> {carrera?.Nom_Car}
+            <strong>Programa de formación:</strong> {carrera?.Nom_Car}
             <br />
             <strong>Token:</strong> {ficha?.Num_Fic}
           </div>

@@ -100,10 +100,10 @@ function CargaPorRuta({ children, ms = 1000 }) {
   }, [location.pathname, ms, sinCarga]);
 
   return (
-    <>
+    <div className={sinCarga ? undefined : "app-theme"}>
       {cargando && !sinCarga && <PantallaCarga texto="Cargando..." />}
       {children}
-    </>
+    </div>
   );
 }
 

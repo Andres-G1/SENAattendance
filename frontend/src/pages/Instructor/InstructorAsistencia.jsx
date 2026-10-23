@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import InstructorNavbar from "/src/components/navbars/InstructorNavbar.jsx";
+import DateCalendar from "/src/components/DateCalendar.jsx";
 
 const API_BASE = "http://localhost:8000";
 
@@ -9,10 +10,10 @@ const API_BASE = "http://localhost:8000";
 // =====================================================
 
 const ESTADOS = [
-  { valor: "presente", nombre: "Presente", color: "#198754", texto: "#fff" },
-  { valor: "retardo", nombre: "Retardo", color: "#ffc107", texto: "#000" },
-  { valor: "falla", nombre: "Falla", color: "#dc3545", texto: "#fff" },
-  { valor: "excusa", nombre: "Excusa", color: "#0dcaf0", texto: "#000" },
+  { valor: "presente", nombre: "Presente", color: "#00851d", texto: "#fff" },
+  { valor: "retardo", nombre: "Retardo", color: "#8a5a00", texto: "#fff" },
+  { valor: "falla", nombre: "Falla", color: "#b42332", texto: "#fff" },
+  { valor: "excusa", nombre: "Excusa", color: "#57728e", texto: "#fff" },
 ];
 
 const A_BACKEND = {
@@ -34,9 +35,9 @@ const DESDE_BACKEND = {
 // =====================================================
 
 const COLOR_SEMAFORO = {
-  ROJO: { fondo: "#dc3545", texto: "#fff" },
-  AMARILLO: { fondo: "#ffc107", texto: "#000" },
-  VERDE: { fondo: "#198754", texto: "#fff" },
+  ROJO: { fondo: "#b42332", texto: "#fff" },
+  AMARILLO: { fondo: "#8a5a00", texto: "#fff" },
+  VERDE: { fondo: "#00851d", texto: "#fff" },
 };
 
 // =====================================================
@@ -796,10 +797,10 @@ export default function InstructorAsistencia() {
             <div>
               <button
                 type="button"
-                className="btn btn-link text-decoration-none px-0 mb-3"
+                className="btn btn-secondary mb-3"
                 onClick={volverAFichas}
               >
-                ← Volver a mis fichas
+                Volver a mis fichas
               </button>
 
               <div
@@ -911,13 +912,13 @@ export default function InstructorAsistencia() {
             <div>
               <button
                 type="button"
-                className="btn btn-link text-decoration-none px-0 mb-3"
+                className="btn btn-secondary mb-3"
                 onClick={() => {
                   setSelectedAsignacion(null);
                   limpiarClase();
                 }}
               >
-                ← Volver a las clases
+                Volver a las clases
               </button>
 
               {/* INFORMACIÓN + BARRA DE FECHA */}
@@ -976,13 +977,13 @@ export default function InstructorAsistencia() {
                       "linear-gradient(#006b18 0%, #00851d 55%, #0a9f2e 100%)",
                   }}
                 >
-                  <div className="d-flex align-items-center justify-content-between gap-2">
+                  <div className="attendance-date-controls d-flex align-items-center justify-content-between gap-2">
                     <button
                       type="button"
-                      className="btn btn-outline-light"
+                      className="btn btn-date-nav btn-date-nav--previous"
                       onClick={() => cambiarDia(-1)}
                     >
-                      ← Anterior
+                      Anterior
                     </button>
 
                     <div className="text-center text-white flex-grow-1">
@@ -997,10 +998,10 @@ export default function InstructorAsistencia() {
 
                     <button
                       type="button"
-                      className="btn btn-outline-light"
+                      className="btn btn-date-nav btn-date-nav--next"
                       onClick={() => cambiarDia(1)}
                     >
-                      Siguiente →
+                      Siguiente
                     </button>
                   </div>
                 </div>
@@ -1017,38 +1018,30 @@ export default function InstructorAsistencia() {
                 <div className="mt-3">
                   <button
                     type="button"
-                    className="btn btn-sm btn-outline-success"
+                    className="attendance-calendar-toggle btn btn-sm btn-outline-success"
                     onClick={() => setMostrarCalendario((prev) => !prev)}
                   >
                     {mostrarCalendario
                       ? "Ocultar calendario"
-                      : "📅 Elegir fecha desde el calendario"}
+                      : "Elegir fecha desde el calendario"}
                   </button>
 
                   {mostrarCalendario && (
-                    <div
-                      className="rounded-3 p-3 mt-3"
-                      style={{
-                        border: "1px dashed #00851d",
-                        backgroundColor: "#f8fdf5",
-                      }}
-                    >
-                      <label
-                        htmlFor="fecha-calendario"
-                        className="form-label fw-semibold mb-1"
-                      >
+                    <div className="attendance-calendar-panel rounded-3 p-3 mt-3">
+                      <p className="form-label fw-semibold mb-1">
                         Fecha de la clase
-                      </label>
+                      </p>
 
-                      <input
-                        id="fecha-calendario"
-                        type="date"
-                        className="form-control"
-                        style={{ maxWidth: 240 }}
+                      <DateCalendar
                         value={fecha}
                         min={limitesActuales.inicio || undefined}
                         max={limitesActuales.fin || undefined}
-                        onChange={(e) => elegirFechaCalendario(e.target.value)}
+                        isDateAllowed={(date) =>
+                          normalizarDia(obtenerDiaSemana(date)) ===
+                          normalizarDia(selectedAsignacion.Dia)
+                        }
+                        ariaLabel="Seleccionar fecha de clase"
+                        onChange={elegirFechaCalendario}
                       />
 
                       <div className="form-text">
@@ -1145,7 +1138,7 @@ export default function InstructorAsistencia() {
                                 {semaforo && semaforo.deserta_por_racha && (
                                   <div
                                     className="small mt-1 fw-semibold"
-                                    style={{ color: "#dc3545" }}
+                                    style={{ color: "#142d4d" }}
                                   >
                                     3 fallas seguidas — riesgo de deserción
                                   </div>
@@ -1156,7 +1149,7 @@ export default function InstructorAsistencia() {
                                   semaforo.deserta_por_acumulado && (
                                     <div
                                       className="small mt-1 fw-semibold"
-                                      style={{ color: "#dc3545" }}
+                                      style={{ color: "#142d4d" }}
                                     >
                                       Fallas acumuladas al máximo — riesgo de
                                       deserción
@@ -1186,9 +1179,9 @@ export default function InstructorAsistencia() {
                                         style={{
                                           backgroundColor: activo
                                             ? estado.color
-                                            : "#f1f1f1",
-                                          color: activo ? estado.texto : "#333",
-                                          border: "1px solid #ddd",
+                                            : "#f3f6fa",
+                                          color: activo ? estado.texto : "#27364b",
+                                          border: `1px solid ${activo ? estado.color : "#d5dee8"}`,
                                           fontWeight: activo ? "600" : "400",
                                         }}
                                       >

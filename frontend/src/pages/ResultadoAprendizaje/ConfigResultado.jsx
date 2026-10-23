@@ -77,12 +77,12 @@ export default function ResultadosAprendizaje() {
             <div className="d-flex gap-2">
               <button
                 type="button"
-                className="btn btn-success btn-sm"
+                className="btn btn-success btn-sm action-create"
                 onClick={() =>
                   navigate("/administrador/resultados-aprendizaje/crear")
                 }
               >
-                + Nuevo Resultado
+                Nuevo Resultado
               </button>
             </div>
           </div>

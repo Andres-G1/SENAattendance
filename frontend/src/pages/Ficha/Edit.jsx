@@ -34,7 +34,7 @@ export default function Edit() {
         fetch(`${API_URL}/fichas/${id}`),
       ]);
 
-      if (!resCarreras.ok) throw new Error("No se pudieron cargar las carreras");
+      if (!resCarreras.ok) throw new Error("No se pudieron cargar los programas de formación");
       if (!resFicha.ok) throw new Error("No se pudo cargar la ficha");
 
       const dataCarreras = await resCarreras.json();
@@ -108,7 +108,7 @@ export default function Edit() {
             <div className="row g-3">
               <div className="col-md-12">
                 <label htmlFor="career" className="form-label">
-                  Carrera
+                  Programa de formación
                 </label>
                 <select
                   name="Id_Car"

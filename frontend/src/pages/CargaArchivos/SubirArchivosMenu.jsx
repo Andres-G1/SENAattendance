@@ -18,8 +18,8 @@ const CATEGORIES = [
   },
   {
     key: "carreras",
-    label: "Carreras",
-    hint: "Listado plano de programas / carreras (.csv, .xlsx)",
+    label: "Programas de formación",
+    hint: "Listado plano de programas de formación (.csv, .xlsx)",
   },
   {
     key: "competencias",
@@ -206,7 +206,7 @@ export default function SubirArchivosMenu() {
             <div>
               <h2 className="fw-bold text-dark h4 mb-1">Cargar archivos planos</h2>
               <p className="text-muted small mb-0">
-                Sube los listados de fichas, carreras o competencias en CSV o Excel.
+                Sube los listados de fichas, programas de formación o competencias en CSV o Excel.
               </p>
             </div>
 

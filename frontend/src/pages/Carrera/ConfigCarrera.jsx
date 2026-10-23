@@ -34,17 +34,17 @@ export default function CarreraList() {
       <main className="container my-4" style={{ maxWidth: 950 }}>
         <div className="card border-0 shadow-sm p-4 bg-white rounded-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="fw-bold text-dark h5 mb-0">Lista de Carreras</h2>
-            <Link to="/carreras/nueva" className="btn btn-success btn-sm rounded-3 fw-semibold">
-              + Nueva Carrera
+            <h2 className="fw-bold text-dark h5 mb-0">Programas de formación</h2>
+            <Link to="/carreras/nueva" className="btn btn-success btn-sm rounded-3 fw-semibold action-create">
+              Nuevo programa de formación
             </Link>
           </div>
 
-          {loading && <p className="text-muted text-center py-4">Cargando carreras...</p>}
+          {loading && <p className="text-muted text-center py-4">Cargando programas de formación...</p>}
 
           {!loading && error && (
             <p className="text-danger text-center py-4">
-              Error al cargar las carreras: {error}
+              Error al cargar los programas de formación: {error}
             </p>
           )}
 
@@ -78,7 +78,7 @@ export default function CarreraList() {
                 ))
               ) : (
                 <li className="list-group-item text-muted text-center py-4 px-0">
-                  No hay carreras registradas
+                  No hay programas de formación registrados
                 </li>
               )}
             </ul>

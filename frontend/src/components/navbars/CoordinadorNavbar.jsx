@@ -73,7 +73,7 @@ export default function CoordinadorNavbar({ user }) {
                 </li>
                 <li>
                   <Link className="dropdown-item" to="/administrador/carreras">
-                    Gestionar Carreras
+                    Gestionar Programas de formación
                   </Link>
                 </li>
                 <li>
@@ -91,7 +91,7 @@ export default function CoordinadorNavbar({ user }) {
                 </li>
                 <li>
                   <Link className="dropdown-item" to="/fichas/subir-archivos">
-                    Cargar archivos planos (Fichas/Carreras/Competencias)
+                    Cargar archivos planos (Fichas/Programas de formación/Competencias)
                   </Link>
                 </li>
               </ul>

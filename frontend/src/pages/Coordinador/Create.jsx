@@ -65,7 +65,7 @@ export default function CrearAprendiz() {
         } else if (err.response?.status === 403) {
           setError("No tienes permisos para crear aprendices.");
         } else {
-          setError("No se pudieron cargar carreras y fichas.");
+          setError("No se pudieron cargar los programas de formación y las fichas.");
         }
       } finally {
         setCargando(false);
@@ -212,7 +212,7 @@ export default function CrearAprendiz() {
       <main className="container my-5">
         <div className="card shadow-sm p-4">
           <p className="mb-0">
-            Cargando carreras y fichas...
+            Cargando programas de formación y fichas...
           </p>
         </div>
       </main>
@@ -423,7 +423,7 @@ export default function CrearAprendiz() {
                   htmlFor="Id_Car"
                   className="form-label"
                 >
-                  Carrera
+                  Programa de formación
                 </label>
 
                 <select
@@ -436,7 +436,7 @@ export default function CrearAprendiz() {
                 >
 
                   <option value="">
-                    -- Selecciona una carrera --
+                    -- Selecciona un programa de formación --
                   </option>
 
                   {carreras.map((carrera) => (
@@ -477,9 +477,9 @@ export default function CrearAprendiz() {
 
                   <option value="">
                     {!formulario.Id_Car
-                      ? "-- Primero selecciona una carrera --"
+                      ? "-- Primero selecciona un programa de formación --"
                       : fichasFiltradas.length === 0
-                        ? "-- No hay fichas para esta carrera --"
+                        ? "-- No hay fichas para este programa de formación --"
                         : "-- Selecciona una ficha --"
                     }
                   </option>
@@ -520,7 +520,7 @@ export default function CrearAprendiz() {
 
               <button
                 type="submit"
-                className="btn btn-success"
+                className="btn btn-success action-create"
                 disabled={guardando}
               >
                 {guardando

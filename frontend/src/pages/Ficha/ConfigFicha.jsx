@@ -65,10 +65,10 @@ export default function FichaList() {
 
             <div className="d-flex gap-2">
               <button
-                className="btn btn-success btn-sm"
+                className="btn btn-success btn-sm action-create"
                 onClick={() => navigate("/fichas/nueva")}
               >
-                + Nueva Ficha 
+                Nueva Ficha
               </button>
             </div>
           </div>
@@ -76,7 +76,7 @@ export default function FichaList() {
 
         <div className="card p-4 shadow-sm">
           <div className="mb-4">
-            <h3 className="h5 mb-0 text-secondary">Lista de Fichas por Carrera</h3>
+            <h3 className="h5 mb-0 text-secondary">Lista de Fichas por programa de formación</h3>
           </div>
 
           {fichasPorCarrera.length > 0 ? (
@@ -119,7 +119,7 @@ export default function FichaList() {
                     </ul>
                   ) : (
                     <p className="text-muted mb-0">
-                      No hay fichas en esta carrera
+                      No hay fichas en este programa de formación
                     </p>
                   )}
                 </div>
@@ -127,7 +127,7 @@ export default function FichaList() {
             ))
           ) : (
             <div className="alert alert-info" role="alert">
-              No hay carreras registradas
+              No hay programas de formación registrados
             </div>
           )}
         </div>

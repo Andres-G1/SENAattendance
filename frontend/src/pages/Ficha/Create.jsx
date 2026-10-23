@@ -25,7 +25,7 @@ export default function Create() {
   async function cargarCarreras() {
     try {
       const res = await fetch(`${API_URL}/carreras/`);
-      if (!res.ok) throw new Error("No se pudieron cargar las carreras");
+      if (!res.ok) throw new Error("No se pudieron cargar los programas de formación");
       const data = await res.json();
       setCarreras(data);
     } catch (err) {
@@ -81,7 +81,7 @@ export default function Create() {
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="career" className="form-label">
-                Selecciona una Carrera
+                Selecciona un programa de formación
               </label>
               <select
                 name="Id_Car"
@@ -92,7 +92,7 @@ export default function Create() {
                 required
               >
                 <option value="" disabled>
-                  -- Selecciona una carrera --
+                  -- Selecciona un programa de formación --
                 </option>
                 {carreras.map((c) => (
                   <option key={c.Id_Car} value={c.Id_Car}>
@@ -157,7 +157,7 @@ export default function Create() {
             )}
 
             <div className="d-flex gap-2">
-              <button type="submit" className="btn btn-success">
+              <button type="submit" className="btn btn-success action-create">
                 Crear Ficha
               </button>
               <button

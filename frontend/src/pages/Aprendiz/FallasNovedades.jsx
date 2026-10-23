@@ -5,15 +5,15 @@ const API_BASE = "http://localhost:8000";
 const ETIQUETAS_TIPO = {
   falla: {
     texto: "Falla",
-    color: "#dc3545",
+    color: "#b42332",
   },
   excusa: {
     texto: "Excusa",
-    color: "#0dcaf0",
+    color: "#57728e",
   },
   retardo: {
     texto: "Retardo",
-    color: "#ffc107",
+    color: "#8a5a00",
   },
 };
 
@@ -244,7 +244,7 @@ export default function FallasNovedades({
               <div
                 className="rounded-3 p-3 text-center"
                 style={{
-                  backgroundColor: "#f8d7da",
+                  backgroundColor: "#fcebed",
                 }}
               >
                 <div className="fs-4 fw-bold text-danger">
@@ -262,13 +262,13 @@ export default function FallasNovedades({
               <div
                 className="rounded-3 p-3 text-center"
                 style={{
-                  backgroundColor: "#cff4fc",
+                  backgroundColor: "#edf3f9",
                 }}
               >
                 <div
                   className="fs-4 fw-bold"
                   style={{
-                    color: "#0dcaf0",
+                    color: "#57728e",
                   }}
                 >
                   {totalExcusas}
@@ -285,7 +285,7 @@ export default function FallasNovedades({
               <div
                 className="rounded-3 p-3 text-center"
                 style={{
-                  backgroundColor: "#fff3cd",
+                  backgroundColor: "#fff4d6",
                 }}
               >
                 <div
@@ -411,10 +411,7 @@ export default function FallasNovedades({
                       style={{
                         backgroundColor:
                           etiqueta.color,
-                        color:
-                          tipo === "retardo"
-                            ? "#212529"
-                            : "#fff",
+                        color: "#fff",
                       }}
                     >
                       {etiqueta.texto}

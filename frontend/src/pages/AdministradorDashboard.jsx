@@ -14,7 +14,7 @@ export default function AdministradorDashboard() {
     <>
       <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
 
-      <div className="bg-light min-vh-100 py-5">
+      <div className="coordinator-dashboard bg-light min-vh-100 py-5">
         <main className="container" style={{ maxWidth: 950, display: 'flex', flexDirection: 'column' }}>
 
           {/* =====================================================
@@ -44,7 +44,7 @@ export default function AdministradorDashboard() {
 
             {/* ---------------- GESTIÓN DE USUARIOS ---------------- */}
             <div className="col-12 col-md-6">
-              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
+              <div className="coordinator-dashboard-card card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
 
                 <div className="d-flex align-items-center gap-3 mb-3">
 
@@ -79,7 +79,7 @@ export default function AdministradorDashboard() {
                   Registro de aprendices, instructores y coordinadores del sistema.
                 </p>
 
-                <div className="d-flex flex-column gap-2 mt-auto">
+                <div className="coordinator-dashboard-actions d-flex flex-column gap-2 mt-auto">
 
                   <Link
                     to="/administrador/aprendices"
@@ -110,7 +110,7 @@ export default function AdministradorDashboard() {
             {/* ---------------- CARGA DE ARCHIVOS ---------------- */}
             <div className="col-12 col-md-6">
 
-              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4 border border-primary-subtle">
+              <div className="coordinator-dashboard-card card h-100 border-0 shadow-sm p-4 bg-white rounded-4 border border-primary-subtle">
 
                 <div className="d-flex align-items-center gap-3 mb-3">
 
@@ -153,8 +153,6 @@ export default function AdministradorDashboard() {
                 >
                   Subir Documento / Excel
                 </Link>
-                  <p className="text-muted small mb-4">
-                </p>                 
               </div>
             </div>
 
@@ -173,7 +171,7 @@ export default function AdministradorDashboard() {
             {/* ---------------- GESTIÓN DE FICHAS ---------------- */}
             <div className="col-12 col-md-6">
 
-              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
+              <div className="coordinator-dashboard-card card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
 
                 <div className="d-flex align-items-center gap-3 mb-3">
 
@@ -205,10 +203,10 @@ export default function AdministradorDashboard() {
                 </div>
 
                 <p className="text-muted small mb-4">
-                  Registro de fichas, carreras y competencias del programa.
+                  Registro de fichas, programas de formación y competencias.
                 </p>
 
-                <div className="d-flex flex-column gap-2 mt-auto">
+                <div className="coordinator-dashboard-actions d-flex flex-column gap-2 mt-auto">
 
                   <Link
                     to="/administrador/fichas"
@@ -221,7 +219,7 @@ export default function AdministradorDashboard() {
                     to="/administrador/carreras"
                     className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
                   >
-                    Gestionar Carreras
+                    Gestionar Programas de formación
                   </Link>
 
                   <Link
@@ -246,7 +244,7 @@ export default function AdministradorDashboard() {
             {/* ---------------- CARGA DE ARCHIVOS PLANOS (FICHAS/CARRERAS/COMPETENCIAS) ---------------- */}
             <div className="col-12 col-md-6">
 
-              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4 border border-primary-subtle">
+              <div className="coordinator-dashboard-card card h-100 border-0 shadow-sm p-4 bg-white rounded-4 border border-primary-subtle">
 
                 <div className="d-flex align-items-center gap-3 mb-3">
 
@@ -279,7 +277,7 @@ export default function AdministradorDashboard() {
                 </div>
 
                 <p className="text-muted small mb-4">
-                  Carga de listados planos de fichas, carreras y competencias.
+                  Carga de listados planos de fichas, programas de formación y competencias.
                 </p>
 
                 <Link
@@ -304,7 +302,7 @@ export default function AdministradorDashboard() {
 
           <div className="row g-4 mb-5" style={{ order: 3 }}>
             <div className="col-12 col-md-6">
-              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
+              <div className="coordinator-dashboard-card card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
 
                 <div className="d-flex align-items-center gap-3 mb-3">
 
@@ -362,7 +360,7 @@ export default function AdministradorDashboard() {
 
           <div className="row g-4 mb-5" style={{ order: 3 }}>
             <div className="col-12 col-md-6">
-              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
+              <div className="coordinator-dashboard-card card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
 
                 <div className="d-flex align-items-center gap-3 mb-3">
 

@@ -50,10 +50,10 @@ export default function ConfigCompetencia() {
             <h2 className="h5 mb-0">Lista de Competencias</h2>
 
             <button
-              className="btn btn-success btn-sm"
+              className="btn btn-success btn-sm action-create"
               onClick={() => navigate("/competencias/nueva")}
             >
-              + Crear Competencia
+              Crear Competencia
             </button>
           </div>
 

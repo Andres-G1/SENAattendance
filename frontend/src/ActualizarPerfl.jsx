@@ -64,6 +64,10 @@ export default function ActualizarPerfil() {
         throw new Error("Debes enviar al menos un campo para actualizar");
       }
 
+      if (form.contraseña_nueva.trim() && !form.contraseña_actual) {
+        throw new Error("Ingresa tu contraseña actual para cambiarla");
+      }
+
       if (Object.keys(payload).length > 0) {
         const path = `${API_URL}/users/${form.role}/${Number(form.user_id)}/perfil`;
         const res = await fetch(path, {
@@ -104,37 +108,107 @@ export default function ActualizarPerfil() {
     <div className="account-page">
       <CuentaNavbar role={storedRole} name={storedName} />
       <main className="config-page">
-      <section className="config-card config-card-edit">
-        <header className="config-header">
-          <div>
-            <h2>Configuración de cuenta</h2>
-            <p className="config-description">Actualiza tus datos de acceso con seguridad y claridad.</p>
-          </div>
-        </header>
+        <section className="config-card config-card-edit">
+          <header className="config-header">
+            <div>
+              <h2>Configuración de cuenta</h2>
+              <p className="config-description">
+                Actualiza tus datos de acceso con seguridad y claridad.
+              </p>
+            </div>
+          </header>
 
-        <form onSubmit={onSubmit} className="config-form">
-          <label>Nombre completo<input name="nombre" value={form.nombre} onChange={onChange} placeholder="Tu nombre" /></label>
+          <form onSubmit={onSubmit} className="config-form">
+            <h3 className="config-section-heading config-section-heading--first">
+              Datos personales
+            </h3>
+            <label>
+              Nombre
+              <input
+                name="nombre"
+                value={form.nombre}
+                onChange={onChange}
+                placeholder="Tus nombres"
+                autoComplete="given-name"
+              />
+            </label>
 
-          <label>Rol<input value={roleLabel} readOnly disabled /></label>
+            <label>
+              Apellido
+              <input
+                name="apellido"
+                value={form.apellido}
+                onChange={onChange}
+                placeholder="Tus apellidos"
+                autoComplete="family-name"
+              />
+            </label>
 
-          <label>Número de identificación<input value={form.numero_identificacion} readOnly disabled /></label>
+            <label>
+              Rol
+              <input value={roleLabel} readOnly disabled aria-label="Rol de la cuenta" />
+            </label>
 
-          <label className="config-field-wide">Correo electrónico<input name="correo" value={form.correo} onChange={onChange} placeholder="correo@ejemplo.com" type="email" /></label>
+            <label>
+              Número de identificación
+              <input value={form.numero_identificacion} readOnly disabled />
+            </label>
 
-          <label className="config-field-wide">Nueva contraseña<input name="contraseña_nueva" type="password" value={form.contraseña_nueva} onChange={onChange} placeholder="Deja vacío si no quieres cambiarla" /></label>
+            <label className="config-field-wide">
+              Correo electrónico
+              <input
+                name="correo"
+                value={form.correo}
+                onChange={onChange}
+                placeholder="correo@ejemplo.com"
+                type="email"
+                autoComplete="email"
+              />
+            </label>
 
-          <label className="config-field-wide">Confirma tu contraseña actual<input name="contraseña_actual" type="password" value={form.contraseña_actual} onChange={onChange} placeholder="Necesaria para guardar cualquier cambio" /></label>
+            <h3 className="config-section-heading">Seguridad de la cuenta</h3>
+            <p className="config-hint">
+              Deja estos campos vacíos si solo deseas actualizar tus datos
+              personales.
+            </p>
 
-          <div className="config-actions config-field-wide">
-            <Link className="config-cancel" to={dashboard}>Cancelar</Link>
-            <button type="submit" disabled={loading}>{loading ? "Guardando..." : "Guardar cambios"}</button>
-          </div>
-        </form>
+            <label className="config-field-wide">
+              Nueva contraseña
+              <input
+                name="contraseña_nueva"
+                type="password"
+                value={form.contraseña_nueva}
+                onChange={onChange}
+                placeholder="Escribe una nueva contraseña"
+                autoComplete="new-password"
+              />
+            </label>
 
-        {error ? <p className="form-message form-error">{error}</p> : null}
-        {success ? <p className="form-message form-success">{success}</p> : null}
+            <label className="config-field-wide">
+              Contraseña actual
+              <input
+                name="contraseña_actual"
+                type="password"
+                value={form.contraseña_actual}
+                onChange={onChange}
+                placeholder="Necesaria para confirmar el cambio de contraseña"
+                autoComplete="current-password"
+              />
+            </label>
 
-      </section>
+            <div className="config-actions config-field-wide">
+              <Link className="config-cancel" to={dashboard}>
+                Cancelar
+              </Link>
+              <button type="submit" disabled={loading}>
+                {loading ? "Guardando..." : "Guardar cambios"}
+              </button>
+            </div>
+          </form>
+
+          {error ? <p className="form-message form-error" role="alert">{error}</p> : null}
+          {success ? <p className="form-message form-success" role="status">{success}</p> : null}
+        </section>
       </main>
     </div>
   );

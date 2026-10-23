@@ -58,16 +58,16 @@ export default function CarreraDelete() {
     <main className="container my-5">
       <div className="page-card card shadow-sm text-dark">
         <div className="card-header bg-danger text-white py-3">
-          <h1 className="h5 mb-0">Eliminar Carrera</h1>
+          <h1 className="h5 mb-0">Eliminar programa de formación</h1>
           <small className="text-light">{carrera?.Nom_Car}</small>
         </div>
         <div className="card-body p-4">
-          <p className="lead">¿Estás seguro de que deseas eliminar esta carrera?</p>
+          <p className="lead">¿Estás seguro de que deseas eliminar este programa de formación?</p>
           <div className="mb-4">
-            <strong>Carrera:</strong> {carrera?.Nom_Car}
+            <strong>Programa de formación:</strong> {carrera?.Nom_Car}
             <br />
             <span className="text-muted">
-              Al eliminar esta carrera también se eliminarán todas las fichas asociadas.
+              Al eliminar este programa de formación también se eliminarán todas las fichas asociadas.
             </span>
           </div>
 

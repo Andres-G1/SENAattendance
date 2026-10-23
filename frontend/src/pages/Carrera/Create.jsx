@@ -77,14 +77,14 @@ return (
       <div className="page-card card shadow-sm" style={{ maxWidth: "600px", margin: "0 auto" }}>
         <div className="card-header bg-success text-white py-3">
           <h1 className="h5 mb-0">
-            {esEdicion ? "Editar Carrera" : "Crear Nueva Carrera"}
+            {esEdicion ? "Editar programa de formación" : "Crear programa de formación"}
           </h1>
         </div>
         <div className="card-body p-4">
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="Nom_Car" className="form-label">
-                Nombre de la Carrera
+                Nombre del programa de formación
               </label>
               <input
                 type="text"
@@ -108,7 +108,7 @@ return (
                 id="Des_Car"
                 name="Des_Car"
                 rows={3}
-                placeholder="Breve descripción de la carrera"
+                placeholder="Breve descripción del programa de formación"
                 value={form.Des_Car}
                 onChange={handleChange}
                 disabled={guardando}
@@ -123,12 +123,12 @@ return (
             )}
 
             <div className="d-flex gap-2">
-              <button type="submit" className="btn btn-success" disabled={guardando}>
+              <button type="submit" className={`btn btn-success${esEdicion ? "" : " action-create"}`} disabled={guardando}>
                 {guardando
                   ? "Guardando..."
                   : esEdicion
                   ? "Guardar Cambios"
-                  : "Crear Carrera"}
+                  : "Crear programa de formación"}
               </button>
               <Link to="/administrador/carreras" className="btn btn-secondary">
                 Cancelar

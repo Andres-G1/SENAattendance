@@ -64,6 +64,9 @@ export default function InstructorNavbar({ user }) {
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navInstructor"
+          aria-controls="navInstructor"
+          aria-expanded="false"
+          aria-label="Abrir menú de navegación"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -79,6 +82,16 @@ export default function InstructorNavbar({ user }) {
               <a className="nav-link px-3 py-2" href="/instructor#mis-fichas">
                 Mis Fichas
               </a>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link px-3 py-2" to="/instructor/asistencia">
+                Tomar Asistencia
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link px-3 py-2" to="/instructor/revisar-asistencia">
+                Revisar Asistencia
+              </Link>
             </li>
           </ul>
 

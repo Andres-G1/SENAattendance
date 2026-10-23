@@ -183,7 +183,7 @@ export default function CrearInstructor() {
             )}
 
             <div className="d-flex gap-2 mt-4">
-              <button type="submit" className="btn btn-success" disabled={guardando}>
+              <button type="submit" className="btn btn-success action-create" disabled={guardando}>
                 {guardando ? "Registrando..." : "Registrar Instructor"}
               </button>
 
