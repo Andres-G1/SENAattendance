@@ -21,8 +21,10 @@ const AprendizDashboard = lazy(() => import("./pages/AprendizDashboard"));
 const InstructorDashboard = lazy(() => import("./pages/InstructorDashboard"));
 const AdministradorDashboard = lazy(() => import("./pages/AdministradorDashboard"));
 
-const InstructorAsistenciaRevisar = lazy(() => import("./pages/Instructor/InstructorAsistenciaRevisar"));
 const InstructorAsistencia = lazy(() => import("./pages/Instructor/InstructorAsistencia"));
+const InstructorAsistenciaRevisar = lazy(() => import("./pages/Instructor/InstructorAsistenciaRevisar"));
+const AprendizAsistencia = lazy(() => import("./pages/Aprendiz/AprendizAsistencia.jsx"))
+const CoordinadorAsistencia = lazy(() => import ("./pages/Coordinador/CoordianadorAsistencia.jsx"))
 
 const ConfigCarrera = lazy(() => import("./pages/Carrera/ConfigCarrera"));
 const CreateC = lazy(() => import("./pages/Carrera/Create"));
@@ -577,6 +579,27 @@ function App() {
                   element={
                     <RutaProtegida rolPermitido="Coordinador">
                       <ConfirmarCompetencia />
+                    </RutaProtegida>
+                  }
+                />
+
+
+                {/*Asistencia */}
+
+                <Route
+                  path="/Aprendiz/AprendizAsistencia"
+                  element={
+                    <RutaProtegida rolPermitido="Aprendiz">
+                      <AprendizAsistencia/>
+                    </RutaProtegida>
+                  }
+                />  
+                
+                <Route
+                  path="/Coordinador/CoordianadorAsistencia"
+                  element={
+                    <RutaProtegida rolPermitido="Coordinador">
+                      <CoordinadorAsistencia/>
                     </RutaProtegida>
                   }
                 />

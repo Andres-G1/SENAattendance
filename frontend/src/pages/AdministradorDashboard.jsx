@@ -355,6 +355,56 @@ export default function AdministradorDashboard() {
               </div>
             </div>
           </div>
+                    
+          <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted" style={{ order: 3 }}>
+            Revision Asistencia
+          </h4>
+
+          <div className="row g-4 mb-5" style={{ order: 3 }}>
+            <div className="col-12 col-md-6">
+              <div className="card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
+
+                <div className="d-flex align-items-center gap-3 mb-3">
+
+                  <div className="p-3 rounded-3 bg-success-subtle text-success">
+
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 11l3 3L22 4" />
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                    </svg>
+
+                  </div>
+
+                  <h5 className="fw-bold text-dark mb-0">
+                    Revision Asistencia
+                  </h5>
+
+                </div>
+
+                <p className="text-muted small mb-4">
+                  Revisa las asistencias de todas las fichas.
+                </p>
+
+                <Link
+                  to="/Coordinador/CoordianadorAsistencia"
+                  className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2 mt-auto"
+                >
+                  Revisar Asistencia
+                </Link>
+
+              </div>
+            </div>
+          </div>
 
         </main>
       </div>

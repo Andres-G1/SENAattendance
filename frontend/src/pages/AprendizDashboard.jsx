@@ -135,7 +135,7 @@ export default function AprendizDashboard() {
             <div className="col-12 col-lg-7">
               <div className="d-flex flex-column h-100 justify-content-between gap-4">
                 <a
-                  href="#historial"
+                  href="/Aprendiz/AprendizAsistencia"
                   className="card text-decoration-none bg-white border-0 shadow-sm p-4 rounded-4 card-hover-premium flex-grow-1"
                 >
                   <div className="d-flex align-items-start gap-3">

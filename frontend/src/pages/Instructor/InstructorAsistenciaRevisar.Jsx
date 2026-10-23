@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 
 import InstructorNavbar from "/src/components/navbars/InstructorNavbar.jsx";
@@ -28,13 +27,11 @@ export default function InstructorAsistenciaRevisar() {
   const [asistencias, setAsistencias] = useState([]);
 
   const [loadingFichas, setLoadingFichas] = useState(true);
-  const [loadingAsistencias, setLoadingAsistencias] =
-    useState(false);
+  const [loadingAsistencias, setLoadingAsistencias] = useState(false);
 
   const [error, setError] = useState("");
 
-  const [documentoBusqueda, setDocumentoBusqueda] =
-    useState("");
+  const [documentoBusqueda, setDocumentoBusqueda] = useState("");
 
   const [diaActual, setDiaActual] = useState(0);
 
@@ -48,9 +45,7 @@ export default function InstructorAsistenciaRevisar() {
       return;
     }
 
-    fetch(
-      `${API_BASE}/asignaciones/instructor/${idInstructor}/fichas`
-    )
+    fetch(`${API_BASE}/asignaciones/instructor/${idInstructor}/fichas`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Error al obtener las fichas");
@@ -90,9 +85,7 @@ export default function InstructorAsistenciaRevisar() {
     )
       .then((res) => {
         if (!res.ok) {
-          throw new Error(
-            "Error al consultar la asistencia"
-          );
+          throw new Error("Error al consultar la asistencia");
         }
 
         return res.json();
@@ -105,9 +98,7 @@ export default function InstructorAsistenciaRevisar() {
 
         setAsistencias([]);
 
-        setError(
-          "No fue posible consultar la asistencia."
-        );
+        setError("No fue posible consultar la asistencia.");
       })
       .finally(() => {
         setLoadingAsistencias(false);
@@ -121,23 +112,18 @@ export default function InstructorAsistenciaRevisar() {
   const diasDisponibles = useMemo(() => {
     const fechas = [
       ...new Set(
-        asistencias
-          .map((registro) => registro.Fec_Asi)
-          .filter(Boolean)
+        asistencias.map((registro) => registro.Fec_Asi).filter(Boolean)
       ),
     ];
 
-    return fechas.sort(
-      (a, b) => new Date(b) - new Date(a)
-    );
+    return fechas.sort((a, b) => new Date(b) - new Date(a));
   }, [asistencias]);
 
   // =========================================================
   // FECHA SELECCIONADA
   // =========================================================
 
-  const fechaSeleccionada =
-    diasDisponibles[diaActual] || null;
+  const fechaSeleccionada = diasDisponibles[diaActual] || null;
 
   // =========================================================
   // FORMATEAR FECHA
@@ -146,9 +132,7 @@ export default function InstructorAsistenciaRevisar() {
   const formatearFecha = (fecha) => {
     if (!fecha) return "Sin fecha";
 
-    const fechaLocal = new Date(
-      `${fecha}T00:00:00`
-    );
+    const fechaLocal = new Date(`${fecha}T00:00:00`);
 
     return fechaLocal.toLocaleDateString("es-CO", {
       weekday: "long",
@@ -168,22 +152,15 @@ export default function InstructorAsistenciaRevisar() {
     }
 
     return asistencias.filter((registro) => {
-      const mismaFecha =
-        registro.Fec_Asi === fechaSeleccionada;
+      const mismaFecha = registro.Fec_Asi === fechaSeleccionada;
 
       const mismoDocumento =
         !documentoBusqueda ||
-        String(registro.Num_ide_Apr || "").includes(
-          documentoBusqueda
-        );
+        String(registro.Num_ide_Apr || "").includes(documentoBusqueda);
 
       return mismaFecha && mismoDocumento;
     });
-  }, [
-    asistencias,
-    fechaSeleccionada,
-    documentoBusqueda,
-  ]);
+  }, [asistencias, fechaSeleccionada, documentoBusqueda]);
 
   // =========================================================
   // CAMBIAR DÍA
@@ -226,14 +203,10 @@ export default function InstructorAsistenciaRevisar() {
       };
     }
 
-    if (
-      normalizado.includes("retardo") ||
-      normalizado.includes("retraso")
-    ) {
+    if (normalizado.includes("retardo") || normalizado.includes("retraso")) {
       return {
         texto: "Retardo",
-        clase:
-          "bg-warning-subtle text-warning-emphasis",
+        clase: "bg-warning-subtle text-warning-emphasis",
       };
     }
 
@@ -244,10 +217,7 @@ export default function InstructorAsistenciaRevisar() {
       };
     }
 
-    if (
-      normalizado.includes("falla") ||
-      normalizado.includes("inasistencia")
-    ) {
+    if (normalizado.includes("falla") || normalizado.includes("inasistencia")) {
       return {
         texto: "Falla",
         clase: "bg-danger-subtle text-danger",
@@ -266,69 +236,44 @@ export default function InstructorAsistenciaRevisar() {
 
   return (
     <>
-      <InstructorNavbar
-        user={{ Nom_Ins: firstName }}
-      />
+      <InstructorNavbar user={{ Nom_Ins: firstName }} />
 
-      <div
-        className="bg-light min-vh-100 py-5"
-      >
-        <main
-          className="container"
-          style={{ maxWidth: "1000px" }}
-        >
-          {/* =================================================
-              ENCABEZADO
-          ================================================= */}
+      <div className="bg-light min-vh-100 py-5">
+        <main className="container" style={{ maxWidth: "1100px" }}>
+          {/* ENCABEZADO */}
 
           <div className="mb-4">
-            <h1 className="fw-bold text-dark">
-              Revisar asistencia
-            </h1>
+            <h1 className="fw-bold text-dark">Revisar asistencia</h1>
 
             <p className="text-muted mb-1">
-              Consulta la asistencia registrada en
-              las fichas asignadas.
+              Consulta la asistencia registrada en las fichas asignadas.
             </p>
 
-            <small className="text-muted">
-              {currentDate}
-            </small>
+            <small className="text-muted">{currentDate}</small>
           </div>
 
-          {/* =================================================
-              CUADRO PRINCIPAL
-          ================================================= */}
+          {/* CUADRO PRINCIPAL */}
 
           <div
             className="bg-white rounded-4 p-4 shadow-sm"
-            style={{
-              border: "2px solid #00851d",
-            }}
+            style={{ border: "2px solid #00851d" }}
           >
-            {/* =================================================
-                SELECCIÓN DE FICHA
-            ================================================= */}
+            {/* SELECCIÓN DE FICHA */}
 
             <div className="mb-4">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
-                  <h5 className="fw-bold mb-1">
-                    Consultar asistencia
-                  </h5>
+                  <h5 className="fw-bold mb-1">Consultar asistencia</h5>
 
                   <p className="text-muted small mb-0">
-                    Selecciona una ficha para revisar
-                    sus registros de asistencia.
+                    Selecciona una ficha para revisar sus registros de
+                    asistencia.
                   </p>
                 </div>
 
                 <span
                   className="badge rounded-pill"
-                  style={{
-                    backgroundColor: "#E6F4D7",
-                    color: "#1B5E20",
-                  }}
+                  style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
                 >
                   {fichas.length} fichas
                 </span>
@@ -336,17 +281,13 @@ export default function InstructorAsistenciaRevisar() {
 
               <div className="row g-3 align-items-end">
                 <div className="col-12 col-md-8">
-                  <label className="form-label fw-semibold">
-                    Ficha
-                  </label>
+                  <label className="form-label fw-semibold">Ficha</label>
 
                   <select
                     className="form-select"
                     value={fichaSeleccionada}
                     onChange={(e) => {
-                      setFichaSeleccionada(
-                        e.target.value
-                      );
+                      setFichaSeleccionada(e.target.value);
 
                       setAsistencias([]);
                       setDocumentoBusqueda("");
@@ -362,12 +303,8 @@ export default function InstructorAsistenciaRevisar() {
                     </option>
 
                     {fichas.map((ficha) => (
-                      <option
-                        key={ficha.Id_Fic}
-                        value={ficha.Id_Fic}
-                      >
-                        {ficha.Num_Fic ||
-                          ficha.Id_Fic}
+                      <option key={ficha.Id_Fic} value={ficha.Id_Fic}>
+                        {ficha.Num_Fic || ficha.Id_Fic}
                       </option>
                     ))}
                   </select>
@@ -377,14 +314,9 @@ export default function InstructorAsistenciaRevisar() {
                   <button
                     type="button"
                     className="btn text-white fw-semibold w-100"
-                    style={{
-                      backgroundColor: "#00851d",
-                    }}
+                    style={{ backgroundColor: "#00851d" }}
                     onClick={consultarAsistencia}
-                    disabled={
-                      !fichaSeleccionada ||
-                      loadingAsistencias
-                    }
+                    disabled={!fichaSeleccionada || loadingAsistencias}
                   >
                     {loadingAsistencias
                       ? "Consultando..."
@@ -394,40 +326,29 @@ export default function InstructorAsistenciaRevisar() {
               </div>
 
               {error && (
-                <div className="alert alert-danger mt-3 mb-0">
-                  {error}
-                </div>
+                <div className="alert alert-danger mt-3 mb-0">{error}</div>
               )}
             </div>
 
-            {/* =================================================
-                ESTADO INICIAL
-            ================================================= */}
+            {/* ESTADO INICIAL */}
 
             {!fichaSeleccionada && (
               <div className="border rounded-3 text-center py-5">
-                <h6 className="fw-bold text-dark">
-                  Selecciona una ficha
-                </h6>
+                <h6 className="fw-bold text-dark">Selecciona una ficha</h6>
 
                 <p className="text-muted small mb-0">
-                  Aquí aparecerá el historial de
-                  asistencia.
+                  Aquí aparecerá el historial de asistencia.
                 </p>
               </div>
             )}
 
-            {/* =================================================
-                CARGANDO
-            ================================================= */}
+            {/* CARGANDO */}
 
             {loadingAsistencias && (
               <div className="border rounded-3 text-center py-5">
                 <div
                   className="spinner-border"
-                  style={{
-                    color: "#00851d",
-                  }}
+                  style={{ color: "#00851d" }}
                   role="status"
                 />
 
@@ -437,36 +358,27 @@ export default function InstructorAsistenciaRevisar() {
               </div>
             )}
 
-            {/* =================================================
-                SIN REGISTROS
-            ================================================= */}
+            {/* SIN REGISTROS */}
 
             {fichaSeleccionada &&
               !loadingAsistencias &&
               asistencias.length === 0 && (
                 <div className="border rounded-3 text-center py-5">
-                  <h6 className="fw-bold">
-                    No hay registros
-                  </h6>
+                  <h6 className="fw-bold">No hay registros</h6>
 
                   <p className="text-muted small mb-0">
-                    No existen asistencias registradas
-                    para esta ficha.
+                    No existen asistencias registradas para esta ficha.
                   </p>
                 </div>
               )}
 
-            {/* =================================================
-                RESULTADOS
-            ================================================= */}
+            {/* RESULTADOS */}
 
             {fichaSeleccionada &&
               !loadingAsistencias &&
               asistencias.length > 0 && (
                 <>
-                  {/* =================================================
-                      BUSCADOR
-                  ================================================= */}
+                  {/* BUSCADOR */}
 
                   <div className="mb-4">
                     <label className="form-label fw-semibold">
@@ -480,19 +392,13 @@ export default function InstructorAsistenciaRevisar() {
                           className="form-control"
                           placeholder="Número de documento"
                           value={documentoBusqueda}
-                          onChange={(e) =>
-                            setDocumentoBusqueda(
-                              e.target.value
-                            )
-                          }
+                          onChange={(e) => setDocumentoBusqueda(e.target.value)}
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* =================================================
-                      NAVEGACIÓN DE FECHA
-                  ================================================= */}
+                  {/* NAVEGACIÓN DE FECHA */}
 
                   <div
                     className="rounded-3 p-3 mb-4"
@@ -505,57 +411,38 @@ export default function InstructorAsistenciaRevisar() {
                       <button
                         type="button"
                         className="btn btn-outline-light"
-                        onClick={() =>
-                          cambiarDia(-1)
-                        }
+                        onClick={() => cambiarDia(-1)}
                         disabled={diaActual === 0}
                       >
                         ← Anterior
                       </button>
 
                       <div className="text-center text-white">
-                        <div
-                          className="small"
-                          style={{
-                            opacity: 0.9,
-                          }}
-                        >
-                          Día {diaActual + 1} de{" "}
-                          {diasDisponibles.length}
+                        <div className="small" style={{ opacity: 0.9 }}>
+                          Día {diaActual + 1} de {diasDisponibles.length}
                         </div>
 
                         <div className="fw-bold text-capitalize">
-                          {formatearFecha(
-                            fechaSeleccionada
-                          )}
+                          {formatearFecha(fechaSeleccionada)}
                         </div>
                       </div>
 
                       <button
                         type="button"
                         className="btn btn-outline-light"
-                        onClick={() =>
-                          cambiarDia(1)
-                        }
-                        disabled={
-                          diaActual ===
-                          diasDisponibles.length - 1
-                        }
+                        onClick={() => cambiarDia(1)}
+                        disabled={diaActual === diasDisponibles.length - 1}
                       >
                         Siguiente →
                       </button>
                     </div>
                   </div>
 
-                  {/* =================================================
-                      CONTADOR
-                  ================================================= */}
+                  {/* CONTADOR */}
 
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                      <span className="fw-semibold">
-                        Registros del día
-                      </span>
+                      <span className="fw-semibold">Registros del día</span>
 
                       <div className="text-muted small">
                         Asistencia registrada en esta fecha
@@ -564,100 +451,68 @@ export default function InstructorAsistenciaRevisar() {
 
                     <span
                       className="badge rounded-pill"
-                      style={{
-                        backgroundColor: "#E6F4D7",
-                        color: "#1B5E20",
-                      }}
+                      style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
                     >
                       {asistenciasDelDia.length}
                     </span>
                   </div>
 
-                  {/* =================================================
-                      TABLA
-                  ================================================= */}
+                  {/* TABLA */}
 
                   {asistenciasDelDia.length > 0 ? (
                     <div className="table-responsive border rounded-3">
                       <table className="table table-hover align-middle mb-0">
                         <thead className="table-light">
                           <tr>
-                            <th className="px-3">
-                              Aprendiz
-                            </th>
-
-                            <th>
-                              Documento
-                            </th>
-
-                            <th>
-                              Competencia
-                            </th>
-
-                            <th>
-                              Instructor
-                            </th>
-
-                            <th className="text-center">
-                              Estado
-                            </th>
+                            <th className="px-3">Aprendiz</th>
+                            <th>Documento</th>
+                            <th>Resultado de aprendizaje</th>
+                            <th>Competencia</th>
+                            <th>Instructor</th>
+                            <th className="text-center">Estado</th>
                           </tr>
                         </thead>
 
                         <tbody>
-                          {asistenciasDelDia.map(
-                            (registro, index) => {
-                              const estado =
-                                obtenerEstado(
-                                  registro.Estado
-                                );
+                          {asistenciasDelDia.map((registro, index) => {
+                            const estado = obtenerEstado(registro.Estado);
 
-                              return (
-                                <tr
-                                  key={
-                                    registro.Id_Asi ||
-                                    index
-                                  }
-                                >
-                                  <td className="px-3 fw-semibold">
-                                    {registro.Aprendiz ||
-                                      "-"}
-                                  </td>
+                            return (
+                              <tr key={registro.Id_Asi || index}>
+                                <td className="px-3 fw-semibold">
+                                  {registro.Aprendiz || "-"}
+                                </td>
 
-                                  <td className="text-muted">
-                                    {registro.Num_ide_Apr ||
-                                      "-"}
-                                  </td>
+                                <td className="text-muted">
+                                  {registro.Num_ide_Apr || "-"}
+                                </td>
 
-                                  <td>
-                                    {registro.Competencia ||
-                                      "-"}
-                                  </td>
+                                <td>{registro.ResultadoAprendizaje || "-"}</td>
 
-                                  <td>
-                                    {registro.Instructor ||
-                                      "-"}
-                                  </td>
+                                <td className="text-muted">
+                                  {registro.Competencia || "-"}
+                                </td>
 
-                                  <td className="text-center">
-                                    <span
-                                      className={`badge rounded-pill px-3 py-2 ${estado.clase}`}
-                                    >
-                                      {estado.texto}
-                                    </span>
-                                  </td>
-                                </tr>
-                              );
-                            }
-                          )}
+                                <td>{registro.Instructor || "-"}</td>
+
+                                <td className="text-center">
+                                  <span
+                                    className={`badge rounded-pill px-3 py-2 ${estado.clase}`}
+                                  >
+                                    {estado.texto}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
                   ) : (
                     <div className="border rounded-3 text-center py-4">
                       <p className="text-muted small mb-0">
-                        No hay asistencia para el
-                        documento buscado en este día.
+                        No hay asistencia para el documento buscado en este
+                        día.
                       </p>
                     </div>
                   )}
