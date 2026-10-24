@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar";
 
@@ -336,7 +335,7 @@ export default function AsignarFicha() {
 
                     {fichas.map((f) => (
                       <option key={f.Id_Fic} value={f.Id_Fic}>
-                        Ficha {f.Num_Fic} ({f.Jor_Fic})
+                        Ficha {f.Num_Fic}
                       </option>
                     ))}
                   </select>

@@ -357,9 +357,6 @@ export default function AsignarAprendiz() {
                         value={f.Id_Fic}
                       >
                         Ficha {f.Num_Fic}
-                        {f.Jor_Fic
-                          ? ` (${f.Jor_Fic})`
-                          : ""}
                       </option>
                     ))}
                   </select>

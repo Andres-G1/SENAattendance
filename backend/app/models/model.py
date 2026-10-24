@@ -114,7 +114,8 @@ class Fichas(SQLModel, table=True):
     Fec_inicio_Fic: date = Field(nullable=False)
     Fec_Fin_Fic: date = Field(nullable=False)
     Num_Fic: int = Field(nullable=False, unique=True)
-    Jor_Fic: Jornada = Field(nullable=False)
+    # Ya no se usa: la jornada se dejó de pedir (se mantiene opcional por compatibilidad)
+    Jor_Fic: Optional[Jornada] = Field(default=None)
 
     Fec_Cre: datetime = Field(
         default_factory=datetime.utcnow

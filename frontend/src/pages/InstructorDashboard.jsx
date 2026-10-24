@@ -527,21 +527,6 @@ export default function InstructorDashboard() {
                           </div>
 
 
-                          {/* JORNADA */}
-
-                          {f.Jor_Fic && (
-
-                            <div className="text-muted small">
-
-                              Jornada:
-
-                              <span className="fw-medium text-dark ms-1">
-                                {f.Jor_Fic}
-                              </span>
-
-                            </div>
-
-                          )}
 
 
                           {/* =================================

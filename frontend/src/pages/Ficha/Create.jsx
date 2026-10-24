@@ -51,13 +51,17 @@ export default function Create() {
           Num_Fic: Number(form.Num_Fic),
           Fec_inicio_Fic: form.Fec_inicio_Fic,
           Fec_Fin_Fic: form.Fec_Fin_Fic,
-        
         }),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.detail || "No se pudo crear la ficha");
+        const detalle = Array.isArray(data?.detail)
+          ? data.detail
+              .map((d) => `${d.loc?.slice(-1)[0] ?? "campo"}: ${d.msg}`)
+              .join(" | ")
+          : data?.detail;
+        throw new Error(detalle || "No se pudo crear la ficha");
       }
 
       navigate("/administrador/fichas");

@@ -769,10 +769,6 @@ export default function InstructorAsistencia() {
                               Ficha {ficha.Num_Fic || ficha.Id_Fic}
                             </div>
 
-                            <div className="text-muted small mt-1">
-                              Jornada: {ficha.Jor_Fic || "No definida"}
-                            </div>
-
                             <div
                               className="small mt-1"
                               style={{ color: "#00851d" }}
@@ -877,12 +873,6 @@ export default function InstructorAsistencia() {
                               {asignacion.Dia}
                             </span>
                           </div>
-
-                          {asignacion.Jor_Fic && (
-                            <div className="text-muted small">
-                              Jornada: {asignacion.Jor_Fic}
-                            </div>
-                          )}
                         </div>
 
                         <div className="col-md-4 text-md-end mt-2 mt-md-0">
@@ -960,12 +950,6 @@ export default function InstructorAsistencia() {
                       {selectedAsignacion.Dia}
                     </span>
                   </div>
-
-                  {selectedAsignacion.Jor_Fic && (
-                    <div className="small text-muted">
-                      Jornada: {selectedAsignacion.Jor_Fic}
-                    </div>
-                  )}
                 </div>
 
                 {/* BARRA PARA CAMBIAR FECHA */}

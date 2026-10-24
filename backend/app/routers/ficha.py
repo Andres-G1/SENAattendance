@@ -8,7 +8,7 @@ import pandas as pd
 from fastapi import UploadFile, File
 
 from database import get_session
-from models.model import Fichas, Jornada
+from models.model import Fichas
 
 
 Router_ficha = APIRouter(
@@ -21,7 +21,6 @@ class FichaCreateRequest(BaseModel):
     Num_Fic: int
     Fec_inicio_Fic: date
     Fec_Fin_Fic: date
-    Jor_Fic: Jornada
 
 
 class FichaUpdateRequest(BaseModel):
@@ -29,7 +28,6 @@ class FichaUpdateRequest(BaseModel):
     Num_Fic: int
     Fec_inicio_Fic: date
     Fec_Fin_Fic: date
-    Jor_Fic: Jornada
 
 
 @Router_ficha.post(
@@ -44,8 +42,7 @@ def create_ficha(
         Id_Car=data.Id_Car,
         Num_Fic=data.Num_Fic,
         Fec_inicio_Fic=data.Fec_inicio_Fic,
-        Fec_Fin_Fic=data.Fec_Fin_Fic,
-        Jor_Fic=data.Jor_Fic
+        Fec_Fin_Fic=data.Fec_Fin_Fic
     )
 
     session.add(nueva_ficha)
@@ -83,7 +80,7 @@ async def cargar_fichas_planas(
             detail="No se pudo leer el archivo"
         )
 
-    requeridas = {"Id_Car", "Num_Fic", "Fec_inicio_Fic", "Fec_Fin_Fic", "Jor_Fic"}
+    requeridas = {"Id_Car", "Num_Fic", "Fec_inicio_Fic", "Fec_Fin_Fic"}
     if not requeridas.issubset(df.columns):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -97,8 +94,7 @@ async def cargar_fichas_planas(
                 Id_Car=int(fila["Id_Car"]),
                 Num_Fic=int(fila["Num_Fic"]),
                 Fec_inicio_Fic=pd.to_datetime(fila["Fec_inicio_Fic"]).date(),
-                Fec_Fin_Fic=pd.to_datetime(fila["Fec_Fin_Fic"]).date(),
-                Jor_Fic=Jornada(fila["Jor_Fic"])
+                Fec_Fin_Fic=pd.to_datetime(fila["Fec_Fin_Fic"]).date()
             )
             session.add(nueva)
             session.commit()
@@ -169,7 +165,6 @@ def actualizar_ficha(
     ficha.Num_Fic = data.Num_Fic
     ficha.Fec_inicio_Fic = data.Fec_inicio_Fic
     ficha.Fec_Fin_Fic = data.Fec_Fin_Fic
-    ficha.Jor_Fic = data.Jor_Fic
 
     session.add(ficha)
     session.commit()

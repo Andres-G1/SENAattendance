@@ -101,9 +101,6 @@ export default function SeleccionarFichaAprendices() {
                   >
                     <div>
                       <strong>Ficha: {ficha.Num_Fic}</strong>
-                      <span className="badge bg-secondary ms-2">
-                        {ficha.Jor_Fic}
-                      </span>
                     </div>
 
                     <Link

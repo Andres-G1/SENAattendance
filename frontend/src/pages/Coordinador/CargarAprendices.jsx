@@ -83,9 +83,9 @@ function CargarAprendices() {
               Subir aprendices{numeroFicha ? ` — Ficha ${numeroFicha}` : ""}
             </h2>
             <p className="text-muted small mb-0">
-              Sube un Excel o CSV: todos los aprendices quedarán en esta ficha.
-              Columnas: Tipo_Identificacion, Numero_Identificacion, Nombre,
-              Apellido, Correo.
+              Sube el reporte de aprendices de SOFIA Plus (.xls / .xlsx) o un
+              CSV. Puedes subirlo varias veces: solo se agregan los aprendices
+              nuevos y se actualizan los datos que cambiaron.
             </p>
           </div>
 
@@ -138,7 +138,9 @@ function CargarAprendices() {
 
                   {resultado ? (
                     <div className="small text-success fw-semibold">
-                      ✓ {resultado.creadas ?? 0} registrada(s)
+                      ✓ {resultado.creadas ?? 0} nuevo(s),{" "}
+                      {resultado.actualizadas ?? 0} actualizado(s),{" "}
+                      {resultado.sin_cambios ?? 0} sin cambios
                     </div>
                   ) : (
                     <button
@@ -174,11 +176,12 @@ function CargarAprendices() {
                 <div className="row g-3">
                   {[
                     ["Procesadas", resultado.procesadas],
-                    ["Creadas", resultado.creadas],
-                    ["Actualizadas", resultado.actualizadas],
+                    ["Nuevos", resultado.creadas],
+                    ["Actualizados", resultado.actualizadas],
+                    ["Sin cambios", resultado.sin_cambios],
                     ["Errores", resultado.total_errores],
                   ].map(([titulo, valor]) => (
-                    <div className="col-6 col-md-3" key={titulo}>
+                    <div className="col-6 col-md" key={titulo}>
                       <div className="border rounded-3 p-3">
                         <small className="text-muted">{titulo}</small>
                         <h3 className="fw-bold mb-0">{valor}</h3>

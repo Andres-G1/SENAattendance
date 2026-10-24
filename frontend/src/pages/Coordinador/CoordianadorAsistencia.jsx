@@ -299,7 +299,6 @@ export default function CoordinadorAsistencia() {
                     {fichas.map((ficha) => (
                       <option key={ficha.Id_Fic} value={ficha.Id_Fic}>
                         {ficha.Num_Fic || ficha.Id_Fic}
-                        {ficha.Jor_Fic ? ` — ${ficha.Jor_Fic}` : ""}
                       </option>
                     ))}
                   </select>

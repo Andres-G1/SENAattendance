@@ -72,7 +72,6 @@ export default function Edit() {
           Num_Fic: Number(form.Num_Fic),
           Fec_inicio_Fic: form.Fec_inicio_Fic,
           Fec_Fin_Fic: form.Fec_Fin_Fic,
-          Jor_Fic: form.Jor_Fic,
         }),
       });
 
