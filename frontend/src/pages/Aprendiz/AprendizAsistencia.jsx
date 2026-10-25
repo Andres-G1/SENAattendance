@@ -1,224 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import InstructorNavbar from "/src/components/navbars/InstructorNavbar.jsx";
+import AprendizNavbar from "/src/components/navbars/AprendizNavbar.jsx"; // ⚠️ AJUSTAR ruta/nombre
 import DateCalendar from "/src/components/DateCalendar.jsx";
+import useCurrentDate from "/src/hooks/useCurrentDate.js";
 
 const API_BASE = "http://localhost:8000";
 
-// =====================================================
-// ESTADOS DE ASISTENCIA
-// =====================================================
-
-const ESTADOS = [
-  { valor: "presente", nombre: "Presente", color: "#00851d", texto: "#fff" },
-  { valor: "retardo", nombre: "Retardo", color: "#8a5a00", texto: "#fff" },
-  { valor: "falla", nombre: "Falla", color: "#b42332", texto: "#fff" },
-  { valor: "excusa", nombre: "Excusa", color: "#57728e", texto: "#fff" },
-];
-
-const A_BACKEND = {
-  presente: "Presente",
-  retardo: "Retardo",
-  falla: "Falla",
-  excusa: "Excusa",
-};
-
-const DESDE_BACKEND = {
-  Presente: "presente",
-  Retardo: "retardo",
-  Falla: "falla",
-  Excusa: "excusa",
-};
-
-// =====================================================
-// COLORES DEL SEMÁFORO
-// =====================================================
-
-const COLOR_SEMAFORO = {
-  ROJO: { fondo: "#b42332", texto: "#fff" },
-  AMARILLO: { fondo: "#8a5a00", texto: "#fff" },
-  VERDE: { fondo: "#00851d", texto: "#fff" },
-};
-
-// =====================================================
-// DÍAS DE LA SEMANA
-// =====================================================
-
-const DIAS_SEMANA = [
-  "domingo",
-  "lunes",
-  "martes",
-  "miércoles",
-  "jueves",
-  "viernes",
-  "sábado",
-];
-
-// =====================================================
-// FUNCIONES PARA FECHAS
-// =====================================================
-
-function obtenerDiaSemana(fecha) {
-  if (!fecha) return "";
-
-  const [anio, mes, dia] = fecha.split("-");
-  const fechaLocal = new Date(Number(anio), Number(mes) - 1, Number(dia));
-
-  return DIAS_SEMANA[fechaLocal.getDay()];
-}
-
-function normalizarDia(dia) {
-  if (!dia) return "";
-
-  return dia
-    .toString()
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
-
-// Convierte una fecha Date a YYYY-MM-DD
-function convertirAISO(fecha) {
-  const anio = fecha.getFullYear();
-  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
-  const dia = String(fecha.getDate()).padStart(2, "0");
-
-  return `${anio}-${mes}-${dia}`;
-}
-
-function obtenerFechaHoy() {
-  return convertirAISO(new Date());
-}
-
-function obtenerIndiceDia(dia) {
-  const diaNormalizado = normalizarDia(dia);
-
-  return DIAS_SEMANA.findIndex(
-    (diaSemana) => normalizarDia(diaSemana) === diaNormalizado
-  );
-}
-
-// =====================================================
-// FUNCIONES PARA EL PERÍODO DEL RESULTADO DE APRENDIZAJE
-// =====================================================
-
-function soloFecha(valor) {
-  if (!valor) return "";
-
-  return valor.toString().slice(0, 10);
-}
-
-function sumarDias(fecha, cantidad) {
-  if (!fecha) return "";
-
-  const [anio, mes, dia] = fecha.split("-");
-  const fechaLocal = new Date(Number(anio), Number(mes) - 1, Number(dia));
-
-  fechaLocal.setDate(fechaLocal.getDate() + cantidad);
-
-  return convertirAISO(fechaLocal);
-}
-
-// Fechas de inicio y fin del resultado de aprendizaje seleccionado
-function obtenerLimitesPeriodo(asignacion) {
-  if (!asignacion) {
-    return { inicio: "", fin: "" };
-  }
-
-  return {
-    inicio: soloFecha(asignacion.Fec_Inicio_RA),
-    fin: soloFecha(asignacion.Fec_Fin_RA),
-  };
-}
-
-// =====================================================
-// FECHA INICIAL
-// =====================================================
-// Busca la fecha más reciente que coincida con el día de la
-// clase, respetando el período del resultado de aprendizaje.
-
-function obtenerFechaInicial(asignacion) {
-  const indicePermitido = obtenerIndiceDia(asignacion?.Dia);
-
-  if (indicePermitido === -1) {
-    return "";
-  }
-
-  const { inicio, fin } = obtenerLimitesPeriodo(asignacion);
-  const hoy = obtenerFechaHoy();
-
-  // Si no existen fechas del período, conserva el comportamiento anterior.
-  if (!inicio && !fin) {
-    const diaHoy = new Date().getDay();
-
-    let diferencia = diaHoy - indicePermitido;
-
-    if (diferencia < 0) {
-      diferencia += 7;
-    }
-
-    const fechaInicial = new Date();
-    fechaInicial.setDate(fechaInicial.getDate() - diferencia);
-
-    return convertirAISO(fechaInicial);
-  }
-
-  // El límite superior nunca será una fecha futura.
-  let limiteSuperior = hoy;
-
-  if (fin && fin < limiteSuperior) {
-    limiteSuperior = fin;
-  }
-
-  // Si el resultado de aprendizaje todavía no empieza, no hay fecha.
-  if (inicio && inicio > hoy) {
-    return "";
-  }
-
-  // Buscamos hacia atrás hasta 6 días.
-  for (let i = 0; i <= 6; i++) {
-    const fechaCandidata = sumarDias(limiteSuperior, -i);
-
-    if (inicio && fechaCandidata < inicio) {
-      break;
-    }
-
-    if (
-      normalizarDia(obtenerDiaSemana(fechaCandidata)) ===
-      normalizarDia(asignacion.Dia)
-    ) {
-      return fechaCandidata;
-    }
-  }
-
-  return "";
-}
-
-// =====================================================
-// CAMBIAR SEMANA
-// =====================================================
-
-function cambiarFechaPorSemana(fechaActual, cantidadSemanas) {
-  if (!fechaActual) return "";
-
-  const [anio, mes, dia] = fechaActual.split("-");
-  const fecha = new Date(Number(anio), Number(mes) - 1, Number(dia));
-
-  fecha.setDate(fecha.getDate() + cantidadSemanas * 7);
-
-  return convertirAISO(fecha);
-}
-
-// =====================================================
-// FORMATEAR FECHA
-// =====================================================
+// =========================================================
+// UTILIDADES
+// =========================================================
 
 function formatearFecha(fecha) {
-  if (!fecha) return "";
+  if (!fecha) return "Sin fecha";
 
-  const [anio, mes, dia] = fecha.split("-");
-  const fechaLocal = new Date(Number(anio), Number(mes) - 1, Number(dia));
+  const fechaLocal = new Date(`${fecha}T00:00:00`);
 
   return fechaLocal.toLocaleDateString("es-CO", {
     weekday: "long",
@@ -228,782 +23,374 @@ function formatearFecha(fecha) {
   });
 }
 
-// =====================================================
-// COMPONENTE
-// =====================================================
-
-export default function InstructorAsistencia() {
-  const nombreCompleto = localStorage.getItem("firstName") || "";
-  const firstName = nombreCompleto.split(" ")[0];
-  const idInstructor = localStorage.getItem("user_id");
-
-  // =====================================================
-  // ESTADOS
-  // =====================================================
-
-  const [asignaciones, setAsignaciones] = useState([]);
-  const [fichaSeleccionada, setFichaSeleccionada] = useState(null);
-  const [selectedAsignacion, setSelectedAsignacion] = useState(null);
-  const [fecha, setFecha] = useState("");
-  const [mostrarCalendario, setMostrarCalendario] = useState(false);
-  const [aprendices, setAprendices] = useState([]);
-  const [estados, setEstados] = useState({});
-  const [estadosAprendices, setEstadosAprendices] = useState({});
-  const [cargandoAsignaciones, setCargandoAsignaciones] = useState(true);
-  const [cargandoAprendices, setCargandoAprendices] = useState(false);
-  const [guardando, setGuardando] = useState(false);
-  const [mensaje, setMensaje] = useState(null);
-
-  // Limpia todo lo relacionado con la clase seleccionada
-  function limpiarClase() {
-    setFecha("");
-    setMostrarCalendario(false);
-    setAprendices([]);
-    setEstados({});
-    setEstadosAprendices({});
-    setMensaje(null);
+function obtenerEstado(estado) {
+  if (!estado) {
+    return { texto: "Sin estado", clase: "attendance-status--unknown" };
   }
 
-  // =====================================================
-  // OBTENER FICHAS DEL INSTRUCTOR
-  // =====================================================
+  const normalizado = estado.toLowerCase();
+
+  if (normalizado.includes("presente")) {
+    return { texto: "Presente", clase: "attendance-status--present" };
+  }
+
+  if (normalizado.includes("retardo") || normalizado.includes("retraso")) {
+    return { texto: "Retardo", clase: "attendance-status--late" };
+  }
+
+  if (normalizado.includes("excusa")) {
+    return { texto: "Excusa", clase: "attendance-status--excused" };
+  }
+
+  if (normalizado.includes("falla") || normalizado.includes("inasistencia")) {
+    return { texto: "Falla", clase: "attendance-status--absent" };
+  }
+
+  return { texto: estado, clase: "attendance-status--unknown" };
+}
+
+// =========================================================
+// COMPONENTE
+// =========================================================
+
+export default function AprendizAsistencia() {
+  const currentDate = useCurrentDate();
+
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
+  const idAprendiz = Number(localStorage.getItem("user_id"));
+
+  // =========================================================
+  // ESTADOS
+  // =========================================================
+
+  const [ficha, setFicha] = useState(null);
+  const [asistencias, setAsistencias] = useState([]);
+
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+
+  const [busqueda, setBusqueda] = useState("");
+  const [soloMias, setSoloMias] = useState(false);
+  const [diaActual, setDiaActual] = useState(0);
+
+  const [mostrarCalendario, setMostrarCalendario] = useState(false);
+  const [errorCalendario, setErrorCalendario] = useState("");
+
+  // =========================================================
+  // CARGAR LA ASISTENCIA DE MI FICHA
+  // =========================================================
 
   useEffect(() => {
-    if (!idInstructor) {
-      setCargandoAsignaciones(false);
+    if (!idAprendiz) {
+      setCargando(false);
+      setError("No se encontró tu sesión. Inicia sesión de nuevo.");
       return;
     }
 
-    fetch(`${API_BASE}/asistencia/instructor/${idInstructor}/asignaciones`)
-      .then((res) => {
+    fetch(`${API_BASE}/asistencia/aprendiz/${idAprendiz}/ficha`)
+      .then(async (res) => {
         if (!res.ok) {
-          throw new Error("No se pudieron cargar las fichas");
+          let detalle;
+
+          try {
+            detalle = await res.json();
+          } catch {
+            detalle = {};
+          }
+
+          throw new Error(
+            detalle.detail || "No fue posible consultar la asistencia."
+          );
         }
 
         return res.json();
       })
       .then((data) => {
-        console.log("Asignaciones:", data);
-        setAsignaciones(data);
+        setFicha(data.ficha);
+        setAsistencias(data.registros || []);
       })
-      .catch((error) => {
-        console.error(error);
-
-        setMensaje({
-          tipo: "error",
-          texto: "No se pudieron cargar las fichas asignadas.",
-        });
+      .catch((err) => {
+        console.error(err);
+        setError(err.message);
       })
       .finally(() => {
-        setCargandoAsignaciones(false);
+        setCargando(false);
       });
-  }, [idInstructor]);
+  }, [idAprendiz]);
 
-  // =====================================================
-  // OBTENER FICHAS ÚNICAS
-  // =====================================================
+  // =========================================================
+  // ¿LOS REGISTROS TRAEN EL ID DEL APRENDIZ?
+  // =========================================================
+  // Si el backend incluye Id_Apr en cada registro, se puede resaltar
+  // la fila propia y activar el filtro "solo mi asistencia".
 
-  const fichas = [];
+  const puedeIdentificarMias = asistencias.some(
+    (registro) => registro.Id_Apr !== undefined
+  );
 
-  asignaciones.forEach((asignacion) => {
-    const existe = fichas.some((ficha) => ficha.Id_Fic === asignacion.Id_Fic);
-
-    if (!existe) {
-      fichas.push(asignacion);
-    }
-  });
-
-  // =====================================================
-  // SELECCIONAR FICHA
-  // =====================================================
-
-  function seleccionarFicha(ficha) {
-    setFichaSeleccionada(ficha);
-    setSelectedAsignacion(null);
-    limpiarClase();
+  function esMia(registro) {
+    return Number(registro.Id_Apr) === idAprendiz;
   }
 
-  // =====================================================
-  // ASIGNACIONES DE LA FICHA
-  // =====================================================
+  // =========================================================
+  // DÍAS DISPONIBLES
+  // =========================================================
 
-  const asignacionesFicha = fichaSeleccionada
-    ? asignaciones.filter(
-        (asignacion) => asignacion.Id_Fic === fichaSeleccionada.Id_Fic
-      )
-    : [];
+  const diasDisponibles = useMemo(() => {
+    const fechas = [
+      ...new Set(
+        asistencias.map((registro) => registro.Fec_Asi).filter(Boolean)
+      ),
+    ];
 
-  // =====================================================
-  // SELECCIONAR CLASE
-  // =====================================================
+    return fechas.sort((a, b) => new Date(b) - new Date(a));
+  }, [asistencias]);
 
-  function seleccionarAsignacion(asignacion) {
-    setSelectedAsignacion(asignacion);
-    limpiarClase();
+  const fechaSeleccionada = diasDisponibles[diaActual] || null;
 
-    // La fecha se obtiene automáticamente, respetando el período
-    setFecha(obtenerFechaInicial(asignacion));
-  }
+  // =========================================================
+  // ASISTENCIAS DEL DÍA
+  // =========================================================
 
-  // =====================================================
-  // CAMBIAR DÍA CON LOS BOTONES ANTERIOR / SIGUIENTE
-  // =====================================================
-
-  function cambiarDia(direccion) {
-    if (!selectedAsignacion || !fecha) {
-      return;
+  const asistenciasDelDia = useMemo(() => {
+    if (!fechaSeleccionada) {
+      return [];
     }
 
-    const nuevaFecha = cambiarFechaPorSemana(fecha, direccion);
-    const { inicio, fin } = obtenerLimitesPeriodo(selectedAsignacion);
+    const texto = busqueda.trim().toLowerCase();
 
-    if (inicio && nuevaFecha < inicio) {
-      setMensaje({
-        tipo: "error",
-        texto:
-          "No puedes retroceder más. Esta fecha está fuera del período del resultado de aprendizaje.",
-      });
+    return asistencias.filter((registro) => {
+      const mismaFecha = registro.Fec_Asi === fechaSeleccionada;
 
-      return;
-    }
+      const coincide =
+        !texto || (registro.Aprendiz || "").toLowerCase().includes(texto);
 
-    if (fin && nuevaFecha > fin) {
-      setMensaje({
-        tipo: "error",
-        texto:
-          "No puedes avanzar más. Esta fecha está fuera del período del resultado de aprendizaje.",
-      });
+      const pasaFiltroMias =
+        !soloMias || !puedeIdentificarMias || esMia(registro);
 
-      return;
-    }
+      return mismaFecha && coincide && pasaFiltroMias;
+    });
+  }, [asistencias, fechaSeleccionada, busqueda, soloMias]);
 
-    const diaNuevaFecha = normalizarDia(obtenerDiaSemana(nuevaFecha));
-    const diaPermitido = normalizarDia(selectedAsignacion.Dia);
+  // =========================================================
+  // CAMBIAR DÍA
+  // =========================================================
 
-    if (diaNuevaFecha !== diaPermitido) {
-      return;
-    }
+  const cambiarDia = (direccion) => {
+    setErrorCalendario("");
 
-    setMensaje(null);
-    setFecha(nuevaFecha);
-  }
+    setDiaActual((actual) => {
+      const nuevo = actual + direccion;
 
-  // =====================================================
+      if (nuevo < 0) {
+        return 0;
+      }
+
+      if (nuevo >= diasDisponibles.length) {
+        return diasDisponibles.length - 1;
+      }
+
+      return nuevo;
+    });
+  };
+
+  // =========================================================
   // ELEGIR FECHA DESDE EL CALENDARIO
-  // =====================================================
+  // =========================================================
 
-  function elegirFechaCalendario(valor) {
-    // El usuario borró la fecha del input: no cambiamos nada
-    if (!valor || !selectedAsignacion) {
+  const elegirFechaCalendario = (valor) => {
+    if (!valor) {
       return;
     }
 
-    const { inicio, fin } = obtenerLimitesPeriodo(selectedAsignacion);
+    const indice = diasDisponibles.indexOf(valor);
 
-    if ((inicio && valor < inicio) || (fin && valor > fin)) {
-      setMensaje({
-        tipo: "error",
-        texto:
-          "La fecha elegida está fuera del período del resultado de aprendizaje.",
-      });
-
-      return;
-    }
-
-    const diaElegido = obtenerDiaSemana(valor);
-
-    if (normalizarDia(diaElegido) !== normalizarDia(selectedAsignacion.Dia)) {
-      setMensaje({
-        tipo: "error",
-        texto: `La fecha elegida es ${diaElegido}, pero esta clase corresponde al día ${selectedAsignacion.Dia}.`,
-      });
-
-      return;
-    }
-
-    setMensaje(null);
-    setFecha(valor);
-  }
-
-  // =====================================================
-  // CARGAR APRENDICES CUANDO CAMBIA LA FECHA
-  // =====================================================
-
-  useEffect(() => {
-    if (!selectedAsignacion || !fecha) {
-      return;
-    }
-
-    cargarClase();
-  }, [fecha, selectedAsignacion]);
-
-  // =====================================================
-  // CARGAR APRENDICES + ASISTENCIA EXISTENTE
-  // =====================================================
-
-  async function cargarClase() {
-    setCargandoAprendices(true);
-    setMensaje(null);
-
-    try {
-      const url =
-        `${API_BASE}/asistencia/clase/` +
-        `${selectedAsignacion.Id_Fic}/` +
-        `${selectedAsignacion.Id_Ins}/` +
-        `${selectedAsignacion.Id_RA}/` +
-        `${encodeURIComponent(selectedAsignacion.Dia)}/` +
-        `${fecha}`;
-
-      console.log("Cargando:", url);
-
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        let error;
-
-        try {
-          error = await response.json();
-        } catch {
-          error = {};
-        }
-
-        throw new Error(error.detail || "No se pudo cargar la clase.");
-      }
-
-      const data = await response.json();
-
-      setAprendices(data);
-
-      // Estados existentes
-      const nuevosEstados = {};
-
-      data.forEach((aprendiz) => {
-        nuevosEstados[aprendiz.Id_Apr] =
-          DESDE_BACKEND[aprendiz.Es_Asi] || "presente";
-      });
-
-      setEstados(nuevosEstados);
-
-      // Semáforos
-      const nuevosSemaforos = {};
-
-      await Promise.all(
-        data.map(async (aprendiz) => {
-          try {
-            const res = await fetch(
-              `${API_BASE}/asistencia/aprendiz/${aprendiz.Id_Apr}/estado`
-            );
-
-            if (res.ok) {
-              nuevosSemaforos[aprendiz.Id_Apr] = await res.json();
-            }
-          } catch {
-            // No interrumpe la carga
-          }
-        })
+    if (indice === -1) {
+      setErrorCalendario(
+        `No hay asistencia registrada el ${formatearFecha(valor)}.`
       );
-
-      setEstadosAprendices(nuevosSemaforos);
-    } catch (error) {
-      console.error(error);
-
-      setAprendices([]);
-      setEstados({});
-      setEstadosAprendices({});
-
-      setMensaje({
-        tipo: "error",
-        texto: error.message,
-      });
-    } finally {
-      setCargandoAprendices(false);
-    }
-  }
-
-  // =====================================================
-  // CAMBIAR ESTADO DE UN APRENDIZ
-  // =====================================================
-
-  function cambiarEstado(Id_Apr, estado) {
-    setEstados((prev) => ({
-      ...prev,
-      [Id_Apr]: estado,
-    }));
-  }
-
-  // =====================================================
-  // GUARDAR ASISTENCIA
-  // =====================================================
-
-  async function guardarAsistencia() {
-    if (!selectedAsignacion) {
-      setMensaje({ tipo: "error", texto: "Selecciona una clase." });
       return;
     }
 
-    if (!fecha) {
-      setMensaje({
-        tipo: "error",
-        texto: "No se pudo determinar la fecha de asistencia.",
-      });
-      return;
-    }
+    setErrorCalendario("");
+    setDiaActual(indice);
+  };
 
-    // Validar período del resultado de aprendizaje
-    const { inicio, fin } = obtenerLimitesPeriodo(selectedAsignacion);
-
-    if ((inicio && fecha < inicio) || (fin && fecha > fin)) {
-      setMensaje({
-        tipo: "error",
-        texto:
-          "No puedes registrar asistencia fuera del período del resultado de aprendizaje.",
-      });
-      return;
-    }
-
-    // Validar día
-    const diaSeleccionado = normalizarDia(obtenerDiaSemana(fecha));
-    const diaPermitido = normalizarDia(selectedAsignacion.Dia);
-
-    if (diaSeleccionado !== diaPermitido) {
-      setMensaje({
-        tipo: "error",
-        texto: `No puedes registrar asistencia porque esta clase corresponde al día ${selectedAsignacion.Dia}.`,
-      });
-      return;
-    }
-
-    setGuardando(true);
-    setMensaje(null);
-
-    const nuevosSemaforos = { ...estadosAprendices };
-
-    try {
-      for (const aprendiz of aprendices) {
-        const estado = estados[aprendiz.Id_Apr];
-
-        if (!estado) {
-          continue;
-        }
-
-        const response = await fetch(`${API_BASE}/asistencia`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            Fec_Asi: fecha,
-            Es_Asi: A_BACKEND[estado],
-            Id_Apr: aprendiz.Id_Apr,
-            Id_Fic: selectedAsignacion.Id_Fic,
-            Id_Ins: selectedAsignacion.Id_Ins,
-            Id_RA: selectedAsignacion.Id_RA,
-            Dia: selectedAsignacion.Dia,
-          }),
-        });
-
-        if (!response.ok) {
-          let error;
-
-          try {
-            error = await response.json();
-          } catch {
-            error = {};
-          }
-
-          throw new Error(error.detail || "Error guardando asistencia.");
-        }
-
-        const resultado = await response.json();
-
-        if (resultado.estado) {
-          nuevosSemaforos[aprendiz.Id_Apr] = resultado.estado;
-        }
-      }
-
-      setEstadosAprendices(nuevosSemaforos);
-
-      setMensaje({
-        tipo: "exito",
-        texto: "Asistencia guardada correctamente.",
-      });
-    } catch (error) {
-      console.error(error);
-
-      setEstadosAprendices(nuevosSemaforos);
-
-      setMensaje({
-        tipo: "error",
-        texto: error.message,
-      });
-    } finally {
-      setGuardando(false);
-    }
-  }
-
-  // =====================================================
-  // VOLVER A FICHAS
-  // =====================================================
-
-  function volverAFichas() {
-    setFichaSeleccionada(null);
-    setSelectedAsignacion(null);
-    limpiarClase();
-  }
-
-  // Límites para el calendario
-  const limitesActuales = obtenerLimitesPeriodo(selectedAsignacion);
-
-  // =====================================================
+  // =========================================================
   // RENDER
-  // =====================================================
+  // =========================================================
 
   return (
     <>
-      <InstructorNavbar user={{ Nom_Ins: firstName }} />
+      <AprendizNavbar user={{ Nom_Apr: firstName }} />
 
       <div className="bg-light min-vh-100 py-5">
-        <main className="container" style={{ maxWidth: 1000 }}>
+        <main className="container" style={{ maxWidth: "1100px" }}>
           {/* ENCABEZADO */}
 
           <div className="mb-4">
-            <h1 className="fw-bold text-dark">Control de Asistencia</h1>
+            <h1 className="fw-bold text-dark">Asistencia de mi ficha</h1>
 
-            <p className="text-muted mb-0">
-              Selecciona una ficha para registrar la asistencia de sus
-              aprendices.
+            <p className="text-muted mb-1">
+              Consulta la asistencia registrada en tu ficha.
             </p>
+
+            <small className="text-muted">{currentDate}</small>
           </div>
 
-          {/* MENSAJES */}
+          {/* CUADRO PRINCIPAL */}
 
-          {mensaje && (
-            <div
-              className={
-                mensaje.tipo === "exito"
-                  ? "alert alert-success"
-                  : "alert alert-danger"
-              }
-            >
-              {mensaje.texto}
-            </div>
-          )}
+          <div
+            className="bg-white rounded-4 p-4 shadow-sm"
+            style={{ border: "2px solid #00851d" }}
+          >
+            {/* INFORMACIÓN DE LA FICHA */}
 
-          {/* ================================================= */}
-          {/* PASO 1 - FICHAS */}
-          {/* ================================================= */}
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h5 className="fw-bold mb-1">
+                  {ficha ? `Ficha ${ficha.Num_Fic}` : "Mi ficha"}
+                </h5>
 
-          {!fichaSeleccionada && (
-            <div
-              className="bg-white rounded-4 p-4 shadow-sm"
-              style={{ border: "2px solid #00851d" }}
-            >
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                  <h5 className="fw-bold mb-1">Mis fichas</h5>
-
-                  <p className="text-muted small mb-0">
-                    Selecciona la ficha en la que deseas tomar asistencia.
-                  </p>
-                </div>
-
-                <span
-                  className="badge rounded-pill"
-                  style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
-                >
-                  {fichas.length} fichas
-                </span>
+                <p className="text-muted small mb-0">
+                  Historial de asistencia día por día.
+                </p>
               </div>
 
-              {cargandoAsignaciones ? (
-                <div className="text-center py-5">
-                  <div
-                    className="spinner-border"
-                    style={{ color: "#00851d" }}
-                  />
-
-                  <p className="text-muted mt-3 mb-0">Cargando fichas...</p>
-                </div>
-              ) : fichas.length === 0 ? (
-                <div className="text-center py-5">
-                  <p className="text-muted mb-0">
-                    No tienes fichas asignadas.
-                  </p>
-                </div>
-              ) : (
-                <div className="row g-3">
-                  {fichas.map((ficha) => (
-                    <div key={ficha.Id_Fic} className="col-12 col-md-6">
-                      <button
-                        type="button"
-                        className="w-100 text-start bg-white rounded-4 p-4"
-                        onClick={() => seleccionarFicha(ficha)}
-                        style={{ border: "1px solid #ddd", transition: "0.2s" }}
-                      >
-                        <div className="d-flex align-items-center gap-3">
-                          <div
-                            className="p-3 rounded-3"
-                            style={{
-                              backgroundColor: "#E6F4D7",
-                              color: "#1B5E20",
-                            }}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <rect x="3" y="4" width="18" height="18" rx="2" />
-                              <line x1="16" y1="2" x2="16" y2="6" />
-                              <line x1="8" y1="2" x2="8" y2="6" />
-                              <line x1="3" y1="10" x2="21" y2="10" />
-                            </svg>
-                          </div>
-
-                          <div className="flex-grow-1">
-                            <div className="fw-bold fs-5 text-dark">
-                              Ficha {ficha.Num_Fic || ficha.Id_Fic}
-                            </div>
-
-                            <div
-                              className="small mt-1"
-                              style={{ color: "#00851d" }}
-                            >
-                              Ver clases →
-                            </div>
-                          </div>
-                        </div>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <span
+                className="badge rounded-pill"
+                style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
+              >
+                {diasDisponibles.length} días con registros
+              </span>
             </div>
-          )}
 
-          {/* ================================================= */}
-          {/* PASO 2 - CLASES */}
-          {/* ================================================= */}
+            {error && <div className="alert alert-danger">{error}</div>}
 
-          {fichaSeleccionada && !selectedAsignacion && (
-            <div>
-              <button
-                type="button"
-                className="btn btn-secondary mb-3"
-                onClick={volverAFichas}
-              >
-                Volver a mis fichas
-              </button>
+            {/* CARGANDO */}
 
-              <div
-                className="bg-white rounded-4 p-4 shadow-sm"
-                style={{ border: "2px solid #00851d" }}
-              >
-                <div className="d-flex align-items-center gap-3 mb-4">
-                  <div
-                    className="p-3 rounded-3"
-                    style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="3" y="4" width="18" height="18" rx="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                  </div>
+            {cargando && (
+              <div className="border rounded-3 text-center py-5">
+                <div
+                  className="spinner-border"
+                  style={{ color: "#00851d" }}
+                  role="status"
+                />
 
-                  <div>
-                    <h4 className="fw-bold mb-1">
-                      Ficha {fichaSeleccionada.Num_Fic || fichaSeleccionada.Id_Fic}
-                    </h4>
+                <p className="text-muted mt-3 mb-0">
+                  Consultando asistencia...
+                </p>
+              </div>
+            )}
 
-                    <p className="text-muted mb-0">
-                      Selecciona la clase que corresponde al día de formación.
-                    </p>
-                  </div>
-                </div>
+            {/* SIN REGISTROS */}
 
-                <div className="d-flex flex-column gap-3">
-                  {asignacionesFicha.map((asignacion) => (
-                    <button
-                      type="button"
-                      key={
-                        `${asignacion.Id_Fic}-` +
-                        `${asignacion.Id_Ins}-` +
-                        `${asignacion.Id_RA}-` +
-                        `${asignacion.Dia}`
-                      }
-                      className="w-100 text-start bg-white rounded-3 p-3"
-                      onClick={() => seleccionarAsignacion(asignacion)}
-                      style={{ border: "1px solid #ddd" }}
-                    >
-                      <div className="row align-items-center">
-                        <div className="col-md-8">
-                          <div className="fw-bold text-dark">
-                            {asignacion.ResultadoAprendizaje ||
-                              `Resultado de aprendizaje ${asignacion.Id_RA}`}
-                          </div>
+            {!cargando && !error && asistencias.length === 0 && (
+              <div className="border rounded-3 text-center py-5">
+                <h6 className="fw-bold">No hay registros</h6>
 
-                          {asignacion.Competencia && (
-                            <div className="text-muted small mt-1">
-                              Competencia: {asignacion.Competencia}
-                            </div>
-                          )}
+                <p className="text-muted small mb-0">
+                  Todavía no hay asistencias registradas para tu ficha.
+                </p>
+              </div>
+            )}
 
-                          <div className="text-muted small mt-1">
-                            Día de formación:{" "}
-                            <span
-                              className="fw-semibold"
-                              style={{ color: "#1B5E20" }}
-                            >
-                              {asignacion.Dia}
-                            </span>
-                          </div>
-                        </div>
+            {/* RESULTADOS */}
 
-                        <div className="col-md-4 text-md-end mt-2 mt-md-0">
-                          <span
-                            className="badge rounded-pill"
-                            style={{
-                              backgroundColor: "#E6F4D7",
-                              color: "#1B5E20",
-                            }}
+            {!cargando && asistencias.length > 0 && (
+              <>
+                {/* BUSCADOR */}
+
+                <div className="mb-4">
+                  <label className="form-label fw-semibold">
+                    Buscar por nombre
+                  </label>
+
+                  <div className="row align-items-center">
+                    <div className="col-12 col-md-6">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Nombre del aprendiz"
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
+                      />
+                    </div>
+
+                    {puedeIdentificarMias && (
+                      <div className="col-12 col-md-6 mt-2 mt-md-0">
+                        <div className="form-check">
+                          <input
+                            id="soloMias"
+                            type="checkbox"
+                            className="form-check-input"
+                            checked={soloMias}
+                            onChange={(e) => setSoloMias(e.target.checked)}
+                          />
+
+                          <label
+                            htmlFor="soloMias"
+                            className="form-check-label"
                           >
-                            Registrar →
-                          </span>
+                            Ver solo mi asistencia
+                          </label>
                         </div>
                       </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ================================================= */}
-          {/* PASO 3 - ASISTENCIA */}
-          {/* ================================================= */}
-
-          {selectedAsignacion && (
-            <div>
-              <button
-                type="button"
-                className="btn btn-secondary mb-3"
-                onClick={() => {
-                  setSelectedAsignacion(null);
-                  limpiarClase();
-                }}
-              >
-                Volver a las clases
-              </button>
-
-              {/* INFORMACIÓN + BARRA DE FECHA */}
-
-              <div
-                className="bg-white rounded-4 p-4 shadow-sm mb-4"
-                style={{ border: "2px solid #00851d" }}
-              >
-                <h5 className="fw-bold mb-4">Registrar asistencia</h5>
-
-                <div
-                  className="p-3 rounded-3 mb-4"
-                  style={{ backgroundColor: "#E6F4D7" }}
-                >
-                  <div className="fw-bold text-dark fs-5">
-                    Ficha {selectedAsignacion.Num_Fic || selectedAsignacion.Id_Fic}
-                  </div>
-
-                  <div className="small text-muted mt-1">
-                    Resultado de aprendizaje:{" "}
-                    <span className="fw-medium text-dark">
-                      {selectedAsignacion.ResultadoAprendizaje ||
-                        `Resultado de aprendizaje ${selectedAsignacion.Id_RA}`}
-                    </span>
-                  </div>
-
-                  {selectedAsignacion.Competencia && (
-                    <div className="small text-muted">
-                      Competencia:{" "}
-                      <span className="fw-medium text-dark">
-                        {selectedAsignacion.Competencia}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="small text-muted">
-                    Día de formación:{" "}
-                    <span className="fw-semibold" style={{ color: "#1B5E20" }}>
-                      {selectedAsignacion.Dia}
-                    </span>
+                    )}
                   </div>
                 </div>
 
-                {/* BARRA PARA CAMBIAR FECHA */}
+                {/* NAVEGACIÓN DE FECHA */}
 
                 <div
-                  className="rounded-3 p-3"
+                  className="rounded-3 p-3 mb-3"
                   style={{
                     background:
                       "linear-gradient(#006b18 0%, #00851d 55%, #0a9f2e 100%)",
                   }}
                 >
-                  <div className="attendance-date-controls d-flex align-items-center justify-content-between gap-2">
+                  <div className="d-flex align-items-center justify-content-between">
                     <button
                       type="button"
-                      className="btn btn-date-nav btn-date-nav--previous"
+                      className="btn btn-outline-light"
                       onClick={() => cambiarDia(-1)}
+                      disabled={diaActual === 0}
                     >
-                      Anterior
+                      ← Más reciente
                     </button>
 
-                    <div className="text-center text-white flex-grow-1">
+                    <div className="text-center text-white">
                       <div className="small" style={{ opacity: 0.9 }}>
-                        Día de formación
+                        Día {diaActual + 1} de {diasDisponibles.length}
                       </div>
 
                       <div className="fw-bold text-capitalize">
-                        {formatearFecha(fecha) || "Sin fecha disponible"}
+                        {formatearFecha(fechaSeleccionada)}
                       </div>
                     </div>
 
                     <button
                       type="button"
-                      className="btn btn-date-nav btn-date-nav--next"
+                      className="btn btn-outline-light"
                       onClick={() => cambiarDia(1)}
+                      disabled={diaActual === diasDisponibles.length - 1}
                     >
-                      Siguiente
+                      Más antiguo →
                     </button>
                   </div>
                 </div>
 
-                <div className="form-text mt-2">
-                  Puedes cambiar únicamente entre las fechas correspondientes
-                  al día de formación de esta clase.
-                </div>
+                {/* CALENDARIO OPCIONAL */}
 
-                {/* ================================================= */}
-                {/* APARTADO OPCIONAL: ELEGIR DESDE EL CALENDARIO */}
-                {/* ================================================= */}
-
-                <div className="mt-3">
+                <div className="mb-4">
                   <button
                     type="button"
                     className="attendance-calendar-toggle btn btn-sm btn-outline-success"
-                    onClick={() => setMostrarCalendario((prev) => !prev)}
+                    onClick={() => {
+                      setMostrarCalendario((prev) => !prev);
+                      setErrorCalendario("");
+                    }}
                   >
                     {mostrarCalendario
                       ? "Ocultar calendario"
@@ -1013,199 +400,126 @@ export default function InstructorAsistencia() {
                   {mostrarCalendario && (
                     <div className="attendance-calendar-panel rounded-3 p-3 mt-3">
                       <p className="form-label fw-semibold mb-1">
-                        Fecha de la clase
+                        Fecha de la asistencia
                       </p>
 
                       <DateCalendar
-                        value={fecha}
-                        min={limitesActuales.inicio || undefined}
-                        max={limitesActuales.fin || undefined}
-                        isDateAllowed={(date) =>
-                          normalizarDia(obtenerDiaSemana(date)) ===
-                          normalizarDia(selectedAsignacion.Dia)
-                        }
-                        ariaLabel="Seleccionar fecha de clase"
+                        value={fechaSeleccionada || ""}
+                        availableDates={diasDisponibles}
+                        ariaLabel="Fechas con asistencia registrada"
                         onChange={elegirFechaCalendario}
                       />
 
                       <div className="form-text">
-                        Solo se aceptan fechas dentro del período del resultado
-                        de aprendizaje
-                        {limitesActuales.inicio && limitesActuales.fin
-                          ? ` (${limitesActuales.inicio} a ${limitesActuales.fin})`
-                          : ""}{" "}
-                        que caigan en <strong>{selectedAsignacion.Dia}</strong>.
+                        Hay registros en {diasDisponibles.length} día(s). Elige
+                        una de esas fechas.
                       </div>
+
+                      {errorCalendario && (
+                        <div className="small text-danger mt-1">
+                          {errorCalendario}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* LISTA DE APRENDICES */}
+                {/* CONTADOR */}
 
-              {fecha && (
-                <div className="bg-white rounded-4 p-4 shadow-sm">
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                      <h5 className="fw-bold mb-1">Aprendices</h5>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <span className="fw-semibold">Registros del día</span>
 
-                      <p className="text-muted small mb-0">
-                        Fecha: {formatearFecha(fecha)}
-                      </p>
+                    <div className="text-muted small">
+                      Asistencia registrada en esta fecha
                     </div>
-
-                    <span
-                      className="badge rounded-pill"
-                      style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
-                    >
-                      {aprendices.length} aprendices
-                    </span>
                   </div>
 
-                  {cargandoAprendices ? (
-                    <div className="text-center py-5">
-                      <div
-                        className="spinner-border"
-                        style={{ color: "#00851d" }}
-                      />
-
-                      <p className="text-muted mt-3">Cargando aprendices...</p>
-                    </div>
-                  ) : aprendices.length === 0 ? (
-                    <div className="text-center py-5 text-muted">
-                      No hay aprendices registrados en esta ficha.
-                    </div>
-                  ) : (
-                    <div className="d-flex flex-column gap-2">
-                      {aprendices.map((aprendiz) => {
-                        const semaforo = estadosAprendices[aprendiz.Id_Apr];
-
-                        const colores = semaforo
-                          ? COLOR_SEMAFORO[semaforo.semaforo]
-                          : null;
-
-                        return (
-                          <div
-                            key={aprendiz.Id_Apr}
-                            className="border rounded-3 p-3"
-                          >
-                            <div className="row align-items-center">
-                              {/* APRENDIZ */}
-
-                              <div className="col-md-5">
-                                <div className="fw-bold d-flex align-items-center flex-wrap gap-2">
-                                  {aprendiz.Nom_Apr} {aprendiz.Ape_Apr}
-
-                                  {semaforo && colores && (
-                                    <span
-                                      className="badge rounded-pill"
-                                      style={{
-                                        backgroundColor: colores.fondo,
-                                        color: colores.texto,
-                                        fontWeight: 600,
-                                      }}
-                                      title={
-                                        `Fallas brutas: ${semaforo.fallas_brutas} · ` +
-                                        `Excusas: ${semaforo.excusas} · ` +
-                                        `Racha actual: ${semaforo.racha_dias} día(s)`
-                                      }
-                                    >
-                                      {semaforo.acumulado} fallas
-                                    </span>
-                                  )}
-                                </div>
-
-                                <div className="text-muted small">
-                                  Documento: {aprendiz.Num_ide_Apr}
-                                </div>
-
-                                {semaforo && semaforo.deserta_por_racha && (
-                                  <div
-                                    className="small mt-1 fw-semibold"
-                                    style={{ color: "#142d4d" }}
-                                  >
-                                    3 fallas seguidas — riesgo de deserción
-                                  </div>
-                                )}
-
-                                {semaforo &&
-                                  !semaforo.deserta_por_racha &&
-                                  semaforo.deserta_por_acumulado && (
-                                    <div
-                                      className="small mt-1 fw-semibold"
-                                      style={{ color: "#142d4d" }}
-                                    >
-                                      Fallas acumuladas al máximo — riesgo de
-                                      deserción
-                                    </div>
-                                  )}
-                              </div>
-
-                              {/* ESTADOS */}
-
-                              <div className="col-md-7">
-                                <div className="d-flex flex-wrap gap-2">
-                                  {ESTADOS.map((estado) => {
-                                    const activo =
-                                      estados[aprendiz.Id_Apr] === estado.valor;
-
-                                    return (
-                                      <button
-                                        key={`${aprendiz.Id_Apr}-${estado.valor}`}
-                                        type="button"
-                                        className="btn btn-sm"
-                                        onClick={() =>
-                                          cambiarEstado(
-                                            aprendiz.Id_Apr,
-                                            estado.valor
-                                          )
-                                        }
-                                        style={{
-                                          backgroundColor: activo
-                                            ? estado.color
-                                            : "#f3f6fa",
-                                          color: activo ? estado.texto : "#27364b",
-                                          border: `1px solid ${activo ? estado.color : "#d5dee8"}`,
-                                          fontWeight: activo ? "600" : "400",
-                                        }}
-                                      >
-                                        {estado.nombre}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* GUARDAR */}
-
-                  {aprendices.length > 0 && (
-                    <button
-                      type="button"
-                      className="btn text-white fw-semibold w-100 mt-4 py-2"
-                      style={{ backgroundColor: "#00851d" }}
-                      disabled={guardando}
-                      onClick={guardarAsistencia}
-                    >
-                      {guardando ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" />
-                          Guardando...
-                        </>
-                      ) : (
-                        "Guardar asistencia"
-                      )}
-                    </button>
-                  )}
+                  <span
+                    className="badge rounded-pill"
+                    style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
+                  >
+                    {asistenciasDelDia.length}
+                  </span>
                 </div>
-              )}
-            </div>
-          )}
+
+                {/* TABLA */}
+
+                {asistenciasDelDia.length > 0 ? (
+                  <div className="table-responsive border rounded-3">
+                    <table className="table table-hover align-middle mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th className="px-3">Aprendiz</th>
+                          <th>Resultado de aprendizaje</th>
+                          <th>Competencia</th>
+                          <th>Instructor</th>
+                          <th className="text-center">Estado</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {asistenciasDelDia.map((registro, index) => {
+                          const estado = obtenerEstado(registro.Estado);
+                          const propia =
+                            puedeIdentificarMias && esMia(registro);
+
+                          return (
+                            <tr
+                              key={registro.Id_Asi || index}
+                              style={
+                                propia
+                                  ? { backgroundColor: "#E6F4D7" }
+                                  : undefined
+                              }
+                            >
+                              <td className="px-3 fw-semibold">
+                                {registro.Aprendiz || "-"}
+
+                                {propia && (
+                                  <span
+                                    className="badge rounded-pill ms-2"
+                                    style={{
+                                      backgroundColor: "#00851d",
+                                      color: "#fff",
+                                    }}
+                                  >
+                                    Yo
+                                  </span>
+                                )}
+                              </td>
+
+                              <td>{registro.ResultadoAprendizaje || "-"}</td>
+
+                              <td className="text-muted">
+                                {registro.Competencia || "-"}
+                              </td>
+
+                              <td>{registro.Instructor || "-"}</td>
+
+                              <td className="text-center">
+                                <span
+                                  className={`badge rounded-pill px-3 py-2 ${estado.clase}`}
+                                >
+                                  {estado.texto}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="border rounded-3 text-center py-4">
+                    <p className="text-muted small mb-0">
+                      No hay asistencia para la búsqueda en este día.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </main>
       </div>
     </>

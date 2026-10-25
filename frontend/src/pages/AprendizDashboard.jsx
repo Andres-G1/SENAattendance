@@ -115,7 +115,7 @@ export default function AprendizDashboard() {
 
                     {estado.deserta_por_racha && (
                       <div className="alert alert-danger mt-3 mb-0 small">
-                        ⚠ Alcanzaste el máximo de fallas acumuladas permitidas.
+                        ⚠ Alcanzaste el máximo de fallas seguidas permitidas.
                       </div>
                     )}
 

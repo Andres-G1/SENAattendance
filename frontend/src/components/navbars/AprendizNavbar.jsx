@@ -50,6 +50,7 @@ export default function CoordinadorNavbar({ user }) {
                   Inicio
                 </Link>
               </li>
+              
               <li className="nav-item">
                 <a className="nav-link active px-3 py-2" href="/Aprendiz/AprendizAsistencia">
                   Revisar Asistencia

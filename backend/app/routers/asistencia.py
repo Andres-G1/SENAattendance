@@ -372,7 +372,6 @@ def obtener_estado_aprendiz(
 
     return calcular_estado(session, Id_Apr, aprendiz.Id_Fic)
 
-
 # =========================================================
 # LISTAR FALLAS / NOVEDADES DE UN APRENDIZ
 # =========================================================
@@ -407,10 +406,18 @@ def obtener_novedades_aprendiz(
     ).all()
 
     resultado = []
+    instructores = {}
 
     for registro in registros:
 
         ra, competencia = _obtener_ra_y_competencia(session, registro.Id_RA)
+
+        if registro.Id_Ins not in instructores:
+            instructores[registro.Id_Ins] = session.get(
+                Instructor, registro.Id_Ins
+            )
+
+        instructor = instructores[registro.Id_Ins]
 
         resultado.append({
             "Id_Asi": registro.Id_Asi,
@@ -419,11 +426,13 @@ def obtener_novedades_aprendiz(
             "Num_Fic": ficha.Num_Fic,
             "ResultadoAprendizaje": ra.Nom_RA if ra else None,
             "Competencia": competencia.Nom_Comp if competencia else None,
+            "Instructor": (
+                f"{instructor.Nom_Ins} {instructor.Ape_Ins}"
+                if instructor else None
+            ),
         })
 
     return resultado
-
-
 # =========================================================
 # REGISTRAR / ACTUALIZAR ASISTENCIA
 # =========================================================
@@ -626,11 +635,9 @@ def revisar_asistencia_aprendiz(
         "ficha": {
             "Id_Fic": ficha.Id_Fic,
             "Num_Fic": ficha.Num_Fic,
-            "Jor_Fic": ficha.Jor_Fic.value if ficha.Jor_Fic else None,
         },
         "registros": registros,
     }
-
 
 # =========================================================
 # COORDINADOR: TODAS LAS FICHAS
