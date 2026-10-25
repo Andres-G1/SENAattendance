@@ -53,9 +53,9 @@ export default function SeleccionarFichaAprendices() {
         <main className="container" style={{ maxWidth: 700 }}>
           <Link
             to="/administrador/carga-usuarios"
-            className="small text-decoration-none"
+            className="btn btn-secondary mb-3"
           >
-            ← Volver
+            Volver
           </Link>
 
           <div className="d-flex flex-wrap justify-content-between align-items-center my-3 gap-3">

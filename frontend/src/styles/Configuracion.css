@@ -187,26 +187,33 @@
   cursor: wait;
 }
 
-.account-page .config-cancel {
+.app-theme .account-page a.config-cancel:not(.btn):not(.nav-link):not(.navbar-brand) {
   display: inline-flex;
-  min-height: 2.75rem;
+  min-height: 2.65rem;
   align-items: center;
   justify-content: center;
-  padding: 0.6rem 1rem;
-  border: 1px solid #cbd5e1;
+  gap: 0.42rem;
+  padding: 0.58rem 1rem;
+  border: 1px solid var(--account-navy);
   border-radius: 0.7rem;
-  color: var(--account-navy);
-  background: #fff;
-  font-size: 0.88rem;
-  font-weight: 650;
+  color: #fff;
+  background: var(--account-navy);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
   text-decoration: none;
-  transition: background 160ms ease, border-color 160ms ease;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
 }
 
-.account-page .config-cancel:hover {
-  border-color: #aebdce;
-  background: #f4f7fa;
-  color: var(--account-navy);
+.account-page .config-cancel::before {
+  content: "←";
+}
+
+.app-theme .account-page a.config-cancel:not(.btn):not(.nav-link):not(.navbar-brand):hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #10233d;
+  background: #10233d;
+  color: #fff;
 }
 
 .account-page .form-message {

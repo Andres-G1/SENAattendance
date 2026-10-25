@@ -73,9 +73,9 @@ function CargarAprendices() {
         <main className="container" style={{ maxWidth: 700 }}>
           <Link
             to="/administrador/aprendices/fichas"
-            className="small text-decoration-none"
+            className="btn btn-secondary mb-3"
           >
-            ← Volver a las fichas
+            Volver a las fichas
           </Link>
 
           <div className="my-3">
