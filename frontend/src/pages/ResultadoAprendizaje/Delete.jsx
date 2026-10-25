@@ -72,7 +72,7 @@ export default function Delete() {
         );
       }
 
-      navigate("/administrador/resultados-aprendizaje", {
+      navigate("/administrador/resultado", {
         state: {
           mensaje: "Resultado de aprendizaje eliminado correctamente.",
         },
@@ -111,7 +111,7 @@ export default function Delete() {
             type="button"
             className="btn btn-secondary"
             onClick={() =>
-              navigate("/administrador/resultados-aprendizaje")
+              navigate("/administrador/resultado")
             }
           >
             Volver
@@ -193,7 +193,7 @@ export default function Delete() {
                   type="button"
                   className="btn btn-secondary"
                   onClick={() =>
-                    navigate("/administrador/resultados-aprendizaje")
+                    navigate("/administrador/resultado")
                   }
                   disabled={eliminando}
                 >

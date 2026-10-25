@@ -78,7 +78,7 @@ export default function CrearResultadoAprendizaje() {
         );
       }
 
-      navigate("/administrador/resultados-aprendizaje");
+      navigate("/administrador/resultado");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -197,7 +197,7 @@ export default function CrearResultadoAprendizaje() {
                   type="button"
                   className="btn btn-secondary"
                   onClick={() =>
-                    navigate("/administrador/resultados-aprendizaje")
+                    navigate("/administrador/resultado")
                   }
                   disabled={cargando}
                 >

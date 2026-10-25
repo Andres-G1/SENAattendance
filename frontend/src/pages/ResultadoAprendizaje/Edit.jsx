@@ -124,7 +124,7 @@ export default function EditarResultadoAprendizaje() {
         );
       }
 
-      navigate("/administrador/resultados-aprendizaje", {
+      navigate("/administrador/resultado", {
         state: {
           mensaje:
             "Resultado de aprendizaje actualizado correctamente.",
@@ -263,7 +263,7 @@ export default function EditarResultadoAprendizaje() {
                   className="btn btn-secondary"
                   onClick={() =>
                     navigate(
-                      "/administrador/resultados-aprendizaje"
+                      "/administrador/resultado"
                     )
                   }
                   disabled={guardando}
