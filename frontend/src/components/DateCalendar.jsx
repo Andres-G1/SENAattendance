@@ -10,6 +10,10 @@ const WEEKDAYS = [
   ["D", "Domingo"],
 ];
 
+const MONTHS = Array.from({ length: 12 }, (_, month) =>
+  new Date(2020, month, 1).toLocaleDateString("es-CO", { month: "long" })
+);
+
 function toISODate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -27,13 +31,6 @@ function parseISODate(value) {
 
 function monthKey(date) {
   return date.getFullYear() * 12 + date.getMonth();
-}
-
-function formatMonth(date) {
-  return date.toLocaleDateString("es-CO", {
-    month: "long",
-    year: "numeric",
-  });
 }
 
 export default function DateCalendar({
@@ -83,6 +80,26 @@ export default function DateCalendar({
   );
   const minMonth = minDate ? monthKey(parseISODate(minDate)) : null;
   const maxMonth = maxDate ? monthKey(parseISODate(maxDate)) : null;
+  const visibleYear = visibleMonth.getFullYear();
+  const minYear = minDate
+    ? Math.min(parseISODate(minDate).getFullYear(), visibleYear)
+    : new Date().getFullYear() - 10;
+  const maxYear = maxDate
+    ? Math.max(parseISODate(maxDate).getFullYear(), visibleYear)
+    : new Date().getFullYear() + 10;
+
+  function changeVisibleMonth(year, month) {
+    let targetMonth = month;
+    const targetKey = year * 12 + targetMonth;
+
+    if (minMonth !== null && targetKey < minMonth) {
+      targetMonth = parseISODate(minDate).getMonth();
+    } else if (maxMonth !== null && targetKey > maxMonth) {
+      targetMonth = parseISODate(maxDate).getMonth();
+    }
+
+    setMonthOverride({ value, date: new Date(year, targetMonth, 1) });
+  }
 
   function selectDay(day) {
     const selected = new Date(
@@ -114,7 +131,53 @@ export default function DateCalendar({
         >
           ‹
         </button>
-        <h3 className="date-calendar__month">{formatMonth(visibleMonth)}</h3>
+        <div className="date-calendar__selectors">
+          <select
+            className="date-calendar__select"
+            aria-label="Seleccionar mes"
+            value={visibleMonth.getMonth()}
+            onChange={(event) =>
+              changeVisibleMonth(visibleYear, Number(event.target.value))
+            }
+          >
+            {MONTHS.map((month, index) => {
+              const key = visibleYear * 12 + index;
+
+              return (
+                <option
+                  key={month}
+                  value={index}
+                  disabled={
+                    (minMonth !== null && key < minMonth) ||
+                    (maxMonth !== null && key > maxMonth)
+                  }
+                >
+                  {month}
+                </option>
+              );
+            })}
+          </select>
+          <select
+            className="date-calendar__select date-calendar__year"
+            aria-label="Seleccionar año"
+            value={visibleYear}
+            onChange={(event) =>
+              changeVisibleMonth(
+                Number(event.target.value),
+                visibleMonth.getMonth()
+              )
+            }
+          >
+            {Array.from(
+              { length: maxYear - minYear + 1 },
+              (_, index) => minYear + index
+            ).map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
         <button
           type="button"
           className="date-calendar__month-nav"

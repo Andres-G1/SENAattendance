@@ -74,7 +74,7 @@ export default function CrearResultadoAprendizaje() {
         const data = await res.json().catch(() => null);
 
         throw new Error(
-          data?.detail || "No se pudo crear el resultado de aprendizaje."
+          data?.detail || "No se pudo agregar el resultado de aprendizaje."
         );
       }
 
@@ -97,7 +97,7 @@ export default function CrearResultadoAprendizaje() {
         >
           <div className="card-header bg-success text-white py-3">
             <h1 className="h5 mb-0">
-              Crear Resultado de Aprendizaje
+              Agregar Resultado de Aprendizaje
             </h1>
           </div>
 
@@ -189,8 +189,8 @@ export default function CrearResultadoAprendizaje() {
                   disabled={cargando || competencias.length === 0}
                 >
                   {cargando
-                    ? "Creando..."
-                    : "Crear Resultado de Aprendizaje"}
+                    ? "Agregando..."
+                    : "Agregar Resultado de Aprendizaje"}
                 </button>
 
                 <button

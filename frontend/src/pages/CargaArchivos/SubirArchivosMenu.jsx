@@ -252,10 +252,11 @@ export default function SubirArchivosMenu() {
             </div>
 
             <input
-              type="text"
+              type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar categoría..."
+              aria-label="Buscar categoría de archivos planos"
               className="form-control"
               style={{ maxWidth: "240px" }}
             />

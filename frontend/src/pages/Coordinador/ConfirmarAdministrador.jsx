@@ -12,7 +12,7 @@ export default function ConfirmarAdministrador() {
   const nombreCompleto = localStorage.getItem("firstName") || "";
   const firstName = nombreCompleto.split(" ")[0];
 
-  const nombre = state?.nombre || "este administrador";
+  const nombre = state?.nombre || "este coordinador";
   const tipo = state?.tipo || "desactivar";
   const esDesactivar = tipo === "desactivar";
 
@@ -43,7 +43,7 @@ export default function ConfirmarAdministrador() {
         >
           <div className="bg-success text-white p-3">
             <h5 className="fw-bold mb-0">
-              {esDesactivar ? "Desactivar Administrador" : "Activar Administrador"}
+              {esDesactivar ? "Desactivar Coordinador" : "Activar Coordinador"}
             </h5>
             <small>{nombre}</small>
           </div>
@@ -51,8 +51,8 @@ export default function ConfirmarAdministrador() {
           <div className="bg-white p-4">
             <p className="text-primary mb-3">
               {esDesactivar
-                ? "¿Estás seguro de que deseas desactivar este administrador?"
-                : "¿Deseas activar nuevamente a este administrador?"}
+                ? "¿Estás seguro de que deseas desactivar este coordinador?"
+                : "¿Deseas activar nuevamente a este coordinador?"}
             </p>
             <p className="mb-1">
               <strong>Nombre:</strong> {nombre}

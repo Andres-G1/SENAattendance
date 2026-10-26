@@ -51,7 +51,7 @@ export default function CreateCompetencia() {
       } else if (err.response?.status === 401) {
         setError("Tu sesión expiró. Inicia sesión nuevamente.");
       } else if (err.response?.status === 403) {
-        setError("No tienes permisos para crear competencias.");
+        setError("No tienes permisos para agregar competencias.");
       } else {
         setError(err.response?.data?.detail || "No se pudo registrar la competencia.");
       }
@@ -67,7 +67,7 @@ export default function CreateCompetencia() {
     <main className="container my-5">
       <div className="page-card card shadow-sm" style={{ maxWidth: "700px", margin: "0 auto" }}>
         <div className="card-header bg-success text-white py-3">
-          <h1 className="h5 mb-0">Crear Nueva Competencia</h1>
+          <h1 className="h5 mb-0">Agregar Nueva Competencia</h1>
         </div>
 
         <div className="card-body p-4">

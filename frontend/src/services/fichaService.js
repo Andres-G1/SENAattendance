@@ -24,7 +24,7 @@ export async function crearFicha(datos) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(datos),
   });
-  return manejarRespuesta(res, "No se pudo crear la ficha");
+  return manejarRespuesta(res, "No se pudo agregar la ficha");
 }
 
 export async function actualizarFicha(fichaId, datos) {

@@ -63,7 +63,7 @@ export default function CrearAprendiz() {
         if (err.response?.status === 401) {
           setError("Tu sesión expiró. Inicia sesión nuevamente.");
         } else if (err.response?.status === 403) {
-          setError("No tienes permisos para crear aprendices.");
+          setError("No tienes permisos para agregar aprendices.");
         } else {
           setError("No se pudieron cargar los programas de formación y las fichas.");
         }
@@ -191,7 +191,7 @@ export default function CrearAprendiz() {
       } else if (err.response?.status === 401) {
         setError("Tu sesión expiró. Inicia sesión nuevamente.");
       } else if (err.response?.status === 403) {
-        setError("No tienes permisos para crear aprendices.");
+        setError("No tienes permisos para agregar aprendices.");
       } else {
         setError(
           err.response?.data?.detail ||
@@ -242,7 +242,7 @@ export default function CrearAprendiz() {
 
         <div className="card-header bg-success text-white py-3">
           <h1 className="h5 mb-0">
-            Crear Nuevo Aprendiz
+            Agregar Nuevo Aprendiz
           </h1>
         </div>
 

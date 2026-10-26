@@ -8,6 +8,7 @@ const API_URL = "http://localhost:8000";
 export default function ResultadosAprendizaje() {
   const [competencias, setCompetencias] = useState([]);
   const [resultados, setResultados] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
@@ -49,13 +50,33 @@ export default function ResultadosAprendizaje() {
     }
   }
 
-  const competenciasConResultados = competencias.map((competencia) => ({
-    ...competencia,
-    resultados: resultados.filter(
-      (resultado) =>
-        Number(resultado.Id_Comp) === Number(competencia.Id_Comp)
-    ),
-  }));
+  const consulta = busqueda.trim().toLowerCase();
+  const competenciasConResultados = competencias
+    .map((competencia) => {
+      const resultadosDeCompetencia = resultados.filter(
+        (resultado) =>
+          Number(resultado.Id_Comp) === Number(competencia.Id_Comp)
+      );
+      const coincideCompetencia = String(competencia.Nom_Comp || "")
+        .toLowerCase()
+        .includes(consulta);
+      const resultadosFiltrados = consulta
+        ? resultadosDeCompetencia.filter(
+            (resultado) =>
+              String(resultado.Nom_RA || "").toLowerCase().includes(consulta) ||
+              String(resultado.Id_RA || "").toLowerCase().includes(consulta)
+          )
+        : resultadosDeCompetencia;
+
+      return {
+        ...competencia,
+        resultados: coincideCompetencia
+          ? resultadosDeCompetencia
+          : resultadosFiltrados,
+        coincideBusqueda: coincideCompetencia || resultadosFiltrados.length > 0,
+      };
+    })
+    .filter((competencia) => competencia.coincideBusqueda);
 
   return (
     <>
@@ -82,7 +103,7 @@ export default function ResultadosAprendizaje() {
                   navigate("/administrador/resultados-aprendizaje/crear")
                 }
               >
-                Nuevo Resultado
+                Agregar Resultado
               </button>
             </div>
           </div>
@@ -108,6 +129,16 @@ export default function ResultadosAprendizaje() {
               Resultados por Competencia
             </h3>
           </div>
+
+          <input
+            type="search"
+            className="form-control mb-4"
+            placeholder="Buscar resultado por nombre, código o competencia..."
+            aria-label="Buscar resultados de aprendizaje"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: "440px" }}
+          />
 
           {cargando ? (
             <p className="text-center my-4">
@@ -182,7 +213,9 @@ export default function ResultadosAprendizaje() {
             ))
           ) : (
             <div className="alert alert-info">
-              No hay competencias registradas.
+              {busqueda
+                ? "No se encontraron resultados para esa búsqueda."
+                : "No hay competencias registradas."}
             </div>
           )}
         </div>

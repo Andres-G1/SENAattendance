@@ -60,12 +60,12 @@ function CargarAdministradores() {
         {/* ENCABEZADO */}
         <div className="text-center mb-5">
           <h1 className="fw-bold text-dark mb-2">
-            Carga masiva de administradores
+            Carga masiva de coordinadores
           </h1>
 
           <p className="text-muted mb-0">
             Sube un archivo Excel o CSV para registrar varios
-            administradores automáticamente.
+            coordinadores automáticamente.
           </p>
         </div>
 
@@ -114,7 +114,7 @@ function CargarAdministradores() {
               </h2>
 
               <p className="text-muted small mb-0">
-                Listado de administradores para registrar o actualizar.
+                Listado de coordinadores para registrar o actualizar.
               </p>
             </div>
 
@@ -164,7 +164,7 @@ function CargarAdministradores() {
                 Procesando...
               </>
             ) : (
-              "Cargar administradores"
+              "Cargar coordinadores"
             )}
           </button>
 

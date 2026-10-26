@@ -10,6 +10,7 @@ export default function Aprendices() {
   const [aprendices, setAprendices] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+  const [busqueda, setBusqueda] = useState("");
 
   const navigate = useNavigate();
 
@@ -39,7 +40,12 @@ export default function Aprendices() {
   useEffect(() => {
     cargarAprendices();
   }, []);
-  
+
+  const aprendicesFiltrados = aprendices.filter((aprendiz) =>
+    String(aprendiz.Num_ide_Apr || "")
+      .toLowerCase()
+      .includes(busqueda.trim().toLowerCase())
+  );
 
   if (cargando) {
     return (
@@ -79,15 +85,29 @@ export default function Aprendices() {
               className="btn btn-success btn-sm action-create"
               onClick={() => navigate("/administrador/aprendices/crear")}
             >
-              Crear nuevo usuario
+              Agregar aprendiz
             </button>
           </div>
 
+          <input
+            type="search"
+            className="form-control mb-4"
+            placeholder="Buscar por identificación..."
+            aria-label="Buscar aprendiz por identificación"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: "320px" }}
+          />
+
           {aprendices.length === 0 ? (
             <div className="alert alert-info">No hay aprendices registrados.</div>
+          ) : aprendicesFiltrados.length === 0 ? (
+            <div className="alert alert-info">
+              No se encontraron aprendices con esa identificación.
+            </div>
           ) : (
             <ul className="list-group">
-              {aprendices.map((aprendiz) => {
+              {aprendicesFiltrados.map((aprendiz) => {
                 const nombreCompleto = `${aprendiz.Nom_Apr} ${aprendiz.Ape_Apr}`;
 
                 return (
@@ -101,7 +121,7 @@ export default function Aprendices() {
                         Ficha: {aprendiz.Num_Fic || "Sin asignar"}
                       </span>
                       <small className="text-muted d-block">
-                        ID: {aprendiz.Id_Apr} - {aprendiz.Cor_Apr}
+                        Identificación: {aprendiz.Num_ide_Apr} - {aprendiz.Cor_Apr}
                       </small>
                       <small className="d-block mt-1">
                         Estado:{" "}

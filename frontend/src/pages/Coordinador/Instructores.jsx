@@ -8,6 +8,7 @@ export default function Instructores() {
   const [instructores, setInstructores] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+  const [busqueda, setBusqueda] = useState("");
 
   const navigate = useNavigate();
 
@@ -39,6 +40,12 @@ export default function Instructores() {
   useEffect(() => {
     cargarInstructores();
   }, []);
+
+  const instructoresFiltrados = instructores.filter((instructor) =>
+    String(instructor.Num_ide_Ins || "")
+      .toLowerCase()
+      .includes(busqueda.trim().toLowerCase())
+  );
 
   if (cargando) {
     return (
@@ -78,15 +85,29 @@ export default function Instructores() {
               className="btn btn-success btn-sm action-create"
               onClick={() => navigate("/administrador/instructores/crear")}
             >
-              Crear nuevo usuario
+              Agregar instructor
             </button>
           </div>
 
+          <input
+            type="search"
+            className="form-control mb-4"
+            placeholder="Buscar por identificación..."
+            aria-label="Buscar instructor por identificación"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: "320px" }}
+          />
+
           {instructores.length === 0 ? (
             <div className="alert alert-info">No hay instructores registrados.</div>
+          ) : instructoresFiltrados.length === 0 ? (
+            <div className="alert alert-info">
+              No se encontraron instructores con esa identificación.
+            </div>
           ) : (
             <ul className="list-group">
-              {instructores.map((instructor) => {
+              {instructoresFiltrados.map((instructor) => {
                 const nombreCompleto = `${instructor.Nom_Ins} ${instructor.Ape_Ins}`;
 
                 return (
@@ -97,7 +118,7 @@ export default function Instructores() {
                     <div>
                       <strong>{nombreCompleto}</strong>
                       <small className="text-muted d-block">
-                        ID: {instructor.Id_Ins} - {instructor.Cor_Ins}
+                        Identificación: {instructor.Num_ide_Ins} - {instructor.Cor_Ins}
                       </small>
                       <small className="d-block mt-1">
                         Estado:{" "}

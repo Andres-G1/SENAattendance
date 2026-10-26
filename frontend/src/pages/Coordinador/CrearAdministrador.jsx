@@ -56,7 +56,7 @@ export default function CrearAdministrador() {
 
       await crearUsuario(datos);
 
-      alert("Administrador registrado correctamente.");
+      alert("Coordinador registrado correctamente.");
       navigate("/administrador/administradores");
     } catch (err) {
       console.error("Error al crear administrador:", err);
@@ -66,9 +66,9 @@ export default function CrearAdministrador() {
       } else if (err.response?.status === 401) {
         setError("Tu sesión expiró. Inicia sesión nuevamente.");
       } else if (err.response?.status === 403) {
-        setError("No tienes permisos para crear administradores.");
+        setError("No tienes permisos para agregar coordinadores.");
       } else {
-        setError(err.response?.data?.detail || "No se pudo registrar el administrador.");
+        setError(err.response?.data?.detail || "No se pudo registrar el coordinador.");
       }
     } finally {
       setGuardando(false);
@@ -82,7 +82,7 @@ export default function CrearAdministrador() {
     <main className="container my-5">
       <div className="page-card card shadow-sm" style={{ maxWidth: "700px", margin: "0 auto" }}>
         <div className="card-header bg-success text-white py-3">
-          <h1 className="h5 mb-0">Crear Nuevo Administrador</h1>
+          <h1 className="h5 mb-0">Agregar Nuevo Coordinador</h1>
         </div>
 
         <div className="card-body p-4">
@@ -170,7 +170,7 @@ export default function CrearAdministrador() {
 
               <div className="col-md-12">
                 <div className="alert alert-info py-2 mb-0" role="alert">
-                  La contraseña inicial del administrador será su número
+                  La contraseña inicial del coordinador será su número
                   de documento. Podrá cambiarla luego desde su perfil.
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function CrearAdministrador() {
 
             <div className="d-flex gap-2 mt-4">
               <button type="submit" className="btn btn-success action-create" disabled={guardando}>
-                {guardando ? "Registrando..." : "Registrar Administrador"}
+                {guardando ? "Agregando..." : "Agregar Coordinador"}
               </button>
 
               <button

@@ -77,7 +77,7 @@ return (
       <div className="page-card card shadow-sm" style={{ maxWidth: "600px", margin: "0 auto" }}>
         <div className="card-header bg-success text-white py-3">
           <h1 className="h5 mb-0">
-            {esEdicion ? "Editar programa de formación" : "Crear programa de formación"}
+            {esEdicion ? "Editar programa de formación" : "Agregar programa de formación"}
           </h1>
         </div>
         <div className="card-body p-4">
@@ -128,7 +128,7 @@ return (
                   ? "Guardando..."
                   : esEdicion
                   ? "Guardar Cambios"
-                  : "Crear programa de formación"}
+                  : "Agregar programa de formación"}
               </button>
               <Link to="/administrador/carreras" className="btn btn-secondary">
                 Cancelar

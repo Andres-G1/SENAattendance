@@ -5,10 +5,16 @@ import CoordinadorNavbar from '/src/components/navbars/CoordinadorNavbar.jsx';
 
 export default function CarreraList() {
   const [carreras, setCarreras] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const nombreCompleto = localStorage.getItem('firstName') || ''; 
   const firstName = nombreCompleto.split(' ')[0];
+  const carrerasFiltradas = carreras.filter((carrera) =>
+    String(carrera.Nom_Car || "")
+      .toLowerCase()
+      .includes(busqueda.trim().toLowerCase())
+  );
 
   useEffect(() => {
     cargarCarreras();
@@ -36,9 +42,19 @@ export default function CarreraList() {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="fw-bold text-dark h5 mb-0">Programas de formación</h2>
             <Link to="/carreras/nueva" className="btn btn-success btn-sm rounded-3 fw-semibold action-create">
-              Nuevo programa de formación
+              Agregar programa de formación
             </Link>
           </div>
+
+          <input
+            type="search"
+            className="form-control mb-3"
+            placeholder="Buscar programa de formación..."
+            aria-label="Buscar programa de formación por nombre"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: "360px" }}
+          />
 
           {loading && <p className="text-muted text-center py-4">Cargando programas de formación...</p>}
 
@@ -50,8 +66,8 @@ export default function CarreraList() {
 
           {!loading && !error && (
             <ul className="list-group list-group-flush">
-              {carreras.length > 0 ? (
-                carreras.map((carrera) => (
+              {carrerasFiltradas.length > 0 ? (
+                carrerasFiltradas.map((carrera) => (
                   <li
                     key={carrera.Id_Car}
                     className="list-group-item d-flex justify-content-between align-items-center py-3 px-0"
@@ -78,7 +94,9 @@ export default function CarreraList() {
                 ))
               ) : (
                 <li className="list-group-item text-muted text-center py-4 px-0">
-                  No hay programas de formación registrados
+                  {busqueda
+                    ? "No se encontraron programas de formación."
+                    : "No hay programas de formación registrados."}
                 </li>
               )}
             </ul>

@@ -15,10 +15,12 @@ const DIAS_SEMANA = [
 export default function AsignarFicha() {
   const [fichas, setFichas] = useState([]);
   const [instructores, setInstructores] = useState([]);
+  const [competencias, setCompetencias] = useState([]);
   const [resultados, setResultados] = useState([]);
 
   const [selectedFicha, setSelectedFicha] = useState("");
   const [selectedInstructor, setSelectedInstructor] = useState("");
+  const [selectedCompetencia, setSelectedCompetencia] = useState("");
   const [selectedResultado, setSelectedResultado] = useState("");
   const [selectedDia, setSelectedDia] = useState("");
 
@@ -35,7 +37,7 @@ export default function AsignarFicha() {
   };
 
   // =====================================================
-  // CARGAR FICHAS, INSTRUCTORES Y RESULTADOS
+  // CARGAR FICHAS, INSTRUCTORES, COMPETENCIAS Y RESULTADOS
   // =====================================================
 
   useEffect(() => {
@@ -44,10 +46,11 @@ export default function AsignarFicha() {
       setErrorCarga(null);
 
       try {
-        const [resFichas, resInstructores, resResultados] =
+        const [resFichas, resInstructores, resCompetencias, resResultados] =
           await Promise.all([
             fetch(`${API_BASE}/fichas`),
             fetch(`${API_BASE}/usuarios/instructores`),
+            fetch(`${API_BASE}/competencias`),
             fetch(`${API_BASE}/resultados-aprendizaje`),
           ]);
 
@@ -59,21 +62,31 @@ export default function AsignarFicha() {
           throw new Error("No se pudieron cargar los instructores.");
         }
 
+        if (!resCompetencias.ok) {
+          throw new Error("No se pudieron cargar las competencias.");
+        }
+
         if (!resResultados.ok) {
           throw new Error(
             "No se pudieron cargar los resultados de aprendizaje."
           );
         }
 
-        const [dataFichas, dataInstructores, dataResultados] =
-          await Promise.all([
-            resFichas.json(),
-            resInstructores.json(),
-            resResultados.json(),
-          ]);
+        const [
+          dataFichas,
+          dataInstructores,
+          dataCompetencias,
+          dataResultados,
+        ] = await Promise.all([
+          resFichas.json(),
+          resInstructores.json(),
+          resCompetencias.json(),
+          resResultados.json(),
+        ]);
 
         setFichas(dataFichas);
         setInstructores(dataInstructores);
+        setCompetencias(dataCompetencias);
         setResultados(dataResultados);
       } catch (err) {
         console.error("Error cargando datos:", err);
@@ -91,21 +104,34 @@ export default function AsignarFicha() {
   }, []);
 
   // =====================================================
-  // OBTENER FICHA SELECCIONADA
+  // DATOS DERIVADOS
   // =====================================================
 
   const fichaSeleccionada = fichas.find(
     (f) => String(f.Id_Fic) === String(selectedFicha)
   );
 
+  // Solo los resultados que pertenecen a la competencia elegida
+  const resultadosFiltrados = selectedCompetencia
+    ? resultados.filter(
+        (ra) => String(ra.Id_Comp) === String(selectedCompetencia)
+      )
+    : [];
+
   // =====================================================
-  // CAMBIAR FICHA
+  // HANDLERS DE CAMBIO
   // =====================================================
 
   const handleFichaChange = (e) => {
     setSelectedFicha(e.target.value);
     setFechaInicioRA("");
     setFechaFinRA("");
+    setMensaje(null);
+  };
+
+  const handleCompetenciaChange = (e) => {
+    setSelectedCompetencia(e.target.value);
+    setSelectedResultado(""); // el resultado anterior ya no aplica
     setMensaje(null);
   };
 
@@ -129,6 +155,14 @@ export default function AsignarFicha() {
       setMensaje({
         tipo: "error",
         texto: "Debes seleccionar un instructor.",
+      });
+      return;
+    }
+
+    if (!selectedCompetencia) {
+      setMensaje({
+        tipo: "error",
+        texto: "Debes seleccionar una competencia.",
       });
       return;
     }
@@ -188,6 +222,7 @@ export default function AsignarFicha() {
     }
 
     // Los nombres deben coincidir con el modelo de FastAPI.
+    // La competencia solo se usa para filtrar, no se envía.
     const bodyData = {
       Id_Fic: Number(selectedFicha),
       Id_Ins: Number(selectedInstructor),
@@ -225,6 +260,7 @@ export default function AsignarFicha() {
 
       setSelectedFicha("");
       setSelectedInstructor("");
+      setSelectedCompetencia("");
       setSelectedResultado("");
       setSelectedDia("");
       setFechaInicioRA("");
@@ -286,8 +322,9 @@ export default function AsignarFicha() {
             </div>
 
             <p className="text-muted small mb-4">
-              Selecciona la ficha, el instructor, el resultado de
-              aprendizaje, el día y el período en que se impartirá.
+              Selecciona la ficha, el instructor, la competencia, el
+              resultado de aprendizaje, el día y el período en que se
+              impartirá.
             </p>
 
             {/* ESTADOS DE CARGA */}
@@ -376,6 +413,32 @@ export default function AsignarFicha() {
                   </select>
                 </div>
 
+                {/* COMPETENCIA (FILTRO) */}
+                <div className="mb-3">
+                  <label
+                    htmlFor="Id_Comp"
+                    className="form-label small fw-medium"
+                  >
+                    Seleccionar competencia
+                  </label>
+
+                  <select
+                    id="Id_Comp"
+                    className="form-select"
+                    value={selectedCompetencia}
+                    onChange={handleCompetenciaChange}
+                    required
+                  >
+                    <option value="">-- Seleccione una competencia --</option>
+
+                    {competencias.map((c) => (
+                      <option key={c.Id_Comp} value={c.Id_Comp}>
+                        {c.Nom_Comp}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* RESULTADO DE APRENDIZAJE */}
                 <div className="mb-3">
                   <label
@@ -390,22 +453,32 @@ export default function AsignarFicha() {
                     className="form-select"
                     value={selectedResultado}
                     onChange={(e) => setSelectedResultado(e.target.value)}
+                    disabled={!selectedCompetencia}
                     required
                   >
                     <option value="">
-                      -- Seleccione un resultado de aprendizaje --
+                      {selectedCompetencia
+                        ? "-- Seleccione un resultado de aprendizaje --"
+                        : "-- Primero seleccione una competencia --"}
                     </option>
 
-                    {resultados.map((ra) => (
+                    {resultadosFiltrados.map((ra) => (
                       <option key={ra.Id_RA} value={ra.Id_RA}>
                         {ra.Nom_RA}
                       </option>
                     ))}
                   </select>
 
+                  {selectedCompetencia && resultadosFiltrados.length === 0 && (
+                    <div className="form-text text-danger">
+                      Esta competencia no tiene resultados de aprendizaje
+                      registrados.
+                    </div>
+                  )}
+
                   {selectedResultado && (
                     <div className="form-text">
-                      {resultados.find(
+                      {resultadosFiltrados.find(
                         (ra) => String(ra.Id_RA) === String(selectedResultado)
                       )?.Des_RA || ""}
                     </div>
@@ -446,7 +519,6 @@ export default function AsignarFicha() {
                   >
                     Inicio del resultado de aprendizaje
                   </label>
-
                   <input
                     id="Fec_Inicio_RA"
                     type="date"
@@ -480,7 +552,6 @@ export default function AsignarFicha() {
                   >
                     Finalización del resultado de aprendizaje
                   </label>
-
                   <input
                     id="Fec_Fin_RA"
                     type="date"

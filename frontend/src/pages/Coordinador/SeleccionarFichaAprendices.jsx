@@ -40,7 +40,12 @@ export default function SeleccionarFichaAprendices() {
       fichas: fichas.filter(
         (f) =>
           f.Id_Car === carrera.Id_Car &&
-          String(f.Num_Fic).includes(busqueda.trim())
+          (String(f.Num_Fic || "")
+            .toLowerCase()
+            .includes(busqueda.trim().toLowerCase()) ||
+            String(carrera.Nom_Car || "")
+              .toLowerCase()
+              .includes(busqueda.trim().toLowerCase()))
       ),
     }))
     .filter((c) => c.fichas.length > 0);
@@ -67,12 +72,13 @@ export default function SeleccionarFichaAprendices() {
             </div>
 
             <input
-              type="text"
+              type="search"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar ficha..."
+              placeholder="Buscar por ficha o programa..."
+              aria-label="Buscar ficha por número o programa"
               className="form-control"
-              style={{ maxWidth: 200 }}
+              style={{ maxWidth: 280 }}
             />
           </div>
 

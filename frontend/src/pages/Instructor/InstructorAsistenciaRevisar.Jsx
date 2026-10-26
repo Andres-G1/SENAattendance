@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import InstructorNavbar from "/src/components/navbars/InstructorNavbar.jsx";
+import DateCalendar from "/src/components/DateCalendar.jsx";
 import useCurrentDate from "/src/hooks/useCurrentDate.js";
 
 const API_BASE = "http://localhost:8000";
@@ -34,6 +35,7 @@ export default function InstructorAsistenciaRevisar() {
   const [documentoBusqueda, setDocumentoBusqueda] = useState("");
 
   const [diaActual, setDiaActual] = useState(0);
+  const [mostrarCalendario, setMostrarCalendario] = useState(false);
 
   // =========================================================
   // CARGAR FICHAS
@@ -79,6 +81,7 @@ export default function InstructorAsistenciaRevisar() {
     setLoadingAsistencias(true);
     setDocumentoBusqueda("");
     setDiaActual(0);
+    setMostrarCalendario(false);
 
     fetch(
       `${API_BASE}/asistencia/instructor/${idInstructor}/revisar/${fichaSeleccionada}`
@@ -292,6 +295,7 @@ export default function InstructorAsistenciaRevisar() {
                       setAsistencias([]);
                       setDocumentoBusqueda("");
                       setDiaActual(0);
+                      setMostrarCalendario(false);
                       setError("");
                     }}
                     disabled={loadingFichas}
@@ -436,6 +440,44 @@ export default function InstructorAsistenciaRevisar() {
                         Siguiente →
                       </button>
                     </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      className="attendance-calendar-toggle btn btn-sm btn-outline-success"
+                      onClick={() => setMostrarCalendario((prev) => !prev)}
+                    >
+                      {mostrarCalendario
+                        ? "Ocultar calendario"
+                        : "Elegir fecha desde el calendario"}
+                    </button>
+
+                    {mostrarCalendario && (
+                      <div className="attendance-calendar-panel rounded-3 p-3 mt-3">
+                        <p className="form-label fw-semibold mb-1">
+                          Fecha de asistencia
+                        </p>
+
+                        <DateCalendar
+                          value={fechaSeleccionada || ""}
+                          availableDates={diasDisponibles}
+                          ariaLabel="Seleccionar fecha de asistencia"
+                          onChange={(fecha) => {
+                            const indice = diasDisponibles.indexOf(fecha);
+
+                            if (indice !== -1) {
+                              setDiaActual(indice);
+                            }
+                          }}
+                        />
+
+                        <div className="form-text">
+                          Solo puedes seleccionar fechas con registros de
+                          asistencia.
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* CONTADOR */}

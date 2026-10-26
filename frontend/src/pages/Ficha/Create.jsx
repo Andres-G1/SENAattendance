@@ -79,7 +79,7 @@ export default function Create() {
         style={{ maxWidth: 600, margin: "0 auto" }}
       >
         <div className="card-header bg-success text-white py-3">
-          <h1 className="h5 mb-0">Crear Nueva Ficha</h1>
+          <h1 className="h5 mb-0">Agregar Nueva Ficha</h1>
         </div>
         <div className="card-body p-4">
           <form onSubmit={handleSubmit}>

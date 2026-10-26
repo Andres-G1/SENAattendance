@@ -99,7 +99,7 @@ export default function AdministradorDashboard() {
                     to="/administrador/administradores"
                     className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
                   >
-                    Gestionar Administradores
+                    Gestionar Coordinadores
                   </Link>
 
                 </div>

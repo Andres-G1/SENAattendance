@@ -38,7 +38,7 @@ export default function EditarAdministrador() {
         });
       } catch (err) {
         console.error(err);
-        setError(err.response?.data?.detail || "No se pudo cargar el administrador.");
+        setError(err.response?.data?.detail || "No se pudo cargar el coordinador.");
       } finally {
         setCargando(false);
       }
@@ -83,11 +83,11 @@ export default function EditarAdministrador() {
 
       await actualizarAdministrador(id, datos);
 
-      alert("Administrador actualizado correctamente.");
+      alert("Coordinador actualizado correctamente.");
       navigate("/administrador/administradores");
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.detail || "No se pudo actualizar el administrador.");
+      setError(err.response?.data?.detail || "No se pudo actualizar el coordinador.");
     } finally {
       setGuardando(false);
     }
@@ -96,7 +96,7 @@ export default function EditarAdministrador() {
   if (cargando) {
     return (
       <main className="container my-5">
-        <div className="alert alert-info">Cargando información del administrador...</div>
+        <div className="alert alert-info">Cargando información del coordinador...</div>
       </main>
     );
   }
@@ -109,7 +109,7 @@ export default function EditarAdministrador() {
     <main className="container my-5">
       <div className="card shadow-sm" style={{ maxWidth: "700px", margin: "0 auto" }}>
         <div className="card-header bg-success text-white py-3">
-          <h1 className="h5 mb-0">Modificar Datos del Administrador</h1>
+          <h1 className="h5 mb-0">Modificar Datos del Coordinador</h1>
           <small>ID: {id}</small>
         </div>
 

@@ -7,6 +7,7 @@ const API_URL = "http://localhost:8000"; // ajusta según tu configuración
 export default function FichaList() {
   const [carreras, setCarreras] = useState([]);
   const [fichas, setFichas] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -43,10 +44,24 @@ export default function FichaList() {
     }
   }
 
-  const fichasPorCarrera = carreras.map((carrera) => ({
-    ...carrera,
-    fichas: fichas.filter((f) => f.Id_Car === carrera.Id_Car),
-  }));
+  const consulta = busqueda.trim().toLowerCase();
+  const fichasPorCarrera = carreras
+    .map((carrera) => {
+      const coincideCarrera = String(carrera.Nom_Car || "")
+        .toLowerCase()
+        .includes(consulta);
+
+      return {
+        ...carrera,
+        fichas: fichas.filter(
+          (ficha) =>
+            ficha.Id_Car === carrera.Id_Car &&
+            (coincideCarrera ||
+              String(ficha.Num_Fic || "").toLowerCase().includes(consulta))
+        ),
+      };
+    })
+    .filter((carrera) => carrera.fichas.length > 0);
 
   if (cargando) return <p className="text-center my-4">Cargando fichas...</p>;
   if (error) return <div className="alert alert-danger m-4">{error}</div>;
@@ -68,7 +83,7 @@ export default function FichaList() {
                 className="btn btn-success btn-sm action-create"
                 onClick={() => navigate("/fichas/nueva")}
               >
-                Nueva Ficha
+                Agregar Ficha
               </button>
             </div>
           </div>
@@ -78,6 +93,16 @@ export default function FichaList() {
           <div className="mb-4">
             <h3 className="h5 mb-0 text-secondary">Lista de Fichas por programa de formación</h3>
           </div>
+
+          <input
+            type="search"
+            className="form-control mb-4"
+            placeholder="Buscar por programa o número de ficha..."
+            aria-label="Buscar ficha por programa o número"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: "400px" }}
+          />
 
           {fichasPorCarrera.length > 0 ? (
             fichasPorCarrera.map((carrera) => (
@@ -124,7 +149,9 @@ export default function FichaList() {
             ))
           ) : (
             <div className="alert alert-info" role="alert">
-              No hay programas de formación registrados
+              {busqueda
+                ? "No se encontraron fichas para esa búsqueda."
+                : "No hay programas de formación registrados."}
             </div>
           )}
         </div>

@@ -9,6 +9,7 @@ export default function ConfigCompetencia() {
   const [error, setError] = useState("");
 
   const [idFiltro, setIdFiltro] = useState("");
+  const [busqueda, setBusqueda] = useState("");
   const [resultados, setResultados] = useState([]);
   const [cargandoRes, setCargandoRes] = useState(false);
 
@@ -65,9 +66,16 @@ export default function ConfigCompetencia() {
     cargarResultados();
   }, [idFiltro]);
 
-  const competenciasVisibles = idFiltro
-    ? competencias.filter((c) => String(c.Id_Comp) === idFiltro)
-    : competencias;
+  const consulta = busqueda.trim().toLowerCase();
+  const competenciasVisibles = competencias.filter((competencia) => {
+    const coincideFiltro = !idFiltro || String(competencia.Id_Comp) === idFiltro;
+    const coincideBusqueda =
+      !consulta ||
+      String(competencia.Nom_Comp || "").toLowerCase().includes(consulta) ||
+      String(competencia.Id_Comp || "").toLowerCase().includes(consulta);
+
+    return coincideFiltro && coincideBusqueda;
+  });
 
   const competenciaSeleccionada = competencias.find(
     (c) => String(c.Id_Comp) === idFiltro
@@ -86,9 +94,19 @@ export default function ConfigCompetencia() {
               className="btn btn-success btn-sm action-create"
               onClick={() => navigate("/competencias/nueva")}
             >
-              Crear Competencia
+              Agregar Competencia
             </button>
           </div>
+
+          <input
+            type="search"
+            className="form-control mb-3"
+            placeholder="Buscar competencia por nombre o código..."
+            aria-label="Buscar competencia por nombre o código"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: "400px" }}
+          />
 
           {!cargando && !error && competencias.length > 0 && (
             <div className="mb-3">
@@ -126,6 +144,10 @@ export default function ConfigCompetencia() {
           ) : competencias.length === 0 ? (
             <div className="alert alert-info">
               No hay competencias registradas.
+            </div>
+          ) : competenciasVisibles.length === 0 ? (
+            <div className="alert alert-info">
+              No se encontraron competencias con esa búsqueda.
             </div>
           ) : (
             <ul className="list-group">

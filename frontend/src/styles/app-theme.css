@@ -514,13 +514,32 @@
   margin-bottom: 0.65rem;
 }
 
-.app-theme .date-calendar__month {
-  margin: 0;
+.app-theme .date-calendar__selectors {
+  display: flex;
+  min-width: 0;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.app-theme .date-calendar__select {
+  min-width: 0;
+  padding: 0.45rem 1.5rem 0.45rem 0.55rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.6rem;
+  background-color: #fff;
   color: var(--app-navy);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  text-align: center;
   text-transform: capitalize;
+}
+
+.app-theme .date-calendar__select:focus {
+  border-color: var(--app-green);
+  outline: 2px solid rgba(0, 133, 29, 0.15);
+}
+
+.app-theme .date-calendar__year {
+  width: 5.5rem;
 }
 
 .app-theme .date-calendar__month-nav {

@@ -19,8 +19,8 @@ const CATEGORIES = [
   },
   {
     key: "administradores",
-    label: "Administradores",
-    hint: "Listado de administradores para registrar o actualizar (.csv, .xlsx)",
+    label: "Coordinadores",
+    hint: "Listado de coordinadores para registrar o actualizar (.csv, .xlsx)",
     uploadFn: cargarAdministradores,
   },
 ];
@@ -165,6 +165,7 @@ function UploadCard({ category, file, status, resultado, error, onPick, onClear,
 }
 
 function CargaUsuarios() {
+  const [query, setQuery] = useState("");
   const [files, setFiles] = useState({});
   const [status, setStatus] = useState({});
   const [resultados, setResultados] = useState({});
@@ -221,6 +222,9 @@ function CargaUsuarios() {
   const user = {
     Nom_Adm: localStorage.getItem("firstName") || "Usuario",
   };
+  const categoriasVisibles = CATEGORIES.filter((category) =>
+    category.label.toLowerCase().includes(query.trim().toLowerCase())
+  );
 
   return (
     <>
@@ -235,11 +239,20 @@ function CargaUsuarios() {
 
             <p className="text-muted small mb-0">
               Sube un archivo Excel o CSV para registrar aprendices,
-              instructores o administradores automáticamente.
+              instructores o coordinadores automáticamente.
             </p>
           </div>
+          <input
+            type="search"
+            className="form-control mb-4"
+            placeholder="Buscar categoría..."
+            aria-label="Buscar categoría de carga"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            style={{ maxWidth: "320px" }}
+          />
           <div className="d-flex flex-column gap-4">
-            {CATEGORIES.map((category) => (
+            {categoriasVisibles.map((category) => (
               <UploadCard
                 key={category.key}
                 category={category}
@@ -252,6 +265,11 @@ function CargaUsuarios() {
                 onUpload={handleUpload}
               />
             ))}
+            {categoriasVisibles.length === 0 && (
+              <p className="text-center text-muted py-4">
+                Ninguna categoría coincide con "{query}".
+              </p>
+            )}
           </div>
         </main>
       </div>

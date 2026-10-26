@@ -91,7 +91,7 @@ export default function CoordinadorNavbar({ user }) {
                 </li>
                 <li>
                   <Link className="dropdown-item" to="/fichas/subir-archivos">
-                    Cargar archivos planos (Fichas/Programas de formación/Competencias)
+                    Gestión de Fichas (CSV / Excel)
                   </Link>
                 </li>
               </ul>
@@ -129,7 +129,7 @@ export default function CoordinadorNavbar({ user }) {
                 </li>
                 <li>
                   <Link className="dropdown-item" to="/administrador/carga-usuarios">
-                    Cargar usuarios (Excel)
+                   Gestión de usuarios (PDF / Excel)
                   </Link>
                 </li>
               </ul>

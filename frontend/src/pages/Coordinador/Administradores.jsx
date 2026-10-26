@@ -28,9 +28,9 @@ export default function Administradores() {
       if (err.response?.status === 401) {
         setError("No estás autenticado o tu sesión expiró.");
       } else if (err.response?.status === 403) {
-        setError("No tienes permisos para consultar los administradores.");
+        setError("No tienes permisos para consultar los coordinadores.");
       } else {
-        setError("No se pudieron cargar los administradores.");
+        setError("No se pudieron cargar los coordinadores.");
       }
     } finally {
       setCargando(false);
@@ -52,7 +52,7 @@ export default function Administradores() {
         <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
         <main className="container my-4">
           <div className="card p-4 shadow-sm">
-            <p className="mb-0">Cargando administradores...</p>
+            <p className="mb-0">Cargando coordinadores...</p>
           </div>
         </main>
       </>
@@ -79,29 +79,30 @@ export default function Administradores() {
       <main className="container my-4">
         <div className="card p-4 shadow-sm mb-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="h5 mb-0">Lista de Administradores</h2>
+            <h2 className="h5 mb-0">Lista de Coordinadores</h2>
             <button
               className="btn btn-success btn-sm action-create"
               onClick={() => navigate("/administrador/administradores/crear")}
             >
-              Crear nuevo usuario
+              Agregar coordinador
             </button>
           </div>
 
           <input
-            type="text"
+          type="search"
             className="form-control mb-4"
             placeholder="Buscar por identificación..."
+          aria-label="Buscar coordinador por identificación"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             style={{ maxWidth: "240px" }}
           />
 
           {administradores.length === 0 ? (
-            <div className="alert alert-info">No hay administradores registrados.</div>
+            <div className="alert alert-info">No hay coordinadores registrados.</div>
           ) : administradoresFiltrados.length === 0 ? (
             <div className="alert alert-info">
-              No se encontraron administradores con esa identificación.
+              No se encontraron coordinadores con esa identificación.
             </div>
           ) : (
             <ul className="list-group">
@@ -116,7 +117,7 @@ export default function Administradores() {
                     <div>
                       <strong>{nombreCompleto}</strong>
                       <small className="text-muted d-block">
-                        ID: {administrador.Id_Adm} - {administrador.Cor_Adm}
+                        Identificación: {administrador.Num_ide_Adm} - {administrador.Cor_Adm}
                       </small>
                       <small className="d-block mt-1">
                         Estado:{" "}
