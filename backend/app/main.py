@@ -20,9 +20,11 @@ from routers.configuracion import Router_configuracion
 from jobs_asistencia import scheduler
 from routers.asignacionaprendiz import Router_asignacionesAprendiz
 from routers.resultados_aprendizaje import Router_resultados_aprendizaje
+from routers.resultado_aprendizaje import Router_resultado
 
 app = FastAPI()
 
+# Configuración de CORS para permitir la conexión desde React (Vite)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -39,6 +41,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Inclusión de todos tus routers
 app.include_router(Router_login)
 app.include_router(router_recovery)
 app.include_router(Router_asignacionesAprendiz)
@@ -53,6 +56,7 @@ app.include_router(Router_carga_administradores)
 app.include_router(Router_carga_aprendices)
 app.include_router(Router_configuracion)
 app.include_router(Router_resultados_aprendizaje)
+app.include_router(Router_resultado)
 
 
 @app.on_event("startup")

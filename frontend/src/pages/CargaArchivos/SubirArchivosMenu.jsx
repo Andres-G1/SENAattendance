@@ -8,6 +8,7 @@ const ENDPOINTS = {
   fichas: `${API_BASE}/fichas/upload`,
   carreras: `${API_BASE}/carreras/upload`,
   competencias: `${API_BASE}/competencias/upload`,
+  resultados: `${API_BASE}/carga-resultados/upload`,
 };
 
 const CATEGORIES = [
@@ -25,6 +26,11 @@ const CATEGORIES = [
     key: "competencias",
     label: "Competencias",
     hint: "Listado plano de competencias asociadas (.csv, .xlsx)",
+  },
+  {
+    key: "resultados",
+    label: "Resultados de Aprendizaje",
+    hint: "Listado plano de resultados de aprendizaje. Si incluye la columna Nom_Comp, las competencias nuevas también se crean (.csv, .xlsx)",
   },
 ];
 
@@ -106,6 +112,16 @@ function UploadCard({ category, file, status, resultado, onPick, onClear, onUplo
                 <span className="text-success fw-semibold">
                   ✓ {resultado?.creadas ?? 0} registrada(s)
                 </span>
+                {resultado?.competencias_creadas > 0 && (
+                  <div className="text-muted mt-1">
+                    {resultado.competencias_creadas} competencia(s) nueva(s)
+                  </div>
+                )}
+                {resultado?.omitidos > 0 && (
+                  <div className="text-muted mt-1">
+                    {resultado.omitidos} ya existía(n) y se omitieron
+                  </div>
+                )}
                 {resultado?.errores?.length > 0 && (
                   <div className="text-danger mt-1">
                     {resultado.errores.length} fila(s) con error (ver consola)
@@ -113,7 +129,9 @@ function UploadCard({ category, file, status, resultado, onPick, onClear, onUplo
                 )}
               </div>
             ) : status === "error" ? (
-              <div className="small text-danger">No se pudo subir. Intenta de nuevo.</div>
+              <div className="small text-danger">
+                {resultado?.error || "No se pudo subir. Intenta de nuevo."}
+              </div>
             ) : (
               <button
                 type="button"
@@ -158,6 +176,11 @@ export default function SubirArchivosMenu() {
   function handlePick(key, file) {
     setFiles((prev) => ({ ...prev, [key]: file }));
     setStatus((prev) => ({ ...prev, [key]: "idle" }));
+    setResultados((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }
 
   function handleClear(key) {
@@ -167,6 +190,11 @@ export default function SubirArchivosMenu() {
       return next;
     });
     setStatus((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+    setResultados((prev) => {
       const next = { ...prev };
       delete next[key];
       return next;
@@ -183,14 +211,27 @@ export default function SubirArchivosMenu() {
       formData.append("file", file);
 
       const res = await fetch(ENDPOINTS[key], { method: "POST", body: formData });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
-      if (!res.ok) throw new Error(data?.detail || "upload failed");
+      if (!res.ok) {
+        const detalle =
+          typeof data?.detail === "string"
+            ? data.detail
+            : data?.detail
+            ? JSON.stringify(data.detail)
+            : `Error ${res.status} al subir el archivo`;
+        throw new Error(detalle);
+      }
+
+      if (data?.errores?.length > 0) {
+        console.table(data.errores);
+      }
 
       setResultados((prev) => ({ ...prev, [key]: data }));
       setStatus((prev) => ({ ...prev, [key]: "done" }));
     } catch (err) {
       console.error(err);
+      setResultados((prev) => ({ ...prev, [key]: { error: err.message } }));
       setStatus((prev) => ({ ...prev, [key]: "error" }));
     }
   }
@@ -206,7 +247,7 @@ export default function SubirArchivosMenu() {
             <div>
               <h2 className="fw-bold text-dark h4 mb-1">Cargar archivos planos</h2>
               <p className="text-muted small mb-0">
-                Sube los listados de fichas, programas de formación o competencias en CSV o Excel.
+                Sube los listados de fichas, programas de formación, competencias o resultados de aprendizaje en CSV o Excel.
               </p>
             </div>
 

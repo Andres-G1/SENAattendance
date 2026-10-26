@@ -1,13 +1,16 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { listarCompetencias } from "../../services/api";
+import { listarCompetencias, listarResultados } from "../../services/api";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
 
 export default function ConfigCompetencia() {
   const [competencias, setCompetencias] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+
+  const [idFiltro, setIdFiltro] = useState("");
+  const [resultados, setResultados] = useState([]);
+  const [cargandoRes, setCargandoRes] = useState(false);
 
   const navigate = useNavigate();
 
@@ -40,6 +43,36 @@ export default function ConfigCompetencia() {
     cargarCompetencias();
   }, []);
 
+  // Cada vez que cambia el filtro, se traen los resultados de esa competencia
+  useEffect(() => {
+    if (!idFiltro) {
+      setResultados([]);
+      return;
+    }
+
+    const cargarResultados = async () => {
+      try {
+        setCargandoRes(true);
+        setResultados(await listarResultados(idFiltro));
+      } catch (err) {
+        console.error(err);
+        setResultados([]);
+      } finally {
+        setCargandoRes(false);
+      }
+    };
+
+    cargarResultados();
+  }, [idFiltro]);
+
+  const competenciasVisibles = idFiltro
+    ? competencias.filter((c) => String(c.Id_Comp) === idFiltro)
+    : competencias;
+
+  const competenciaSeleccionada = competencias.find(
+    (c) => String(c.Id_Comp) === idFiltro
+  );
+
   return (
     <>
       <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
@@ -56,6 +89,26 @@ export default function ConfigCompetencia() {
               Crear Competencia
             </button>
           </div>
+
+          {!cargando && !error && competencias.length > 0 && (
+            <div className="mb-3">
+              <label className="form-label small text-muted">
+                Filtrar por competencia
+              </label>
+              <select
+                className="form-select"
+                value={idFiltro}
+                onChange={(e) => setIdFiltro(e.target.value)}
+              >
+                <option value="">Todas las competencias</option>
+                {competencias.map((c) => (
+                  <option key={c.Id_Comp} value={String(c.Id_Comp)}>
+                    {c.Nom_Comp}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {cargando ? (
             <p className="mb-0">Cargando competencias...</p>
@@ -76,7 +129,7 @@ export default function ConfigCompetencia() {
             </div>
           ) : (
             <ul className="list-group">
-              {competencias.map((competencia) => (
+              {competenciasVisibles.map((competencia) => (
                 <li
                   key={competencia.Id_Comp}
                   className="list-group-item py-3"
@@ -126,6 +179,35 @@ export default function ConfigCompetencia() {
                 </li>
               ))}
             </ul>
+          )}
+
+          {idFiltro && (
+            <div className="mt-4">
+              <h3 className="h6 mb-3">
+                Resultados de aprendizaje de {competenciaSeleccionada?.Nom_Comp}
+              </h3>
+
+              {cargandoRes ? (
+                <p className="mb-0">Cargando resultados...</p>
+              ) : resultados.length === 0 ? (
+                <div className="alert alert-info mb-0">
+                  Esta competencia no tiene resultados de aprendizaje.
+                </div>
+              ) : (
+                <ul className="list-group">
+                  {resultados.map((ra) => (
+                    <li key={ra.Id_RA} className="list-group-item">
+                      <strong>{ra.Nom_RA}</strong>
+                      {ra.Des_RA && (
+                        <small className="text-muted d-block mt-1">
+                          {ra.Des_RA}
+                        </small>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
         </div>
       </main>

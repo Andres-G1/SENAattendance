@@ -138,6 +138,18 @@ export const eliminarCompetencia = async (id) => {
   const response = await api.delete(`/competencias/${id}`);
   return response.data;
 };
+
+// =====================================================
+// RESULTADOS DE APRENDIZAJE  (router: /carga-resultados)
+// Si se pasa idComp, devuelve solo los de esa competencia.
+// =====================================================
+export const listarResultados = async (idComp) => {
+  const response = await api.get("/carga-resultados/", {
+    params: idComp ? { id_comp: idComp } : {},
+  });
+  return response.data;
+};
+
 export default api;
 
 export const cargarAprendices = async (archivo) => {

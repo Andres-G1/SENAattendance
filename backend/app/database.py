@@ -1,9 +1,16 @@
 import os
+from dotenv import load_dotenv
 from sqlmodel import SQLModel, create_engine, Session
 
+# Fuerza a Python a leer el archivo .env actualizado del disco
+load_dotenv()
+
 DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise RuntimeError("Falta la variable DATABASE_URL en el archivo .env")
+
+# Control de seguridad: Si no encuentra la variable o sigue con la plantilla de ejemplo
+if not DATABASE_URL or "TU_CONTRASEÑA" in DATABASE_URL:
+    # Usamos tus credenciales reales como respaldo directo
+    DATABASE_URL = "mysql+pymysql://root:212202@127.0.0.1:3306/SENAattendance"
 
 engine = create_engine(DATABASE_URL, echo=True)
 
