@@ -297,11 +297,11 @@ export default function AdministradorDashboard() {
               ASIGNACIÓN DE FICHAS
           ====================================================== */}
           <div className="row g-4 mb-5" style={{ order: 3 }}>
-            <div className="col-12 col-md-6">
+            <div className="col-12 col-md-6 d-flex flex-column">
               <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted">
                 Grupos
               </h4>
-              <div className="coordinator-dashboard-card card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
+              <div className="coordinator-dashboard-card card flex-grow-1 border-0 shadow-sm p-4 bg-white rounded-4">
 
                 <div className="d-flex align-items-center gap-3 mb-3">
 
@@ -351,11 +351,11 @@ export default function AdministradorDashboard() {
               </div>
             </div>
 
-            <div className="col-12 col-md-6">
+            <div className="col-12 col-md-6 d-flex flex-column">
               <h4 className="fw-bold text-dark mb-4 small text-uppercase tracking-wider text-muted">
                 Asistencia
               </h4>
-              <div className="coordinator-dashboard-card card h-100 border-0 shadow-sm p-4 bg-white rounded-4">
+              <div className="coordinator-dashboard-card card flex-grow-1 border-0 shadow-sm p-4 bg-white rounded-4">
 
                 <div className="d-flex align-items-center gap-3 mb-3">
 

@@ -170,7 +170,7 @@ export default function Login({ onLoginSuccess }) {
 
         {error && <p className="login-error">{error}</p>}
 
-        <button type="submit">Login</button>
+        <button type="submit">Iniciar Sesión</button>
       </form>
     </div>
   );
