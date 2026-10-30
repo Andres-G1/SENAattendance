@@ -334,20 +334,22 @@ export default function AdministradorDashboard() {
                   Elige qué fichas maneja cada instructor y en que ficha estara el Aprendiz.
                 </p>
 
+                <div className="coordinator-dashboard-actions d-flex flex-column gap-2 mt-auto">
                 <Link
                   to="/fichas/asignar"
-                  className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2 mt-auto"
+                  className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2"
                 >
                   Asignar Fichas
                 </Link>
 
                 <Link
                   to="/fichas/AsignarAprendiz"
-                  className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2 mt-auto"
+                  className="btn btn-outline-success rounded-3 w-100 fw-semibold py-2 "
                 >
                   Asignar Aprendiz
                 </Link>
 
+                </div>
               </div>
             </div>
 

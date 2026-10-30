@@ -286,9 +286,9 @@ export default function AsignarFicha() {
       <CoordinadorNavbar user={user} />
 
       <div className="bg-light min-vh-100 py-5">
-        <main className="container" style={{ maxWidth: 700 }}>
+        <main className="container" style={{ maxWidth: 920 }}>
           <div
-            className="rounded-4 p-4 bg-white"
+            className="rounded-4 p-3 p-md-4 bg-white"
             style={{ border: "2px solid #00851d" }}
           >
             {/* ENCABEZADO */}
@@ -337,12 +337,12 @@ export default function AsignarFicha() {
                 {errorCarga}
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="row g-3">
                 {/* MENSAJE */}
                 {mensaje && (
                   <div
                     role="alert"
-                    className={`alert ${
+                    className={`alert col-12 mb-0 ${
                       mensaje.tipo === "exito"
                         ? "alert-success"
                         : "alert-danger"
@@ -353,7 +353,7 @@ export default function AsignarFicha() {
                 )}
 
                 {/* FICHA */}
-                <div className="mb-3">
+                <div className="col-12 col-md-6">
                   <label
                     htmlFor="Id_Fic"
                     className="form-label small fw-medium"
@@ -388,7 +388,7 @@ export default function AsignarFicha() {
                 </div>
 
                 {/* INSTRUCTOR */}
-                <div className="mb-3">
+                <div className="col-12 col-md-6">
                   <label
                     htmlFor="Id_Ins"
                     className="form-label small fw-medium"
@@ -414,7 +414,7 @@ export default function AsignarFicha() {
                 </div>
 
                 {/* COMPETENCIA (FILTRO) */}
-                <div className="mb-3">
+                <div className="col-12 col-md-6">
                   <label
                     htmlFor="Id_Comp"
                     className="form-label small fw-medium"
@@ -440,7 +440,7 @@ export default function AsignarFicha() {
                 </div>
 
                 {/* RESULTADO DE APRENDIZAJE */}
-                <div className="mb-3">
+                <div className="col-12 col-md-6">
                   <label
                     htmlFor="Id_RA"
                     className="form-label small fw-medium"
@@ -485,114 +485,138 @@ export default function AsignarFicha() {
                   )}
                 </div>
 
-                {/* DÍA */}
-                <div className="mb-3">
-                  <label
-                    htmlFor="Dia"
-                    className="form-label small fw-medium"
-                  >
-                    Día en que se dicta
-                  </label>
+                <div className="col-12">
+                  <section className="rounded-3 border bg-light p-3 p-md-4">
+                    <h6 className="fw-semibold text-dark mb-1">
+                      Programación
+                    </h6>
+                    <p className="small text-muted mb-3">
+                      Define el día y las fechas en que se impartirá.
+                    </p>
 
-                  <select
-                    id="Dia"
-                    className="form-select"
-                    value={selectedDia}
-                    onChange={(e) => setSelectedDia(e.target.value)}
-                    required
-                  >
-                    <option value="">-- Seleccione un día --</option>
+                    <div className="row g-3">
+                      {/* DÍA */}
+                      <div className="col-12 col-md-6">
+                        <label
+                          htmlFor="Dia"
+                          className="form-label small fw-medium"
+                        >
+                          Día de formación
+                        </label>
 
-                    {DIAS_SEMANA.map((dia) => (
-                      <option key={dia} value={dia}>
-                        {dia}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                        <select
+                          id="Dia"
+                          className="form-select"
+                          value={selectedDia}
+                          onChange={(e) => setSelectedDia(e.target.value)}
+                          required
+                        >
+                          <option value="">-- Seleccione un día --</option>
 
-                {/* FECHA INICIO */}
-                <div className="mb-3">
-                  <label
-                    htmlFor="Fec_Inicio_RA"
-                    className="form-label small fw-medium"
-                  >
-                    Inicio del resultado de aprendizaje
-                  </label>
-                  <input
-                    id="Fec_Inicio_RA"
-                    type="date"
-                    className="form-control"
-                    value={fechaInicioRA}
-                    onChange={(e) => setFechaInicioRA(e.target.value)}
-                    min={
-                      fichaSeleccionada
-                        ? String(fichaSeleccionada.Fec_inicio_Fic).slice(0, 10)
-                        : undefined
-                    }
-                    max={
-                      fichaSeleccionada
-                        ? String(fichaSeleccionada.Fec_Fin_Fic).slice(0, 10)
-                        : undefined
-                    }
-                    required
-                  />
+                          {DIAS_SEMANA.map((dia) => (
+                            <option key={dia} value={dia}>
+                              {dia}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                  <div className="form-text">
-                    Fecha desde la cual el instructor comienza a impartir
-                    este resultado.
-                  </div>
-                </div>
+                      {/* FECHA INICIO */}
+                      <div className="col-12 col-md-6">
+                        <label
+                          htmlFor="Fec_Inicio_RA"
+                          className="form-label small fw-medium"
+                        >
+                          Fecha de inicio
+                        </label>
+                        <input
+                          id="Fec_Inicio_RA"
+                          type="date"
+                          className="form-control"
+                          value={fechaInicioRA}
+                          onChange={(e) => setFechaInicioRA(e.target.value)}
+                          min={
+                            fichaSeleccionada
+                              ? String(fichaSeleccionada.Fec_inicio_Fic).slice(
+                                  0,
+                                  10
+                                )
+                              : undefined
+                          }
+                          max={
+                            fichaSeleccionada
+                              ? String(fichaSeleccionada.Fec_Fin_Fic).slice(
+                                  0,
+                                  10
+                                )
+                              : undefined
+                          }
+                          required
+                        />
+                        <div className="form-text">
+                          Desde cuándo se impartirá.
+                        </div>
+                      </div>
 
-                {/* FECHA FIN */}
-                <div className="mb-4">
-                  <label
-                    htmlFor="Fec_Fin_RA"
-                    className="form-label small fw-medium"
-                  >
-                    Finalización del resultado de aprendizaje
-                  </label>
-                  <input
-                    id="Fec_Fin_RA"
-                    type="date"
-                    className="form-control"
-                    value={fechaFinRA}
-                    onChange={(e) => setFechaFinRA(e.target.value)}
-                    min={
-                      fechaInicioRA ||
-                      (fichaSeleccionada
-                        ? String(fichaSeleccionada.Fec_inicio_Fic).slice(0, 10)
-                        : undefined)
-                    }
-                    max={
-                      fichaSeleccionada
-                        ? String(fichaSeleccionada.Fec_Fin_Fic).slice(0, 10)
-                        : undefined
-                    }
-                    required
-                  />
-
-                  <div className="form-text">
-                    Fecha hasta la cual el instructor impartirá este resultado.
-                  </div>
+                      {/* FECHA FIN */}
+                      <div className="col-12 col-md-6">
+                        <label
+                          htmlFor="Fec_Fin_RA"
+                          className="form-label small fw-medium"
+                        >
+                          Fecha de finalización
+                        </label>
+                        <input
+                          id="Fec_Fin_RA"
+                          type="date"
+                          className="form-control"
+                          value={fechaFinRA}
+                          onChange={(e) => setFechaFinRA(e.target.value)}
+                          min={
+                            fechaInicioRA ||
+                            (fichaSeleccionada
+                              ? String(fichaSeleccionada.Fec_inicio_Fic).slice(
+                                  0,
+                                  10
+                                )
+                              : undefined)
+                          }
+                          max={
+                            fichaSeleccionada
+                              ? String(fichaSeleccionada.Fec_Fin_Fic).slice(
+                                  0,
+                                  10
+                                )
+                              : undefined
+                          }
+                          required
+                        />
+                        <div className="form-text">
+                          Hasta cuándo se impartirá.
+                        </div>
+                      </div>
+                    </div>
+                  </section>
                 </div>
 
                 {/* BOTÓN */}
-                <button
-                  type="submit"
-                  disabled={enviando}
-                  className="btn rounded-3 w-100 fw-semibold py-2 shadow-sm text-white"
-                  style={{ backgroundColor: "#00851d" }}
-                >
-                  {enviando ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" />
-                      Asignando...
-                    </>
-                  ) : (
-                    "Asignar resultado de aprendizaje"
-                  )}
-                </button>
+                <div className="col-12 d-flex justify-content-md-end">
+                  <button
+                    type="submit"
+                    disabled={enviando}
+                    className="btn rounded-3 w-100 col-md-6 fw-semibold py-2 shadow-sm text-white"
+                    style={{ backgroundColor: "#00851d" }}
+                  >
+                    {enviando ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" />
+                        Asignando...
+                      </>
+                    ) : (
+                      "Asignar resultado de aprendizaje"
+                    )}
+                  </button>
+                </div>
               </form>
             )}
           </div>
