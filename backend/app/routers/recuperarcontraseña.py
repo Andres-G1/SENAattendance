@@ -2,17 +2,27 @@ import os
 import secrets
 import string
 import smtplib
+import time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request
 from sqlmodel import Session, select
 from pydantic import BaseModel, EmailStr
 from database import get_session
 from models.model import Aprendiz, Instructor, Administrador
 
-# Importamos tu función corregida
 from security import hash_contraseña 
+
+# =========================================================================
+# CONFIGURACIÓN DE RATE LIMITING (SLOWAPI)
+# =========================================================================
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+# Inicializamos el limitador basado en la IP del cliente
+limiter = Limiter(key_func=get_remote_address)
 
 router_recovery = APIRouter(
     prefix="/users",
@@ -28,18 +38,23 @@ def generar_password_temporal(longitud=10) -> str:
     return "".join(secrets.choice(caracteres) for _ in range(longitud))
 
 
-def enviar_correo(email_destino: str, nueva_password: str, nombre_usuario: str):
+def enviar_correo_recovery_bg(email_destino: str, nueva_password: str, nombre_usuario: str):
+    """Envía el correo de recuperación en segundo plano espaciando los reintentos contra bots."""
     smtp_host = os.getenv("SMTP_HOST")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
     smtp_user = os.getenv("SMTP_USER")
     smtp_password = os.getenv("SMTP_PASSWORD")
 
-    mensaje = MIMEMultipart()
-    mensaje["From"] = smtp_user
-    mensaje["To"] = email_destino
-    mensaje["Subject"] = "Recuperación de contraseña - SENA Attendance"
+    try:
+        # CONTROL ANTI-SPAM INTERNO: Pausa prudencial entre ejecuciones de la cola
+        time.sleep(2)
 
-    cuerpo = f"""
+        mensaje = MIMEMultipart()
+        mensaje["From"] = smtp_user
+        mensaje["To"] = email_destino
+        mensaje["Subject"] = "Recuperación de contraseña - SENA Attendance"
+
+        cuerpo = f"""
 Hola {nombre_usuario},
 
 Se ha solicitado la recuperación de tu contraseña de SENA Attendance.
@@ -55,16 +70,27 @@ Si no solicitaste este cambio, por favor ponte en contacto con el administrador.
 Saludos,
 Equipo de SENA Attendance
 """
-    mensaje.attach(MIMEText(cuerpo, "plain"))
+        mensaje.attach(MIMEText(cuerpo, "plain"))
 
-    with smtplib.SMTP(smtp_host, smtp_port) as servidor:
-        servidor.starttls()
-        servidor.login(smtp_user, smtp_password)
-        servidor.send_message(mensaje)
+        with smtplib.SMTP(smtp_host, smtp_port) as servidor:
+            servidor.starttls()
+            servidor.login(smtp_user, smtp_password)
+            servidor.send_message(mensaje)
+            
+    except Exception as e:
+        print(f"Error crítico asíncrono enviando correo de recuperación a {email_destino}: {e}")
 
 
 @router_recovery.post("/password")
-async def recuperar_password(data: RecuperarPasswordRequest, session: Session = Depends(get_session)):
+# DECORADOR DE LÍMITE: Máximo 3 peticiones cada 15 minutos por dirección IP
+@limiter.limit("3/15 minutes")
+# CAMBIO DEFINITIVO: Cambiado a "def" (sincrónico) para que slowapi no rompa las BackgroundTasks de FastAPI
+def recuperar_password(
+    request: Request,  # <-- OBLIGATORIO para que Slowapi capture la IP
+    data: RecuperarPasswordRequest, 
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_session)
+):
     usuario = None
     nombre_usuario = None
     campo_password = ""
@@ -118,7 +144,6 @@ async def recuperar_password(data: RecuperarPasswordRequest, session: Session = 
     nueva_password = generar_password_temporal()
     password_hasheada = hash_contraseña(nueva_password) 
 
-    # Asignación explícita para que el ORM detecte el cambio de inmediato
     if campo_password == "Con_Apr":
         usuario.Con_Apr = password_hasheada
     elif campo_password == "Con_Ins":
@@ -126,23 +151,13 @@ async def recuperar_password(data: RecuperarPasswordRequest, session: Session = 
     elif campo_password == "Con_Adm":
         usuario.Con_Adm = password_hasheada
 
-    # Añadimos el usuario modificado a la sesión antes de procesar el servicio de correo
+    # 5. GUARDAR EN BD PRIMERO
     session.add(usuario)
-
-    # 5. ENVIAR EL CORREO ELECTRÓNICO
-    try:
-        enviar_correo(email_destino, nueva_password, nombre_usuario)
-    except Exception as e:
-        session.rollback()  # Si el correo falla, cancelamos los cambios en la BD
-        print("Error enviando correo:", e)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="No fue posible enviar el correo de recuperación. Intente más tarde."
-        )
-
-    # 6. GUARDAR CAMBIOS EN LA BASE DE DATOS
     session.commit()
     session.refresh(usuario)
+
+    # 6. ENVIAR EL CORREO EN SEGUNDO PLANO
+    background_tasks.add_task(enviar_correo_recovery_bg, email_destino, nueva_password, nombre_usuario)
 
     return {
         "message": "Se ha enviado una nueva contraseña temporal al correo registrado."
