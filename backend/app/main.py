@@ -54,7 +54,7 @@ def manejador_rate_limit_personalizado(request: Request, exc: RateLimitExceeded)
     segundos = segundos_totales % 60
 
     if minutos > 0:
-        tiempo_texto = f"{minutos} minutos y {segundos} segundos"
+        tiempo_texto = f"{minutos} minutos"
     else:
         tiempo_texto = f"{segundos} segundos"
 
