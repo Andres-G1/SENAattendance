@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { obtenerInstructor, actualizarInstructor } from "../../services/api";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
+import Dropdown from "../../components/Dropdown";
 
 export default function EditarInstructor() {
   const { id } = useParams();
@@ -120,10 +121,9 @@ export default function EditarInstructor() {
                 <label htmlFor="tipo_identificacion" className="form-label">
                   Tipo de Documento
                 </label>
-                <select
+                <Dropdown
                   id="tipo_identificacion"
                   name="tipo_identificacion"
-                  className="form-select"
                   value={formulario.tipo_identificacion}
                   onChange={handleChange}
                   required
@@ -133,7 +133,7 @@ export default function EditarInstructor() {
                   <option value="CE">Cédula de Extranjería (CE)</option>
                   <option value="PEP">PEP</option>
                   <option value="PPT">PPT</option>
-                </select>
+                </Dropdown>
               </div>
 
               <div className="col-md-6">

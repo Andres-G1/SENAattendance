@@ -1,0 +1,210 @@
+.dd {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.dd-trigger,
+.app-theme .dd-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border: 1.5px solid #d5dee8;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--app-text, #27364b);
+  text-align: left;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.dd-trigger:hover:not(:disabled) {
+  border-color: var(--app-green, #00851d);
+}
+
+.dd.open .dd-trigger,
+.dd-trigger:focus-visible,
+.app-theme .dd.open .dd-trigger,
+.app-theme .dd-trigger:focus-visible {
+  border-color: var(--app-green, #00851d);
+  box-shadow: 0 0 0 0.2rem rgba(0, 133, 29, 0.15);
+  outline: none;
+}
+
+.dd-trigger:disabled {
+  background: #eef2f6;
+  color: #7c8998;
+  cursor: not-allowed;
+}
+
+.dd.invalid .dd-trigger {
+  border-color: var(--app-danger, #b42332);
+  box-shadow: 0 0 0 0.2rem rgba(180, 35, 50, 0.12);
+}
+
+.dd-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dd-placeholder {
+  color: var(--app-muted, #6e7c8d);
+}
+
+.dd-arrow {
+  flex-shrink: 0;
+  color: var(--app-green-dark, #006b18);
+  transition: transform 160ms ease;
+}
+
+.dd.open .dd-arrow {
+  transform: rotate(180deg);
+}
+
+.dd-panel {
+  position: absolute;
+  z-index: 1050;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  min-width: 160px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--app-border, #e1e8ef);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+  animation: dd-in 120ms ease-out;
+}
+
+@keyframes dd-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dd-search,
+.app-theme .dd-search {
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--app-border, #e1e8ef);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--app-text, #27364b);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.dd-search:focus {
+  border-color: var(--app-green, #00851d);
+}
+
+.dd-option,
+.app-theme .dd-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--app-text, #27364b);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.dd-option:hover:not(:disabled) {
+  background: var(--app-green-soft, #e8f5ec);
+}
+
+.dd-option.selected {
+  background: var(--app-green-soft, #e8f5ec);
+  color: var(--app-green-dark, #006b18);
+  font-weight: 600;
+}
+
+.dd-option:disabled {
+  color: #9aa5b1;
+  cursor: not-allowed;
+}
+
+.dd-empty {
+  padding: 0.6rem 0.7rem;
+  color: var(--app-muted, #6e7c8d);
+  font-size: 0.85rem;
+}
+
+.dd-sm {
+  width: 100%;
+}
+
+.dd-sm .dd-trigger {
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.dd-sm .dd-panel {
+  right: 0;
+  left: auto;
+  width: 160px;
+}
+
+.dd-native {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.app-theme .card:has(.dd.open) {
+  overflow: visible;
+}
+
+.app-theme .date-calendar__select {
+  width: auto;
+  min-width: 0;
+}
+
+.app-theme .date-calendar__select .dd-trigger {
+  text-transform: capitalize;
+}
+
+.app-theme .date-calendar__year {
+  width: 5.5rem;
+}
+
+.app-theme .date-calendar__select .dd-panel {
+  right: auto;
+  left: 0;
+  min-width: 100%;
+  max-height: 220px;
+}
+
+.formulario_login .login-dropdown {
+  margin-bottom: 15px;
+}
+
+.formulario_login .login-dropdown .dd-trigger {
+  font: inherit;
+}

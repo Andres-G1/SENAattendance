@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
+import Dropdown from "../../components/Dropdown";
 
 const API_URL = "http://localhost:8000";
 
@@ -145,13 +146,13 @@ export default function CrearResultadoAprendizaje() {
                   Competencia Asociada
                 </label>
 
-                <select
-                  className="form-select"
+                <Dropdown
                   id="Id_Comp"
                   name="Id_Comp"
                   value={form.Id_Comp}
                   onChange={handleChange}
                   required
+                  searchable
                 >
                   <option value="" disabled>
                     -- Selecciona una competencia --
@@ -165,7 +166,7 @@ export default function CrearResultadoAprendizaje() {
                       {competencia.Nom_Comp}
                     </option>
                   ))}
-                </select>
+                </Dropdown>
 
                 {competencias.length === 0 && !error && (
                   <small className="text-muted">

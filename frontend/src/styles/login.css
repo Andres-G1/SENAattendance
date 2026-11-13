@@ -98,7 +98,7 @@ body.login-page #root {
   border-color: #008f0c;
 }
 
-.formulario_login button {
+.formulario_login button:not(.dd-trigger):not(.dd-option) {
   width: 100%;
   padding: 12px;
   background-color: #00851d;
@@ -111,11 +111,11 @@ body.login-page #root {
   transition: background-color 0.2s ease;
 }
 
-.formulario_login button:hover {
+.formulario_login button:hover:not(.dd-trigger):not(.dd-option) {
   background-color: #00b51e;
 }
 
-.formulario_login button:disabled {
+.formulario_login button:disabled:not(.dd-trigger):not(.dd-option) {
   background-color: #8bc79a;
   cursor: not-allowed;
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/api";
+import Dropdown from "./Dropdown";
 import "../styles/Login.css";
 
 export default function Login({ onLoginSuccess }) {
@@ -79,12 +80,14 @@ export default function Login({ onLoginSuccess }) {
       </nav>
 
       <form className="formulario_login" onSubmit={handleSubmit}>
-        <select
-          className="input-login"
+        <Dropdown
+          className="login-dropdown"
           name="typeid"
           value={typeid}
           onChange={(e) => setTypeid(e.target.value)}
           required
+          placeholder="Tipo de documento"
+          ariaLabel="Tipo de documento"
         >
           <option value="" disabled>Tipo de documento</option>
           <option value="CC">Cédula de Ciudadanía (CC)</option>
@@ -92,7 +95,7 @@ export default function Login({ onLoginSuccess }) {
           <option value="CE">Cédula de Extranjería (CE)</option>
           <option value="PEP">PEP</option>
           <option value="PPT">Permiso por protección temporal (PPT)</option>
-        </select>
+        </Dropdown>
 
         <input
           className="input-login"

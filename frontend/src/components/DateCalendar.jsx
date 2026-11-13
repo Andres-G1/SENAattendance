@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import Dropdown from "./Dropdown";
 
 const WEEKDAYS = [
   ["L", "Lunes"],
@@ -132,9 +133,9 @@ export default function DateCalendar({
           ‹
         </button>
         <div className="date-calendar__selectors">
-          <select
+          <Dropdown
             className="date-calendar__select"
-            aria-label="Seleccionar mes"
+            ariaLabel="Seleccionar mes"
             value={visibleMonth.getMonth()}
             onChange={(event) =>
               changeVisibleMonth(visibleYear, Number(event.target.value))
@@ -156,10 +157,10 @@ export default function DateCalendar({
                 </option>
               );
             })}
-          </select>
-          <select
+          </Dropdown>
+          <Dropdown
             className="date-calendar__select date-calendar__year"
-            aria-label="Seleccionar año"
+            ariaLabel="Seleccionar año"
             value={visibleYear}
             onChange={(event) =>
               changeVisibleMonth(
@@ -176,7 +177,7 @@ export default function DateCalendar({
                 {year}
               </option>
             ))}
-          </select>
+          </Dropdown>
         </div>
         <button
           type="button"

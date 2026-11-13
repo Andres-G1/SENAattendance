@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { listarCompetencias, listarResultados } from "../../services/api";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
+import Dropdown from "../../components/Dropdown";
 
 export default function ConfigCompetencia() {
   const [competencias, setCompetencias] = useState([]);
@@ -113,10 +114,10 @@ export default function ConfigCompetencia() {
               <label className="form-label small text-muted">
                 Filtrar por competencia
               </label>
-              <select
-                className="form-select"
+              <Dropdown
                 value={idFiltro}
                 onChange={(e) => setIdFiltro(e.target.value)}
+                searchable
               >
                 <option value="">Todas las competencias</option>
                 {competencias.map((c) => (
@@ -124,7 +125,7 @@ export default function ConfigCompetencia() {
                     {c.Nom_Comp}
                   </option>
                 ))}
-              </select>
+              </Dropdown>
             </div>
           )}
 

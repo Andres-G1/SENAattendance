@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
+import Dropdown from "../../components/Dropdown";
 
 const API_URL = "http://localhost:8000"; // ajusta según tu configuración
 
@@ -109,20 +110,20 @@ export default function Edit() {
                 <label htmlFor="career" className="form-label">
                   Programa de formación
                 </label>
-                <select
+                <Dropdown
                   name="Id_Car"
                   id="career"
-                  className="form-select"
                   value={form.Id_Car}
                   onChange={handleChange}
                   required
+                  searchable
                 >
                   {carreras.map((c) => (
                     <option key={c.Id_Car} value={c.Id_Car}>
                       {c.Nom_Car}
                     </option>
                   ))}
-                </select>
+                </Dropdown>
               </div>
 
               <div className="col-md-12">

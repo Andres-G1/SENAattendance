@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import CoordinadorNavbar from "/src/components/navbars/CoordinadorNavbar.jsx";
 import DateCalendar from "/src/components/DateCalendar.jsx";
+import Dropdown from "../../components/Dropdown";
 import useCurrentDate from "/src/hooks/useCurrentDate.js";
 
 const API_BASE = "http://localhost:8000";
@@ -284,11 +285,11 @@ export default function CoordinadorAsistencia() {
                 <div className="col-12 col-md-8">
                   <label className="form-label fw-semibold">Ficha</label>
 
-                  <select
-                    className="form-select"
+                  <Dropdown
                     value={fichaSeleccionada}
                     onChange={(e) => seleccionarFicha(e.target.value)}
                     disabled={loadingFichas}
+                    searchable
                   >
                     <option value="">
                       {loadingFichas
@@ -301,7 +302,7 @@ export default function CoordinadorAsistencia() {
                         {ficha.Num_Fic || ficha.Id_Fic}
                       </option>
                     ))}
-                  </select>
+                  </Dropdown>
                 </div>
               </div>
 

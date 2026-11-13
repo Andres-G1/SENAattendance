@@ -28,15 +28,17 @@ Router_asignaciones = APIRouter(
 # REQUEST PARA ASIGNAR RESULTADO DE APRENDIZAJE
 # =========================================================
 
+class AsignacionItem(BaseModel):
+    Id_RA: int
+    Dia: DiaSemana           # tu enum actual
+
+
 class AsignarInstructorRequest(BaseModel):
     Id_Fic: int
     Id_Ins: int
-    Id_RA: int
-    Dia: DiaSemana
-
+    Asignaciones: list[AsignacionItem]   # reemplaza Id_RA / Id_RAs / Dias
     Fec_Inicio_RA: date
     Fec_Fin_RA: date
-
 
 # =========================================================
 # REQUEST PARA ASIGNAR APRENDIZ
@@ -50,7 +52,6 @@ class AsignarAprendizRequest(BaseModel):
 # =========================================================
 # ASIGNAR RESULTADO DE APRENDIZAJE A UN INSTRUCTOR
 # =========================================================
-
 @Router_asignaciones.post(
     "/instructor",
     status_code=status.HTTP_201_CREATED,
@@ -59,108 +60,95 @@ def asignar_instructor(
     data: AsignarInstructorRequest,
     session: Session = Depends(get_session),
 ):
-    # 1. Buscar ficha
+    # 1. Ficha
     ficha = session.get(Fichas, data.Id_Fic)
-
     if not ficha:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Ficha no encontrada",
-        )
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Ficha no encontrada")
 
-    # 2. Buscar instructor
+    # 2. Instructor
     instructor = session.get(Instructor, data.Id_Ins)
-
     if not instructor:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Instructor no encontrado")
+
+    # 3. Pares (resultado, día) sin repetidos
+    pares = list(dict.fromkeys((a.Id_RA, a.Dia) for a in data.Asignaciones))
+    if not pares:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Instructor no encontrado",
+            status.HTTP_400_BAD_REQUEST,
+            "Debes enviar al menos una asignación",
         )
 
-    # 3. Buscar resultado de aprendizaje
-    resultado = session.get(
-        ResultadoAprendizaje,
-        data.Id_RA,
-    )
+    # 4. Verificar que los resultados existan
+    ids_ra = list(dict.fromkeys(id_ra for id_ra, _ in pares))
 
-    if not resultado:
+    resultados = session.exec(
+        select(ResultadoAprendizaje).where(ResultadoAprendizaje.Id_RA.in_(ids_ra))
+    ).all()
+
+    encontrados = {r.Id_RA for r in resultados}
+    faltantes = [i for i in ids_ra if i not in encontrados]
+    if faltantes:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Resultado de aprendizaje no encontrado",
+            status.HTTP_404_NOT_FOUND,
+            f"Resultados de aprendizaje no encontrados: {faltantes}",
         )
 
-    # 4. Validar fechas
+    # 5. Validar fechas
     if data.Fec_Inicio_RA > data.Fec_Fin_RA:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "La fecha de inicio del resultado de aprendizaje "
-                "no puede ser posterior a la fecha final"
-            ),
+            status.HTTP_400_BAD_REQUEST,
+            "La fecha de inicio no puede ser posterior a la fecha final",
         )
 
-    # 5. Validar fecha inicial contra la ficha
     if data.Fec_Inicio_RA < ficha.Fec_inicio_Fic:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "La fecha de inicio del resultado de aprendizaje "
-                "no puede ser anterior al inicio de la ficha"
-            ),
+            status.HTTP_400_BAD_REQUEST,
+            "La fecha de inicio no puede ser anterior al inicio de la ficha",
         )
 
-    # 6. Validar fecha final contra la ficha
     if data.Fec_Fin_RA > ficha.Fec_Fin_Fic:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "La fecha final del resultado de aprendizaje "
-                "no puede ser posterior al fin de la ficha"
-            ),
+            status.HTTP_400_BAD_REQUEST,
+            "La fecha final no puede ser posterior al fin de la ficha",
         )
 
-    # 7. Crear asignación
-    nueva_relacion = FichaInstructor(
-        Id_Fic=data.Id_Fic,
-        Id_Ins=data.Id_Ins,
-        Id_RA=data.Id_RA,
-        Dia=data.Dia,
-        Fec_Inicio_RA=data.Fec_Inicio_RA,
-        Fec_Fin_RA=data.Fec_Fin_RA,
-    )
+    # 6. Crear asignaciones
+    nuevas = [
+        FichaInstructor(
+            Id_Fic=data.Id_Fic,
+            Id_Ins=data.Id_Ins,
+            Id_RA=id_ra,
+            Dia=dia,
+            Fec_Inicio_RA=data.Fec_Inicio_RA,
+            Fec_Fin_RA=data.Fec_Fin_RA,
+        )
+        for id_ra, dia in pares
+    ]
+    session.add_all(nuevas)
 
-    session.add(nueva_relacion)
-
-    # 8. Guardar
+    # 7. Un solo commit: si una falla, no se guarda ninguna
     try:
         session.commit()
-        session.refresh(nueva_relacion)
-
     except IntegrityError:
         session.rollback()
-
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=(
-                "Esta combinación de ficha, instructor, "
-                "resultado de aprendizaje y día ya existe, "
-                "o infringe una restricción de la base de datos"
-            ),
+            status.HTTP_409_CONFLICT,
+            "Alguna combinación de ficha, instructor, resultado de "
+            "aprendizaje y día ya existe, o infringe una restricción "
+            "de la base de datos",
         )
 
-    # 9. Respuesta
+    # 8. Respuesta
     return {
-        "mensaje": "Resultado de aprendizaje asignado al instructor exitosamente",
+        "mensaje": f"{len(nuevas)} asignación(es) creada(s) exitosamente",
         "Id_Fic": data.Id_Fic,
         "Id_Ins": data.Id_Ins,
-        "Id_RA": data.Id_RA,
-        "Dia": data.Dia.value,
         "Fec_Inicio_RA": data.Fec_Inicio_RA,
         "Fec_Fin_RA": data.Fec_Fin_RA,
-        "Id_Comp": resultado.Id_Comp,
-        "Nom_RA": resultado.Nom_RA,
+        "asignaciones": [
+            {"Id_RA": id_ra, "Dia": dia.value} for id_ra, dia in pares
+        ],
     }
-
 
 # =========================================================
 # OBTENER FICHAS Y RESULTADOS DE UN INSTRUCTOR

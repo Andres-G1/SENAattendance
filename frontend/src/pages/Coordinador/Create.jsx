@@ -6,6 +6,7 @@ import { getCarreras } from "../../services/carreraService";
 import { obtenerFichas } from "../../services/fichaService";
 
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
+import Dropdown from "../../components/Dropdown";
 
 export default function CrearAprendiz() {
   const navigate = useNavigate();
@@ -269,10 +270,9 @@ export default function CrearAprendiz() {
                   Tipo de Documento
                 </label>
 
-                <select
+                <Dropdown
                   id="tipo_identificacion"
                   name="tipo_identificacion"
-                  className="form-select"
                   value={formulario.tipo_identificacion}
                   onChange={handleChange}
                   required
@@ -298,7 +298,7 @@ export default function CrearAprendiz() {
                     PPT
                   </option>
 
-                </select>
+                </Dropdown>
 
               </div>
 
@@ -426,13 +426,13 @@ export default function CrearAprendiz() {
                   Programa de formación
                 </label>
 
-                <select
+                <Dropdown
                   id="Id_Car"
                   name="Id_Car"
-                  className="form-select"
                   value={formulario.Id_Car}
                   onChange={handleChange}
                   required
+                  searchable
                 >
 
                   <option value="">
@@ -448,7 +448,7 @@ export default function CrearAprendiz() {
                     </option>
                   ))}
 
-                </select>
+                </Dropdown>
 
               </div>
 
@@ -465,14 +465,14 @@ export default function CrearAprendiz() {
                   Ficha
                 </label>
 
-                <select
+                <Dropdown
                   id="Id_Fic"
                   name="Id_Fic"
-                  className="form-select"
                   value={formulario.Id_Fic}
                   onChange={handleChange}
                   required
                   disabled={!formulario.Id_Car}
+                  searchable
                 >
 
                   <option value="">
@@ -493,7 +493,7 @@ export default function CrearAprendiz() {
                     </option>
                   ))}
 
-                </select>
+                </Dropdown>
 
               </div>
 

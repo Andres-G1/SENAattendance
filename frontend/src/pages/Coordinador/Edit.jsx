@@ -5,6 +5,7 @@ import {
   actualizarAprendiz,
 } from "../../services/api";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
+import Dropdown from "../../components/Dropdown";
 
 export default function EditarAprendiz() {
   const { id } = useParams();
@@ -248,10 +249,9 @@ export default function EditarAprendiz() {
                 </label>
 
 
-                <select
+                <Dropdown
                   id="tipo_identificacion"
                   name="tipo_identificacion"
-                  className="form-select"
                   value={
                     formulario.tipo_identificacion
                   }
@@ -281,7 +281,7 @@ export default function EditarAprendiz() {
                   <option value="PPT">
                     PPT
                   </option>
-                </select>
+                </Dropdown>
 
 
               </div>

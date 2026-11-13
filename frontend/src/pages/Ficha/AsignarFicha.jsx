@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar";
+import Dropdown from "../../components/Dropdown";
 
 const API_BASE = "http://localhost:8000";
 
@@ -12,6 +13,52 @@ const DIAS_SEMANA = [
   "Sabado",
 ];
 
+// =====================================================
+// ESTILOS
+// =====================================================
+
+const STYLES = `
+.app-theme .af-card { overflow:visible; }
+.af-icon { background:var(--app-green-soft); color:var(--app-green-dark); border-radius:14px; }
+.af-section { background:#f6f8fa; border:1px solid var(--app-border); border-radius:16px; padding:1.25rem; }
+.af-label { font-size:.8rem; font-weight:600; color:var(--app-navy); margin-bottom:.35rem; display:block; }
+.af-pill-count { background:var(--app-green); color:#fff; font-size:.72rem; font-weight:600; padding:.2rem .6rem; border-radius:999px; }
+
+/* Resultados elegidos */
+.af-chosen { display:flex; align-items:center; gap:.75rem; background:var(--app-green-soft); border:1px solid rgba(0,133,29,.2); border-left:5px solid var(--app-green); border-radius:12px; padding:.55rem .8rem; }
+.af-chosen-title { flex:1; font-size:.85rem; font-weight:600; color:var(--app-green-dark); }
+.af-chosen-day { width:150px; flex-shrink:0; }
+.af-remove { width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:50%; background:rgba(0,107,24,.1); color:var(--app-green-dark); font-size:1.1rem; line-height:1; transition:background .15s; }
+.af-remove:hover { background:var(--app-green-dark); color:#fff; }
+@media (max-width:575px) {
+  .af-chosen { flex-wrap:wrap; }
+  .af-chosen-title { flex-basis:100%; }
+  .af-chosen-day { flex:1; width:auto; }
+}
+
+/* Lista de resultados */
+.af-ra-list { max-height:320px; overflow-y:auto; padding-right:4px; }
+.af-ra { display:flex; align-items:flex-start; gap:.8rem; width:100%; text-align:left; background:#fff; border:2px solid var(--app-border); border-radius:12px; padding:.8rem .9rem; transition:border-color .15s, background .15s; }
+.af-ra:hover { border-color:rgba(0,133,29,.45); background:#f8fbf9; }
+.af-ra.active { border-color:var(--app-green); background:var(--app-green-soft); }
+.af-ra-check { width:22px; height:22px; margin-top:2px; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; border:2px solid #adb5bd; background:#fff; color:#fff; font-size:.75rem; }
+.af-ra.active .af-ra-check { background:var(--app-green); border-color:var(--app-green); }
+.af-ra-title { display:block; font-weight:600; color:var(--app-navy); }
+.af-ra.active .af-ra-title { color:var(--app-green-dark); }
+.af-ra-desc { display:block; margin-top:.2rem; font-size:.82rem; color:var(--app-muted); }
+
+/* Fechas y botón */
+.af-date { border:1.5px solid #d5dee8; border-radius:10px; padding:.6rem .9rem; accent-color:var(--app-green); }
+.af-date:focus { border-color:var(--app-green); box-shadow:0 0 0 .2rem rgba(0,133,29,.12); }
+.af-submit { background:var(--app-green); color:#fff; border:0; border-radius:12px; font-weight:600; padding:.7rem 1.5rem; box-shadow:0 4px 14px rgba(0,107,24,.2); transition:background .15s, transform .1s; }
+.af-submit:hover:not(:disabled) { background:var(--app-green-dark); transform:translateY(-1px); }
+.af-submit:disabled { opacity:.7; }
+`;
+
+// =====================================================
+// PÁGINA
+// =====================================================
+
 export default function AsignarFicha() {
   const [fichas, setFichas] = useState([]);
   const [instructores, setInstructores] = useState([]);
@@ -21,8 +68,8 @@ export default function AsignarFicha() {
   const [selectedFicha, setSelectedFicha] = useState("");
   const [selectedInstructor, setSelectedInstructor] = useState("");
   const [selectedCompetencia, setSelectedCompetencia] = useState("");
-  const [selectedResultado, setSelectedResultado] = useState("");
-  const [selectedDia, setSelectedDia] = useState("");
+  const [selectedResultados, setSelectedResultados] = useState([]);
+  const [diasPorRA, setDiasPorRA] = useState({});
 
   const [fechaInicioRA, setFechaInicioRA] = useState("");
   const [fechaFinRA, setFechaFinRA] = useState("");
@@ -36,9 +83,7 @@ export default function AsignarFicha() {
     Nom_Adm: localStorage.getItem("firstName") || "Usuario",
   };
 
-  // =====================================================
-  // CARGAR FICHAS, INSTRUCTORES, COMPETENCIAS Y RESULTADOS
-  // =====================================================
+  // ---------- CARGAR DATOS ----------
 
   useEffect(() => {
     async function cargarDatos() {
@@ -54,23 +99,15 @@ export default function AsignarFicha() {
             fetch(`${API_BASE}/resultados-aprendizaje`),
           ]);
 
-        if (!resFichas.ok) {
-          throw new Error("No se pudieron cargar las fichas.");
-        }
-
-        if (!resInstructores.ok) {
+        if (!resFichas.ok) throw new Error("No se pudieron cargar las fichas.");
+        if (!resInstructores.ok)
           throw new Error("No se pudieron cargar los instructores.");
-        }
-
-        if (!resCompetencias.ok) {
+        if (!resCompetencias.ok)
           throw new Error("No se pudieron cargar las competencias.");
-        }
-
-        if (!resResultados.ok) {
+        if (!resResultados.ok)
           throw new Error(
             "No se pudieron cargar los resultados de aprendizaje."
           );
-        }
 
         const [
           dataFichas,
@@ -90,7 +127,6 @@ export default function AsignarFicha() {
         setResultados(dataResultados);
       } catch (err) {
         console.error("Error cargando datos:", err);
-
         setErrorCarga(
           err.message ||
             "No se pudieron cargar los datos. Verifica el backend."
@@ -103,82 +139,105 @@ export default function AsignarFicha() {
     cargarDatos();
   }, []);
 
-  // =====================================================
-  // DATOS DERIVADOS
-  // =====================================================
+  // ---------- DATOS DERIVADOS ----------
 
   const fichaSeleccionada = fichas.find(
     (f) => String(f.Id_Fic) === String(selectedFicha)
   );
 
-  // Solo los resultados que pertenecen a la competencia elegida
   const resultadosFiltrados = selectedCompetencia
     ? resultados.filter(
         (ra) => String(ra.Id_Comp) === String(selectedCompetencia)
       )
     : [];
 
-  // =====================================================
-  // HANDLERS DE CAMBIO
-  // =====================================================
+  const resultadosElegidos = resultados.filter((ra) =>
+    selectedResultados.includes(String(ra.Id_RA))
+  );
 
-  const handleFichaChange = (e) => {
-    setSelectedFicha(e.target.value);
+  const opcionesFichas = fichas.map((f) => ({
+    value: f.Id_Fic,
+    label: `Ficha ${f.Num_Fic}`,
+  }));
+
+  const opcionesInstructores = instructores.map((i) => ({
+    value: i.Id_Ins,
+    label: `${i.Nom_Ins} ${i.Ape_Ins} - ${i.Num_ide_Ins}`,
+  }));
+
+  const opcionesCompetencias = competencias.map((c) => ({
+    value: c.Id_Comp,
+    label: c.Nom_Comp,
+  }));
+
+  const opcionesDias = DIAS_SEMANA.map((d) => ({ value: d, label: d }));
+
+  const inicioFicha = fichaSeleccionada
+    ? String(fichaSeleccionada.Fec_inicio_Fic).slice(0, 10)
+    : undefined;
+  const finFicha = fichaSeleccionada
+    ? String(fichaSeleccionada.Fec_Fin_Fic).slice(0, 10)
+    : undefined;
+
+  // ---------- HANDLERS ----------
+
+  const handleFichaChange = (valor) => {
+    setSelectedFicha(valor);
     setFechaInicioRA("");
     setFechaFinRA("");
     setMensaje(null);
   };
 
-  const handleCompetenciaChange = (e) => {
-    setSelectedCompetencia(e.target.value);
-    setSelectedResultado(""); // el resultado anterior ya no aplica
+  const handleCompetenciaChange = (valor) => {
+    setSelectedCompetencia(valor);
     setMensaje(null);
   };
 
-  // =====================================================
-  // ENVIAR ASIGNACIÓN
-  // =====================================================
+  const toggleResultado = (id) => {
+    const idStr = String(id);
+    setSelectedResultados((prev) =>
+      prev.includes(idStr) ? prev.filter((x) => x !== idStr) : [...prev, idStr]
+    );
+    setDiasPorRA((prev) => {
+      const copia = { ...prev };
+      delete copia[idStr];
+      return copia;
+    });
+  };
+
+  const cambiarDia = (id, dia) => {
+    setDiasPorRA((prev) => ({ ...prev, [String(id)]: dia }));
+  };
+
+  // ---------- ENVIAR ----------
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMensaje(null);
 
     if (!selectedFicha) {
-      setMensaje({
-        tipo: "error",
-        texto: "Debes seleccionar una ficha.",
-      });
+      setMensaje({ tipo: "error", texto: "Debes seleccionar una ficha." });
       return;
     }
 
     if (!selectedInstructor) {
+      setMensaje({ tipo: "error", texto: "Debes seleccionar un instructor." });
+      return;
+    }
+
+    if (selectedResultados.length === 0) {
       setMensaje({
         tipo: "error",
-        texto: "Debes seleccionar un instructor.",
+        texto: "Debes seleccionar al menos un resultado de aprendizaje.",
       });
       return;
     }
 
-    if (!selectedCompetencia) {
+    const sinDia = selectedResultados.filter((id) => !diasPorRA[id]);
+    if (sinDia.length > 0) {
       setMensaje({
         tipo: "error",
-        texto: "Debes seleccionar una competencia.",
-      });
-      return;
-    }
-
-    if (!selectedResultado) {
-      setMensaje({
-        tipo: "error",
-        texto: "Debes seleccionar un resultado de aprendizaje.",
-      });
-      return;
-    }
-
-    if (!selectedDia) {
-      setMensaje({
-        tipo: "error",
-        texto: "Debes seleccionar un día.",
+        texto: "Debes asignar un día a cada resultado seleccionado.",
       });
       return;
     }
@@ -194,16 +253,12 @@ export default function AsignarFicha() {
     if (fechaFinRA < fechaInicioRA) {
       setMensaje({
         tipo: "error",
-        texto:
-          "La fecha final no puede ser anterior a la fecha inicial.",
+        texto: "La fecha final no puede ser anterior a la fecha inicial.",
       });
       return;
     }
 
     if (fichaSeleccionada) {
-      const inicioFicha = String(fichaSeleccionada.Fec_inicio_Fic).slice(0, 10);
-      const finFicha = String(fichaSeleccionada.Fec_Fin_Fic).slice(0, 10);
-
       if (fechaInicioRA < inicioFicha) {
         setMensaje({
           tipo: "error",
@@ -221,13 +276,13 @@ export default function AsignarFicha() {
       }
     }
 
-    // Los nombres deben coincidir con el modelo de FastAPI.
-    // La competencia solo se usa para filtrar, no se envía.
     const bodyData = {
       Id_Fic: Number(selectedFicha),
       Id_Ins: Number(selectedInstructor),
-      Id_RA: Number(selectedResultado),
-      Dia: selectedDia,
+      Asignaciones: selectedResultados.map((id) => ({
+        Id_RA: Number(id),
+        Dia: diasPorRA[id],
+      })),
       Fec_Inicio_RA: fechaInicioRA,
       Fec_Fin_RA: fechaFinRA,
     };
@@ -237,37 +292,40 @@ export default function AsignarFicha() {
     try {
       const res = await fetch(`${API_BASE}/asignaciones/instructor`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyData),
       });
 
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : `Error al realizar la asignación (${res.status}).`
-        );
+        let motivo = `Error al realizar la asignación (${res.status}).`;
+
+        if (typeof data.detail === "string") {
+          motivo = data.detail;
+        } else if (Array.isArray(data.detail)) {
+          motivo = data.detail
+            .map((d) => `${d.loc.slice(1).join(".")}: ${d.msg}`)
+            .join(" | ");
+        }
+
+        throw new Error(motivo);
       }
 
       setMensaje({
         tipo: "exito",
-        texto: data.mensaje || "Resultado de aprendizaje asignado correctamente.",
+        texto: data.mensaje || "Asignaciones creadas correctamente.",
       });
 
       setSelectedFicha("");
       setSelectedInstructor("");
       setSelectedCompetencia("");
-      setSelectedResultado("");
-      setSelectedDia("");
+      setSelectedResultados([]);
+      setDiasPorRA({});
       setFechaInicioRA("");
       setFechaFinRA("");
     } catch (err) {
       console.error("Error al asignar:", err);
-
       setMensaje({
         tipo: "error",
         texto: err.message || "No se pudo conectar con el servidor.",
@@ -277,29 +335,19 @@ export default function AsignarFicha() {
     }
   };
 
-  // =====================================================
-  // RENDERIZADO
-  // =====================================================
+  // ---------- RENDER ----------
 
   return (
     <>
+      <style>{STYLES}</style>
       <CoordinadorNavbar user={user} />
 
       <div className="bg-light min-vh-100 py-5">
         <main className="container" style={{ maxWidth: 920 }}>
-          <div
-            className="rounded-4 p-3 p-md-4 bg-white"
-            style={{ border: "2px solid #00851d" }}
-          >
+          <div className="card page-card af-card p-3 p-md-4">
             {/* ENCABEZADO */}
             <div className="d-flex align-items-center gap-3 mb-3">
-              <div
-                className="p-3 rounded-3"
-                style={{
-                  backgroundColor: "#E6F4D7",
-                  color: "#1B5E20",
-                }}
-              >
+              <div className="af-icon p-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -316,29 +364,25 @@ export default function AsignarFicha() {
                 </svg>
               </div>
 
-              <h5 className="fw-bold text-dark mb-0">
-                Asignar resultado de aprendizaje
-              </h5>
+              <div>
+                <h5 className="fw-bold text-dark mb-0">
+                  Asignar resultados de aprendizaje
+                </h5>
+                <p className="text-muted small mb-0">
+                  Elige la ficha, el instructor, los resultados (cada uno con su
+                  día) y el período.
+                </p>
+              </div>
             </div>
 
-            <p className="text-muted small mb-4">
-              Selecciona la ficha, el instructor, la competencia, el
-              resultado de aprendizaje, el día y el período en que se
-              impartirá.
-            </p>
+            <hr className="mt-3 mb-4" style={{ opacity: 0.1 }} />
 
-            {/* ESTADOS DE CARGA */}
             {cargando ? (
-              <div className="text-muted small py-3">
-                Cargando datos...
-              </div>
+              <div className="text-muted small py-3">Cargando datos...</div>
             ) : errorCarga ? (
-              <div className="alert alert-danger small mb-0">
-                {errorCarga}
-              </div>
+              <div className="alert alert-danger small mb-0">{errorCarga}</div>
             ) : (
               <form onSubmit={handleSubmit} className="row g-3">
-                {/* MENSAJE */}
                 {mensaje && (
                   <div
                     role="alert"
@@ -354,246 +398,186 @@ export default function AsignarFicha() {
 
                 {/* FICHA */}
                 <div className="col-12 col-md-6">
-                  <label
-                    htmlFor="Id_Fic"
-                    className="form-label small fw-medium"
-                  >
-                    Seleccionar ficha
+                  <label htmlFor="Id_Fic" className="af-label">
+                    Ficha
                   </label>
-
-                  <select
+                  <Dropdown
                     id="Id_Fic"
-                    className="form-select"
                     value={selectedFicha}
                     onChange={handleFichaChange}
-                    required
-                  >
-                    <option value="">-- Seleccione una ficha --</option>
-
-                    {fichas.map((f) => (
-                      <option key={f.Id_Fic} value={f.Id_Fic}>
-                        Ficha {f.Num_Fic}
-                      </option>
-                    ))}
-                  </select>
+                    options={opcionesFichas}
+                    placeholder="Seleccione una ficha"
+                    searchable
+                  />
 
                   {fichaSeleccionada && (
                     <div className="mt-2 small text-muted">
-                      <strong>Período de la ficha:</strong>{" "}
-                      {String(fichaSeleccionada.Fec_inicio_Fic).slice(0, 10)}
+                      <strong>Período de la ficha:</strong> {inicioFicha}
                       {" → "}
-                      {String(fichaSeleccionada.Fec_Fin_Fic).slice(0, 10)}
+                      {finFicha}
                     </div>
                   )}
                 </div>
 
                 {/* INSTRUCTOR */}
                 <div className="col-12 col-md-6">
-                  <label
-                    htmlFor="Id_Ins"
-                    className="form-label small fw-medium"
-                  >
-                    Seleccionar instructor
+                  <label htmlFor="Id_Ins" className="af-label">
+                    Instructor
                   </label>
-
-                  <select
+                  <Dropdown
                     id="Id_Ins"
-                    className="form-select"
                     value={selectedInstructor}
-                    onChange={(e) => setSelectedInstructor(e.target.value)}
-                    required
-                  >
-                    <option value="">-- Seleccione un instructor --</option>
-
-                    {instructores.map((i) => (
-                      <option key={i.Id_Ins} value={i.Id_Ins}>
-                        {i.Nom_Ins} {i.Ape_Ins} - {i.Num_ide_Ins}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setSelectedInstructor}
+                    options={opcionesInstructores}
+                    placeholder="Seleccione un instructor"
+                    searchable
+                  />
                 </div>
 
-                {/* COMPETENCIA (FILTRO) */}
-                <div className="col-12 col-md-6">
-                  <label
-                    htmlFor="Id_Comp"
-                    className="form-label small fw-medium"
-                  >
-                    Seleccionar competencia
-                  </label>
-
-                  <select
-                    id="Id_Comp"
-                    className="form-select"
-                    value={selectedCompetencia}
-                    onChange={handleCompetenciaChange}
-                    required
-                  >
-                    <option value="">-- Seleccione una competencia --</option>
-
-                    {competencias.map((c) => (
-                      <option key={c.Id_Comp} value={c.Id_Comp}>
-                        {c.Nom_Comp}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* RESULTADO DE APRENDIZAJE */}
-                <div className="col-12 col-md-6">
-                  <label
-                    htmlFor="Id_RA"
-                    className="form-label small fw-medium"
-                  >
-                    Seleccionar resultado de aprendizaje
-                  </label>
-
-                  <select
-                    id="Id_RA"
-                    className="form-select"
-                    value={selectedResultado}
-                    onChange={(e) => setSelectedResultado(e.target.value)}
-                    disabled={!selectedCompetencia}
-                    required
-                  >
-                    <option value="">
-                      {selectedCompetencia
-                        ? "-- Seleccione un resultado de aprendizaje --"
-                        : "-- Primero seleccione una competencia --"}
-                    </option>
-
-                    {resultadosFiltrados.map((ra) => (
-                      <option key={ra.Id_RA} value={ra.Id_RA}>
-                        {ra.Nom_RA}
-                      </option>
-                    ))}
-                  </select>
-
-                  {selectedCompetencia && resultadosFiltrados.length === 0 && (
-                    <div className="form-text text-danger">
-                      Esta competencia no tiene resultados de aprendizaje
-                      registrados.
-                    </div>
-                  )}
-
-                  {selectedResultado && (
-                    <div className="form-text">
-                      {resultadosFiltrados.find(
-                        (ra) => String(ra.Id_RA) === String(selectedResultado)
-                      )?.Des_RA || ""}
-                    </div>
-                  )}
-                </div>
-
+                {/* RESULTADOS */}
                 <div className="col-12">
-                  <section className="rounded-3 border bg-light p-3 p-md-4">
-                    <h6 className="fw-semibold text-dark mb-1">
-                      Programación
-                    </h6>
+                  <section className="af-section">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <h6 className="fw-semibold text-dark mb-0">
+                        Resultados de aprendizaje
+                      </h6>
+                      {selectedResultados.length > 0 && (
+                        <span className="af-pill-count">
+                          {selectedResultados.length} seleccionado(s)
+                        </span>
+                      )}
+                    </div>
                     <p className="small text-muted mb-3">
-                      Define el día y las fechas en que se impartirá.
+                      Filtra por competencia, marca los resultados y elige el
+                      día de cada uno. Puedes repetir el mismo día.
+                    </p>
+
+                    {resultadosElegidos.length > 0 && (
+                      <div className="d-flex flex-column gap-2 mb-3">
+                        {resultadosElegidos.map((ra) => (
+                          <div key={ra.Id_RA} className="af-chosen">
+                            <span className="af-chosen-title">{ra.Nom_RA}</span>
+
+                            <div className="af-chosen-day">
+                              <Dropdown
+                                small
+                                value={diasPorRA[String(ra.Id_RA)] || ""}
+                                onChange={(d) => cambiarDia(ra.Id_RA, d)}
+                                options={opcionesDias}
+                                placeholder="Día..."
+                              />
+                            </div>
+
+                            <button
+                              type="button"
+                              aria-label="Quitar"
+                              className="af-remove"
+                              onClick={() => toggleResultado(ra.Id_RA)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <label htmlFor="Id_Comp" className="af-label">
+                      Competencia
+                    </label>
+                    <div className="mb-3">
+                      <Dropdown
+                        id="Id_Comp"
+                        value={selectedCompetencia}
+                        onChange={handleCompetenciaChange}
+                        options={opcionesCompetencias}
+                        placeholder="Seleccione una competencia"
+                        searchable
+                      />
+                    </div>
+
+                    {!selectedCompetencia ? (
+                      <div className="text-muted small">
+                        Selecciona una competencia para ver sus resultados.
+                      </div>
+                    ) : resultadosFiltrados.length === 0 ? (
+                      <div className="text-danger small">
+                        Esta competencia no tiene resultados de aprendizaje
+                        registrados.
+                      </div>
+                    ) : (
+                      <div className="af-ra-list d-flex flex-column gap-2">
+                        {resultadosFiltrados.map((ra) => {
+                          const activo = selectedResultados.includes(
+                            String(ra.Id_RA)
+                          );
+
+                          return (
+                            <button
+                              type="button"
+                              key={ra.Id_RA}
+                              onClick={() => toggleResultado(ra.Id_RA)}
+                              aria-pressed={activo}
+                              className={`af-ra ${activo ? "active" : ""}`}
+                            >
+                              <span className="af-ra-check">
+                                {activo && "✓"}
+                              </span>
+
+                              <span>
+                                <span className="af-ra-title">{ra.Nom_RA}</span>
+                                {ra.Des_RA && (
+                                  <span className="af-ra-desc">
+                                    {ra.Des_RA}
+                                  </span>
+                                )}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </section>
+                </div>
+
+                {/* PROGRAMACIÓN */}
+                <div className="col-12">
+                  <section className="af-section">
+                    <h6 className="fw-semibold text-dark mb-1">Programación</h6>
+                    <p className="small text-muted mb-3">
+                      Define las fechas del período.
                     </p>
 
                     <div className="row g-3">
-                      {/* DÍA */}
                       <div className="col-12 col-md-6">
-                        <label
-                          htmlFor="Dia"
-                          className="form-label small fw-medium"
-                        >
-                          Día de formación
-                        </label>
-
-                        <select
-                          id="Dia"
-                          className="form-select"
-                          value={selectedDia}
-                          onChange={(e) => setSelectedDia(e.target.value)}
-                          required
-                        >
-                          <option value="">-- Seleccione un día --</option>
-
-                          {DIAS_SEMANA.map((dia) => (
-                            <option key={dia} value={dia}>
-                              {dia}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* FECHA INICIO */}
-                      <div className="col-12 col-md-6">
-                        <label
-                          htmlFor="Fec_Inicio_RA"
-                          className="form-label small fw-medium"
-                        >
+                        <label htmlFor="Fec_Inicio_RA" className="af-label">
                           Fecha de inicio
                         </label>
                         <input
                           id="Fec_Inicio_RA"
                           type="date"
-                          className="form-control"
+                          className="form-control af-date"
                           value={fechaInicioRA}
                           onChange={(e) => setFechaInicioRA(e.target.value)}
-                          min={
-                            fichaSeleccionada
-                              ? String(fichaSeleccionada.Fec_inicio_Fic).slice(
-                                  0,
-                                  10
-                                )
-                              : undefined
-                          }
-                          max={
-                            fichaSeleccionada
-                              ? String(fichaSeleccionada.Fec_Fin_Fic).slice(
-                                  0,
-                                  10
-                                )
-                              : undefined
-                          }
+                          min={inicioFicha}
+                          max={finFicha}
                           required
                         />
-                        <div className="form-text">
-                          Desde cuándo se impartirá.
-                        </div>
                       </div>
 
-                      {/* FECHA FIN */}
                       <div className="col-12 col-md-6">
-                        <label
-                          htmlFor="Fec_Fin_RA"
-                          className="form-label small fw-medium"
-                        >
+                        <label htmlFor="Fec_Fin_RA" className="af-label">
                           Fecha de finalización
                         </label>
                         <input
                           id="Fec_Fin_RA"
                           type="date"
-                          className="form-control"
+                          className="form-control af-date"
                           value={fechaFinRA}
                           onChange={(e) => setFechaFinRA(e.target.value)}
-                          min={
-                            fechaInicioRA ||
-                            (fichaSeleccionada
-                              ? String(fichaSeleccionada.Fec_inicio_Fic).slice(
-                                  0,
-                                  10
-                                )
-                              : undefined)
-                          }
-                          max={
-                            fichaSeleccionada
-                              ? String(fichaSeleccionada.Fec_Fin_Fic).slice(
-                                  0,
-                                  10
-                                )
-                              : undefined
-                          }
+                          min={fechaInicioRA || inicioFicha}
+                          max={finFicha}
                           required
                         />
-                        <div className="form-text">
-                          Hasta cuándo se impartirá.
-                        </div>
                       </div>
                     </div>
                   </section>
@@ -604,8 +588,7 @@ export default function AsignarFicha() {
                   <button
                     type="submit"
                     disabled={enviando}
-                    className="btn rounded-3 w-100 col-md-6 fw-semibold py-2 shadow-sm text-white"
-                    style={{ backgroundColor: "#00851d" }}
+                    className="af-submit w-100 col-md-6"
                   >
                     {enviando ? (
                       <>
@@ -613,7 +596,7 @@ export default function AsignarFicha() {
                         Asignando...
                       </>
                     ) : (
-                      "Asignar resultado de aprendizaje"
+                      "Asignar resultados de aprendizaje"
                     )}
                   </button>
                 </div>

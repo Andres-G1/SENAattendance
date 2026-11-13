@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { crearUsuario } from "../../services/api";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx";
+import Dropdown from "../../components/Dropdown";
 
 export default function CrearInstructor() {
   const navigate = useNavigate();
@@ -92,10 +93,9 @@ export default function CrearInstructor() {
                 <label htmlFor="tipo_identificacion" className="form-label">
                   Tipo de Documento
                 </label>
-                <select
+                <Dropdown
                   id="tipo_identificacion"
                   name="tipo_identificacion"
-                  className="form-select"
                   value={formulario.tipo_identificacion}
                   onChange={handleChange}
                   required
@@ -105,7 +105,7 @@ export default function CrearInstructor() {
                   <option value="CE">Cédula de Extranjería (CE)</option>
                   <option value="PEP">PEP</option>
                   <option value="PPT">PPT</option>
-                </select>
+                </Dropdown>
               </div>
 
               <div className="col-md-6">

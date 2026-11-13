@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar";
+import Dropdown from "../../components/Dropdown";
 
 const API_BASE = "http://localhost:8000";
 
@@ -285,12 +286,12 @@ export default function AsignarAprendiz() {
                     Seleccionar Aprendiz
                   </label>
 
-                  <select
-                    className="form-select"
+                  <Dropdown
                     value={selectedAprendiz}
                     onChange={handleAprendizChange}
                     required
                     disabled={enviando}
+                    searchable
                   >
                     <option value="">
                       -- Seleccione un Aprendiz --
@@ -308,7 +309,7 @@ export default function AsignarAprendiz() {
                           : ""}
                       </option>
                     ))}
-                  </select>
+                  </Dropdown>
 
                   {/* INFORMACIÓN DEL APRENDIZ */}
                   {aprendizSeleccionado && (
@@ -340,12 +341,12 @@ export default function AsignarAprendiz() {
                     Seleccionar Ficha
                   </label>
 
-                  <select
-                    className="form-select"
+                  <Dropdown
                     value={selectedFicha}
                     onChange={handleFichaChange}
                     required
                     disabled={enviando}
+                    searchable
                   >
                     <option value="">
                       -- Seleccione una Ficha --
@@ -359,7 +360,7 @@ export default function AsignarAprendiz() {
                         Ficha {f.Num_Fic}
                       </option>
                     ))}
-                  </select>
+                  </Dropdown>
 
                   {/* INFORMACIÓN DE LA FICHA */}
                   {fichaSeleccionada && (
