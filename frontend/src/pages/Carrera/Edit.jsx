@@ -95,7 +95,7 @@ export default function CarreraAlter() {
               </div>
             )}
 
-            <div className="form-actions mt-4">
+            <div className="form-actions mt-4 d-flex gap-2">
               <Link to="/administrador/carreras" className="btn btn-secondary">
                 Cancelar
               </Link>
