@@ -312,128 +312,133 @@ export default function InstructorAsistenciaRevisar() {
 
   return (
     <>
-  <InstructorNavbar user={{ Nom_Ins: firstName }} />
+      <InstructorNavbar user={{ Nom_Ins: firstName }} />
 
-<div className="bg-light min-vh-100 py-5">
-  <main className="container" style={{ maxWidth: "1100px" }}>
-    {/* ENCABEZADO */}
-    <div className="mb-4">
-      <h1 className="fw-bold text-dark">Revisar asistencia</h1>
+      <div className="bg-light min-vh-100 py-5">
+        <main className="container" style={{ maxWidth: "1100px" }}>
+          {/* ENCABEZADO */}
 
-      <p className="text-muted mb-1">
-        Consulta la asistencia registrada en las fichas asignadas.
-      </p>
+          <div className="mb-4">
+            <h1 className="fw-bold text-dark">Revisar asistencia</h1>
 
-      <small className="text-muted">{currentDate}</small>
-    </div>
-
-    {/* CUADRO PRINCIPAL */}
-    <div
-      className="bg-white rounded-4 p-4 shadow-sm"
-      style={{ border: "2px solid #00851d" }}
-    >
-     {/* SELECCIÓN DE FICHA */}
-        <div className="mb-4">
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h5 className="fw-bold mb-1">Consultar asistencia</h5>
-
-              <p className="text-muted small mb-0">
-                Selecciona una ficha para revisar sus registros de asistencia.
-              </p>
-            </div>
-
-            <span
-              className="badge rounded-pill"
-              style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
-            >
-              {fichasUnicas.length} fichas
-            </span>
-          </div>
-
-          <div className="row g-3 align-items-end">
-            <div className="col-12 col-md-5" style={{ maxWidth: "350px" }}>
-              <label className="form-label fw-semibold">Ficha</label>
-
-              <Dropdown
-                value={fichaSeleccionada}
-                onChange={(e) => {
-                  setFichaSeleccionada(e.target.value);
-
-                  setAsistencias([]);
-                  setDocumentoBusqueda("");
-                  setDiaActual(0);
-                  setResultadoSeleccionado("");
-                  setMostrarCalendario(false);
-                  setError("");
-                }}
-                disabled={loadingFichas}
-                searchable
-              >
-                <option value="">
-                  {loadingFichas ? "Cargando fichas..." : "Selecciona una ficha"}
-                </option>
-
-                {fichasUnicas.map((ficha) => (
-                  <option key={ficha.Id_Fic} value={ficha.Id_Fic}>
-                    {ficha.Num_Fic || ficha.Id_Fic}
-                  </option>
-                ))}
-              </Dropdown>
-            </div>
-
-            <div className="col-12 col-md-4">
-              <button
-                type="button"
-                className="btn text-white fw-semibold w-100"
-                style={{ backgroundColor: "#00851d" }}
-                onClick={consultarAsistencia}
-                disabled={!fichaSeleccionada || loadingAsistencias}
-              >
-                {loadingAsistencias ? "Consultando..." : "Consultar asistencia"}
-              </button>
-            </div>
-          </div>
-
-          {error && <div className="alert alert-danger mt-3 mb-0">{error}</div>}
-        </div>
-
-      {/* ESTADO INICIAL */}
-      {!fichaSeleccionada && (
-        <div className="border rounded-3 text-center py-5">
-          <h6 className="fw-bold text-dark">Selecciona una ficha</h6>
-
-          <p className="text-muted small mb-0">
-            Aquí aparecerá el historial de asistencia.
-          </p>
-        </div>
-      )}
-
-      {/* CARGANDO */}
-      {loadingAsistencias && (
-        <div className="border rounded-3 text-center py-5">
-          <div
-            className="spinner-border"
-            style={{ color: "#00851d" }}
-            role="status"
-          />
-
-          <p className="text-muted mt-3 mb-0">Consultando asistencia...</p>
-        </div>
-      )}
-
-      {/* SIN REGISTROS */}
-      {fichaSeleccionada &&
-        !loadingAsistencias &&
-        asistencias.length === 0 && (
-          <div className="border rounded-3 text-center py-5">
-            <h6 className="fw-bold">No hay registros</h6>
-
-            <p className="text-muted small mb-0">
-              No existen asistencias registradas para esta ficha.
+            <p className="text-muted mb-1">
+              Consulta la asistencia registrada en las fichas asignadas.
             </p>
+
+            <small className="text-muted">{currentDate}</small>
           </div>
-        )}
+          {/* CUADRO PRINCIPAL */}
+            <div
+              className="bg-white rounded-4 p-4 shadow-sm"
+              style={{ border: "2px solid #00851d" }}
+            >
+              {/* SELECCIÓN DE FICHA */}
+              <div className="mb-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 className="fw-bold mb-1">Consultar asistencia</h5>
+
+                    <p className="text-muted small mb-0">
+                      Selecciona una ficha para revisar sus registros de asistencia.
+                    </p>
+                  </div>
+
+                  <span
+                    className="badge rounded-pill"
+                    style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
+                  >
+                    {fichasUnicas.length} fichas
+                  </span>
+                </div>
+
+                <div className="row g-3 align-items-end">
+                  <div className="col-12 col-md-8">
+                    <label className="form-label fw-semibold">Ficha</label>
+
+                    <Dropdown
+                      value={fichaSeleccionada}
+                      onChange={(e) => {
+                        setFichaSeleccionada(e.target.value);
+
+                        setAsistencias([]);
+                        setDocumentoBusqueda("");
+                        setDiaActual(0);
+                        setResultadoSeleccionado("");
+                        setMostrarCalendario(false);
+                        setError("");
+                      }}
+                      disabled={loadingFichas}
+                      searchable
+                    >
+                      <option value="">
+                        {loadingFichas ? "Cargando fichas..." : "Selecciona una ficha"}
+                      </option>
+
+                      {fichasUnicas.map((ficha) => (
+                        <option key={ficha.Id_Fic} value={ficha.Id_Fic}>
+                          {ficha.Num_Fic || ficha.Id_Fic}
+                        </option>
+                      ))}
+                    </Dropdown>
+                  </div>
+
+                  <div className="col-12 col-md-4">
+                    <button
+                      type="button"
+                      className="btn text-white fw-semibold w-100"
+                      style={{ backgroundColor: "#00851d" }}
+                      onClick={consultarAsistencia}
+                      disabled={!fichaSeleccionada || loadingAsistencias}
+                    >
+                      {loadingAsistencias ? "Consultando..." : "Consultar asistencia"}
+                    </button>
+                  </div>
+                </div>
+
+                {error && <div className="alert alert-danger mt-3 mb-0">{error}</div>}
+              </div>
+
+            {/* ESTADO INICIAL */}
+
+            {!fichaSeleccionada && (
+              <div className="border rounded-3 text-center py-5">
+                <h6 className="fw-bold text-dark">Selecciona una ficha</h6>
+
+                <p className="text-muted small mb-0">
+                  Aquí aparecerá el historial de asistencia.
+                </p>
+              </div>
+            )}
+
+            {/* CARGANDO */}
+
+            {loadingAsistencias && (
+              <div className="border rounded-3 text-center py-5">
+                <div
+                  className="spinner-border"
+                  style={{ color: "#00851d" }}
+                  role="status"
+                />
+
+                <p className="text-muted mt-3 mb-0">
+                  Consultando asistencia...
+                </p>
+              </div>
+            )}
+
+            {/* SIN REGISTROS */}
+
+            {fichaSeleccionada &&
+              !loadingAsistencias &&
+              asistencias.length === 0 && (
+                <div className="border rounded-3 text-center py-5">
+                  <h6 className="fw-bold">No hay registros</h6>
+
+                  <p className="text-muted small mb-0">
+                    No existen asistencias registradas para esta ficha.
+                  </p>
+                </div>
+              )}
 
             {/* RESULTADOS */}
 
