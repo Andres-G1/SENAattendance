@@ -49,6 +49,14 @@ function obtenerEstado(estado) {
   return { texto: estado, clase: "attendance-status--unknown" };
 }
 
+// Clave del resultado de aprendizaje de un registro.
+// Usa Id_RA si el endpoint lo devuelve; si no, el nombre.
+function claveRA(registro) {
+  return String(
+    registro.Id_RA ?? registro.ResultadoAprendizaje ?? "sin-resultado"
+  );
+}
+
 // =========================================================
 // COMPONENTE
 // =========================================================
@@ -73,6 +81,9 @@ export default function AprendizAsistencia() {
   const [busqueda, setBusqueda] = useState("");
   const [soloMias, setSoloMias] = useState(false);
   const [diaActual, setDiaActual] = useState(0);
+
+  // Resultado de aprendizaje elegido con los botones
+  const [resultadoSeleccionado, setResultadoSeleccionado] = useState("");
 
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
   const [errorCalendario, setErrorCalendario] = useState("");
@@ -150,7 +161,42 @@ export default function AprendizAsistencia() {
   const fechaSeleccionada = diasDisponibles[diaActual] || null;
 
   // =========================================================
-  // ASISTENCIAS DEL DÍA
+  // RESULTADOS DE APRENDIZAJE CON ASISTENCIA EN EL DÍA
+  // =========================================================
+
+  const resultadosDelDia = useMemo(() => {
+    if (!fechaSeleccionada) {
+      return [];
+    }
+
+    const mapa = new Map();
+
+    asistencias
+      .filter((registro) => registro.Fec_Asi === fechaSeleccionada)
+      .forEach((registro) => {
+        const clave = claveRA(registro);
+
+        if (!mapa.has(clave)) {
+          mapa.set(clave, {
+            clave,
+            nombre: registro.ResultadoAprendizaje || "Sin resultado",
+            competencia: registro.Competencia || "",
+          });
+        }
+      });
+
+    return [...mapa.values()];
+  }, [asistencias, fechaSeleccionada]);
+
+  // Si el seleccionado no existe en este día, se usa el primero
+  const resultadoActivo = resultadosDelDia.some(
+    (ra) => ra.clave === resultadoSeleccionado
+  )
+    ? resultadoSeleccionado
+    : resultadosDelDia[0]?.clave || "";
+
+  // =========================================================
+  // ASISTENCIAS DEL DÍA (filtradas por resultado y búsqueda)
   // =========================================================
 
   const asistenciasDelDia = useMemo(() => {
@@ -163,15 +209,23 @@ export default function AprendizAsistencia() {
     return asistencias.filter((registro) => {
       const mismaFecha = registro.Fec_Asi === fechaSeleccionada;
 
+      const mismoResultado = claveRA(registro) === resultadoActivo;
+
       const coincide =
         !texto || (registro.Aprendiz || "").toLowerCase().includes(texto);
 
       const pasaFiltroMias =
         !soloMias || !puedeIdentificarMias || esMia(registro);
 
-      return mismaFecha && coincide && pasaFiltroMias;
+      return mismaFecha && mismoResultado && coincide && pasaFiltroMias;
     });
-  }, [asistencias, fechaSeleccionada, busqueda, soloMias]);
+  }, [
+    asistencias,
+    fechaSeleccionada,
+    resultadoActivo,
+    busqueda,
+    soloMias,
+  ]);
 
   // =========================================================
   // CAMBIAR DÍA
@@ -424,11 +478,54 @@ export default function AprendizAsistencia() {
                   )}
                 </div>
 
+                {/* BOTONES POR RESULTADO DE APRENDIZAJE */}
+
+                {resultadosDelDia.length > 0 && (
+                  <div className="mb-4">
+                    <div className="text-muted small mb-2">
+                      {resultadosDelDia.length === 1
+                        ? "Asistencia tomada en este día"
+                        : `Asistencias tomadas en este día (${resultadosDelDia.length})`}
+                    </div>
+
+                    <div className="d-flex flex-wrap gap-2">
+                      {resultadosDelDia.map((ra) => {
+                        const activo = ra.clave === resultadoActivo;
+
+                        return (
+                          <button
+                            key={ra.clave}
+                            type="button"
+                            className={`btn text-start ${
+                              activo ? "text-white" : "btn-outline-success"
+                            }`}
+                            style={
+                              activo ? { backgroundColor: "#00851d" } : undefined
+                            }
+                            onClick={() => setResultadoSeleccionado(ra.clave)}
+                            aria-pressed={activo}
+                          >
+                            <div className="fw-semibold">{ra.nombre}</div>
+
+                            {ra.competencia && (
+                              <div className="small" style={{ opacity: 0.85 }}>
+                                {ra.competencia}
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* CONTADOR */}
 
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <span className="fw-semibold">Registros del día</span>
+                    <span className="fw-semibold">
+                      Registros del resultado seleccionado
+                    </span>
 
                     <div className="text-muted small">
                       Asistencia registrada en esta fecha

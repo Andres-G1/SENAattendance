@@ -2,9 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 
 import InstructorNavbar from "/src/components/navbars/InstructorNavbar.jsx";
 import DateCalendar from "/src/components/DateCalendar.jsx";
+import Dropdown from "../../components/Dropdown";
+
 import useCurrentDate from "/src/hooks/useCurrentDate.js";
 
 const API_BASE = "http://localhost:8000";
+
+// =========================================================
+// CLAVE DEL RESULTADO DE APRENDIZAJE
+// Usa Id_RA si el endpoint lo devuelve; si no, el nombre.
+// =========================================================
+
+const claveRA = (registro) =>
+  String(registro.Id_RA ?? registro.ResultadoAprendizaje ?? "sin-resultado");
 
 // =========================================================
 // COMPONENTE
@@ -37,6 +47,9 @@ export default function InstructorAsistenciaRevisar() {
   const [diaActual, setDiaActual] = useState(0);
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
 
+  // Resultado de aprendizaje elegido con los botones
+  const [resultadoSeleccionado, setResultadoSeleccionado] = useState("");
+
   // =========================================================
   // CARGAR FICHAS
   // =========================================================
@@ -68,6 +81,25 @@ export default function InstructorAsistenciaRevisar() {
   }, [idInstructor]);
 
   // =========================================================
+  // FICHAS ÚNICAS
+  // El endpoint devuelve una fila por cada asignación
+  // (ficha + resultado + día), así que una ficha puede
+  // repetirse. Aquí se deja una sola vez en el selector.
+  // =========================================================
+
+  const fichasUnicas = useMemo(() => {
+    const mapa = new Map();
+
+    fichas.forEach((ficha) => {
+      if (!mapa.has(ficha.Id_Fic)) {
+        mapa.set(ficha.Id_Fic, ficha);
+      }
+    });
+
+    return [...mapa.values()];
+  }, [fichas]);
+
+  // =========================================================
   // CONSULTAR ASISTENCIA
   // =========================================================
 
@@ -81,6 +113,7 @@ export default function InstructorAsistenciaRevisar() {
     setLoadingAsistencias(true);
     setDocumentoBusqueda("");
     setDiaActual(0);
+    setResultadoSeleccionado("");
     setMostrarCalendario(false);
 
     fetch(
@@ -146,7 +179,45 @@ export default function InstructorAsistenciaRevisar() {
   };
 
   // =========================================================
-  // ASISTENCIAS DEL DÍA
+  // RESULTADOS DE APRENDIZAJE CON ASISTENCIA EN EL DÍA
+  // =========================================================
+
+  const resultadosDelDia = useMemo(() => {
+    if (!fechaSeleccionada) {
+      return [];
+    }
+
+    const mapa = new Map();
+
+    asistencias
+      .filter((registro) => registro.Fec_Asi === fechaSeleccionada)
+      .forEach((registro) => {
+        const clave = claveRA(registro);
+
+        if (!mapa.has(clave)) {
+          mapa.set(clave, {
+            clave,
+            nombre: registro.ResultadoAprendizaje || "Sin resultado",
+            competencia: registro.Competencia || "",
+            total: 0,
+          });
+        }
+
+        mapa.get(clave).total += 1;
+      });
+
+    return [...mapa.values()];
+  }, [asistencias, fechaSeleccionada]);
+
+  // Si el seleccionado no existe en este día, se usa el primero
+  const resultadoActivo = resultadosDelDia.some(
+    (ra) => ra.clave === resultadoSeleccionado
+  )
+    ? resultadoSeleccionado
+    : resultadosDelDia[0]?.clave || "";
+
+  // =========================================================
+  // ASISTENCIAS DEL DÍA (filtradas por resultado y documento)
   // =========================================================
 
   const asistenciasDelDia = useMemo(() => {
@@ -157,13 +228,15 @@ export default function InstructorAsistenciaRevisar() {
     return asistencias.filter((registro) => {
       const mismaFecha = registro.Fec_Asi === fechaSeleccionada;
 
+      const mismoResultado = claveRA(registro) === resultadoActivo;
+
       const mismoDocumento =
         !documentoBusqueda ||
         String(registro.Num_ide_Apr || "").includes(documentoBusqueda);
 
-      return mismaFecha && mismoDocumento;
+      return mismaFecha && mismoResultado && mismoDocumento;
     });
-  }, [asistencias, fechaSeleccionada, documentoBusqueda]);
+  }, [asistencias, fechaSeleccionada, resultadoActivo, documentoBusqueda]);
 
   // =========================================================
   // CAMBIAR DÍA
@@ -239,142 +312,128 @@ export default function InstructorAsistenciaRevisar() {
 
   return (
     <>
-      <InstructorNavbar user={{ Nom_Ins: firstName }} />
+  <InstructorNavbar user={{ Nom_Ins: firstName }} />
 
-      <div className="bg-light min-vh-100 py-5">
-        <main className="container" style={{ maxWidth: "1100px" }}>
-          {/* ENCABEZADO */}
+<div className="bg-light min-vh-100 py-5">
+  <main className="container" style={{ maxWidth: "1100px" }}>
+    {/* ENCABEZADO */}
+    <div className="mb-4">
+      <h1 className="fw-bold text-dark">Revisar asistencia</h1>
 
-          <div className="mb-4">
-            <h1 className="fw-bold text-dark">Revisar asistencia</h1>
+      <p className="text-muted mb-1">
+        Consulta la asistencia registrada en las fichas asignadas.
+      </p>
 
-            <p className="text-muted mb-1">
-              Consulta la asistencia registrada en las fichas asignadas.
-            </p>
+      <small className="text-muted">{currentDate}</small>
+    </div>
 
-            <small className="text-muted">{currentDate}</small>
-          </div>
+    {/* CUADRO PRINCIPAL */}
+    <div
+      className="bg-white rounded-4 p-4 shadow-sm"
+      style={{ border: "2px solid #00851d" }}
+    >
+     {/* SELECCIÓN DE FICHA */}
+        <div className="mb-4">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 className="fw-bold mb-1">Consultar asistencia</h5>
 
-          {/* CUADRO PRINCIPAL */}
-
-          <div
-            className="bg-white rounded-4 p-4 shadow-sm"
-            style={{ border: "2px solid #00851d" }}
-          >
-            {/* SELECCIÓN DE FICHA */}
-
-            <div className="mb-4">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                  <h5 className="fw-bold mb-1">Consultar asistencia</h5>
-
-                  <p className="text-muted small mb-0">
-                    Selecciona una ficha para revisar sus registros de
-                    asistencia.
-                  </p>
-                </div>
-
-                <span
-                  className="badge rounded-pill"
-                  style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
-                >
-                  {fichas.length} fichas
-                </span>
-              </div>
-
-              <div className="row g-3 align-items-end">
-                <div className="col-12 col-md-8">
-                  <label className="form-label fw-semibold">Ficha</label>
-
-                  <select
-                    className="form-select"
-                    value={fichaSeleccionada}
-                    onChange={(e) => {
-                      setFichaSeleccionada(e.target.value);
-
-                      setAsistencias([]);
-                      setDocumentoBusqueda("");
-                      setDiaActual(0);
-                      setMostrarCalendario(false);
-                      setError("");
-                    }}
-                    disabled={loadingFichas}
-                  >
-                    <option value="">
-                      {loadingFichas
-                        ? "Cargando fichas..."
-                        : "Selecciona una ficha"}
-                    </option>
-
-                    {fichas.map((ficha) => (
-                      <option key={ficha.Id_Fic} value={ficha.Id_Fic}>
-                        {ficha.Num_Fic || ficha.Id_Fic}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="col-12 col-md-4">
-                  <button
-                    type="button"
-                    className="btn text-white fw-semibold w-100"
-                    style={{ backgroundColor: "#00851d" }}
-                    onClick={consultarAsistencia}
-                    disabled={!fichaSeleccionada || loadingAsistencias}
-                  >
-                    {loadingAsistencias
-                      ? "Consultando..."
-                      : "Consultar asistencia"}
-                  </button>
-                </div>
-              </div>
-
-              {error && (
-                <div className="alert alert-danger mt-3 mb-0">{error}</div>
-              )}
+              <p className="text-muted small mb-0">
+                Selecciona una ficha para revisar sus registros de asistencia.
+              </p>
             </div>
 
-            {/* ESTADO INICIAL */}
+            <span
+              className="badge rounded-pill"
+              style={{ backgroundColor: "#E6F4D7", color: "#1B5E20" }}
+            >
+              {fichasUnicas.length} fichas
+            </span>
+          </div>
 
-            {!fichaSeleccionada && (
-              <div className="border rounded-3 text-center py-5">
-                <h6 className="fw-bold text-dark">Selecciona una ficha</h6>
+          <div className="row g-3 align-items-end">
+            <div className="col-12 col-md-5" style={{ maxWidth: "350px" }}>
+              <label className="form-label fw-semibold">Ficha</label>
 
-                <p className="text-muted small mb-0">
-                  Aquí aparecerá el historial de asistencia.
-                </p>
-              </div>
-            )}
+              <Dropdown
+                value={fichaSeleccionada}
+                onChange={(e) => {
+                  setFichaSeleccionada(e.target.value);
 
-            {/* CARGANDO */}
+                  setAsistencias([]);
+                  setDocumentoBusqueda("");
+                  setDiaActual(0);
+                  setResultadoSeleccionado("");
+                  setMostrarCalendario(false);
+                  setError("");
+                }}
+                disabled={loadingFichas}
+                searchable
+              >
+                <option value="">
+                  {loadingFichas ? "Cargando fichas..." : "Selecciona una ficha"}
+                </option>
 
-            {loadingAsistencias && (
-              <div className="border rounded-3 text-center py-5">
-                <div
-                  className="spinner-border"
-                  style={{ color: "#00851d" }}
-                  role="status"
-                />
+                {fichasUnicas.map((ficha) => (
+                  <option key={ficha.Id_Fic} value={ficha.Id_Fic}>
+                    {ficha.Num_Fic || ficha.Id_Fic}
+                  </option>
+                ))}
+              </Dropdown>
+            </div>
 
-                <p className="text-muted mt-3 mb-0">
-                  Consultando asistencia...
-                </p>
-              </div>
-            )}
+            <div className="col-12 col-md-4">
+              <button
+                type="button"
+                className="btn text-white fw-semibold w-100"
+                style={{ backgroundColor: "#00851d" }}
+                onClick={consultarAsistencia}
+                disabled={!fichaSeleccionada || loadingAsistencias}
+              >
+                {loadingAsistencias ? "Consultando..." : "Consultar asistencia"}
+              </button>
+            </div>
+          </div>
 
-            {/* SIN REGISTROS */}
+          {error && <div className="alert alert-danger mt-3 mb-0">{error}</div>}
+        </div>
 
-            {fichaSeleccionada &&
-              !loadingAsistencias &&
-              asistencias.length === 0 && (
-                <div className="border rounded-3 text-center py-5">
-                  <h6 className="fw-bold">No hay registros</h6>
+      {/* ESTADO INICIAL */}
+      {!fichaSeleccionada && (
+        <div className="border rounded-3 text-center py-5">
+          <h6 className="fw-bold text-dark">Selecciona una ficha</h6>
 
-                  <p className="text-muted small mb-0">
-                    No existen asistencias registradas para esta ficha.
-                  </p>
-                </div>
-              )}
+          <p className="text-muted small mb-0">
+            Aquí aparecerá el historial de asistencia.
+          </p>
+        </div>
+      )}
+
+      {/* CARGANDO */}
+      {loadingAsistencias && (
+        <div className="border rounded-3 text-center py-5">
+          <div
+            className="spinner-border"
+            style={{ color: "#00851d" }}
+            role="status"
+          />
+
+          <p className="text-muted mt-3 mb-0">Consultando asistencia...</p>
+        </div>
+      )}
+
+      {/* SIN REGISTROS */}
+      {fichaSeleccionada &&
+        !loadingAsistencias &&
+        asistencias.length === 0 && (
+          <div className="border rounded-3 text-center py-5">
+            <h6 className="fw-bold">No hay registros</h6>
+
+            <p className="text-muted small mb-0">
+              No existen asistencias registradas para esta ficha.
+            </p>
+          </div>
+        )}
 
             {/* RESULTADOS */}
 
@@ -480,11 +539,56 @@ export default function InstructorAsistenciaRevisar() {
                     )}
                   </div>
 
+                  {/* BOTONES POR RESULTADO DE APRENDIZAJE */}
+
+                  {resultadosDelDia.length > 0 && (
+                    <div className="mt-4 mb-4">
+                      <div className="text-muted small mb-2">
+                        {resultadosDelDia.length === 1
+                          ? "Asistencia tomada en este día"
+                          : `Asistencias tomadas en este día (${resultadosDelDia.length})`}
+                      </div>
+
+                      <div className="d-flex flex-wrap gap-2">
+                        {resultadosDelDia.map((ra) => {
+                          const activo = ra.clave === resultadoActivo;
+
+                          return (
+                            <button
+                              key={ra.clave}
+                              type="button"
+                              className={`btn text-start ${
+                                activo ? "text-white" : "btn-outline-success"
+                              }`}
+                              style={
+                                activo
+                                  ? { backgroundColor: "#00851d" }
+                                  : undefined
+                              }
+                              onClick={() => setResultadoSeleccionado(ra.clave)}
+                              aria-pressed={activo}
+                            >
+                              <div className="fw-semibold">{ra.nombre}</div>
+
+                              {ra.competencia && (
+                                <div className="small" style={{ opacity: 0.85 }}>
+                                  {ra.competencia}
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   {/* CONTADOR */}
 
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                      <span className="fw-semibold">Registros del día</span>
+                      <span className="fw-semibold">
+                        Registros del resultado seleccionado
+                      </span>
 
                       <div className="text-muted small">
                         Asistencia registrada en esta fecha

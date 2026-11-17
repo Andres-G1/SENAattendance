@@ -1,4 +1,4 @@
-
+from collections import Counter
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -17,6 +17,8 @@ from models.model import (
     DiaSemana,
 )
 
+MAX_RESULTADOS_POR_DIA = 3
+
 
 Router_asignaciones = APIRouter(
     prefix="/asignaciones",
@@ -30,7 +32,7 @@ Router_asignaciones = APIRouter(
 
 class AsignacionItem(BaseModel):
     Id_RA: int
-    Dia: DiaSemana           # tu enum actual
+    Dia: DiaSemana          # tu enum actual
 
 
 class AsignarInstructorRequest(BaseModel):
@@ -112,7 +114,40 @@ def asignar_instructor(
             "La fecha final no puede ser posterior al fin de la ficha",
         )
 
-    # 6. Crear asignaciones
+    # Consultar asignaciones existentes del instructor en esta ficha
+    asignaciones_existentes = session.exec(
+        select(FichaInstructor).where(
+            FichaInstructor.Id_Fic == data.Id_Fic,
+            FichaInstructor.Id_Ins == data.Id_Ins,
+        )
+    ).all()
+
+    # 6. Validar que el resultado (Id_RA) no esté ya asignado
+    ra_ya_asignados = sorted({rel.Id_RA for rel in asignaciones_existentes if rel.Id_RA in ids_ra})
+    if ra_ya_asignados:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"El instructor ya tiene asignados estos resultados de aprendizaje en la ficha: {ra_ya_asignados}",
+        )
+
+    # 7. Validar máximo de 3 resultados por día (existentes + nuevos)
+    conteo_por_dia = Counter(rel.Dia for rel in asignaciones_existentes if rel.Dia is not None)
+    nuevos_por_dia = Counter(dia for _, dia in pares)
+
+    for dia, cantidad_nueva in nuevos_por_dia.items():
+        actuales = conteo_por_dia[dia]
+        total_dia = actuales + cantidad_nueva
+        if total_dia > MAX_RESULTADOS_POR_DIA:
+            cupos_disponibles = max(0, MAX_RESULTADOS_POR_DIA - actuales)
+            nombre_dia = dia.value if hasattr(dia, "value") else str(dia)
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                f"El día {nombre_dia} supera el límite de {MAX_RESULTADOS_POR_DIA} resultados "
+                f"(actuales: {actuales}, intentas agregar: {cantidad_nueva}, "
+                f"cupos disponibles: {cupos_disponibles})",
+            )
+
+    # 8. Crear asignaciones
     nuevas = [
         FichaInstructor(
             Id_Fic=data.Id_Fic,
@@ -126,7 +161,7 @@ def asignar_instructor(
     ]
     session.add_all(nuevas)
 
-    # 7. Un solo commit: si una falla, no se guarda ninguna
+    # 9. Un solo commit: si una falla, no se guarda ninguna
     try:
         session.commit()
     except IntegrityError:
@@ -138,7 +173,7 @@ def asignar_instructor(
             "de la base de datos",
         )
 
-    # 8. Respuesta
+    # 10. Respuesta
     return {
         "mensaje": f"{len(nuevas)} asignación(es) creada(s) exitosamente",
         "Id_Fic": data.Id_Fic,
@@ -149,6 +184,7 @@ def asignar_instructor(
             {"Id_RA": id_ra, "Dia": dia.value} for id_ra, dia in pares
         ],
     }
+
 
 # =========================================================
 # OBTENER FICHAS Y RESULTADOS DE UN INSTRUCTOR
