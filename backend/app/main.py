@@ -17,6 +17,7 @@ app = FastAPI()
 from routers.login import Router_login
 from routers.recuperarcontraseña import router_recovery, limiter  # <-- Importación segura aquí
 from routers.asistencia import Router_asistencia
+from routers.asistencia_pdf import Router_asistencia_pdf
 from routers.ficha import Router_ficha
 from routers.carrera import Router_carrera
 from routers.competencias import Router_competencia
@@ -88,6 +89,7 @@ app.include_router(Router_login)
 app.include_router(router_recovery)
 app.include_router(Router_asignacionesAprendiz)
 app.include_router(Router_asistencia)
+app.include_router(Router_asistencia_pdf)
 app.include_router(Router_ficha)
 app.include_router(Router_carrera)
 app.include_router(Router_competencia)

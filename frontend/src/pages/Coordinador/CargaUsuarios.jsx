@@ -234,7 +234,7 @@ function CargaUsuarios() {
         <main className="container" style={{ maxWidth: 700 }}>
           <div className="mb-4">
             <h2 className="fw-bold text-dark h4 mb-1">
-              Gestión de usuarios (PDF/Excel)
+              Gestión de usuarios (CSV/Excel)
             </h2>
 
             <p className="text-muted small mb-0">

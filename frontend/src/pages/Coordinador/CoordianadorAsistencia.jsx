@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import CoordinadorNavbar from "/src/components/navbars/CoordinadorNavbar.jsx";
 import DateCalendar from "/src/components/DateCalendar.jsx";
 import Dropdown from "../../components/Dropdown";
+import BotonesExportarPdf from "../../components/BotonesExportarPdf";
 import useCurrentDate from "/src/hooks/useCurrentDate.js";
 
 const API_BASE = "http://localhost:8000";
@@ -240,6 +241,32 @@ export default function CoordinadorAsistencia() {
   }, [asistencias, fechaSeleccionada, resultadoActivo, busqueda]);
 
   // =========================================================
+  // EXPORTAR PDF
+  // =========================================================
+
+  const numFichaSeleccionada = fichas.find(
+    (f) => String(f.Id_Fic) === String(fichaSeleccionada)
+  )?.Num_Fic;
+
+  // Si la búsqueda deja un solo aprendiz, se puede exportar solo el suyo
+  const aprendizFiltrado = useMemo(() => {
+    const texto = busqueda.trim().toLowerCase();
+    if (!texto) return null;
+
+    const mapa = new Map();
+    asistencias.forEach((r) => {
+      if (
+        (r.Aprendiz || "").toLowerCase().includes(texto) ||
+        String(r.Num_ide_Apr || "").includes(texto)
+      ) {
+        mapa.set(r.Id_Apr, r);
+      }
+    });
+
+    return mapa.size === 1 ? [...mapa.values()][0] : null;
+  }, [asistencias, busqueda]);
+
+  // =========================================================
   // CAMBIAR DÍA
   // =========================================================
 
@@ -410,21 +437,30 @@ export default function CoordinadorAsistencia() {
               !loadingAsistencias &&
               asistencias.length > 0 && (
                 <>
-                  {/* BUSCADOR */}
+                  {/* BUSCADOR + EXPORTAR PDF */}
 
                   <div className="mb-4">
                     <label className="form-label fw-semibold">
                       Buscar por nombre o documento
                     </label>
 
-                    <div className="row">
-                      <div className="col-12 col-md-6">
+                    <div className="row g-3 align-items-start">
+                      <div className="col-12 col-md-5">
                         <input
                           type="text"
                           className="form-control"
                           placeholder="Nombre o número de documento"
                           value={busqueda}
                           onChange={(e) => setBusqueda(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="col-12 col-md-7">
+                        <BotonesExportarPdf
+                          idFicha={fichaSeleccionada}
+                          numFicha={numFichaSeleccionada}
+                          idAprendiz={aprendizFiltrado?.Id_Apr}
+                          docAprendiz={aprendizFiltrado?.Num_ide_Apr}
                         />
                       </div>
                     </div>
