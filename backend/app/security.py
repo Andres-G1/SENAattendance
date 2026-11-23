@@ -5,6 +5,9 @@ from passlib.context import CryptContext
 from passlib.exc import UnknownHashError
 from werkzeug.security import check_password_hash
 import jwt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

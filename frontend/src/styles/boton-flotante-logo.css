@@ -1,0 +1,148 @@
+/* ==============================
+   CONTENEDOR (esquina inferior derecha)
+============================== */
+.boton-flotante-contenedor {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1050;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+/* ==============================
+   BOTÓN PRINCIPAL (logo)
+============================== */
+.boton-flotante-logo {
+  width: 64px;
+  height: 64px;
+  padding: 6px;
+  border: none;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(135deg, #0a8a1f, #007a1a);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.boton-flotante-logo:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+}
+
+.boton-flotante-logo.activo {
+  box-shadow: 0 0 0 4px rgba(10, 138, 31, 0.25), 0 10px 24px rgba(0, 0, 0, 0.3);
+}
+
+.boton-flotante-logo:focus-visible,
+.boton-flotante-opcion:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.boton-flotante-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ==============================
+   BOTÓN SECUNDARIO (Guía de funcionamiento)
+============================== */
+.boton-flotante-opcion {
+  /* Círculo arriba, texto debajo, centrado sobre el logo */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 64px;
+  overflow: visible;
+
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+
+  /* Oculto por defecto */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px) scale(0.95);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.boton-flotante-opcion.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.boton-flotante-opcion-circulo {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(135deg, #0a8a1f, #007a1a);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.boton-flotante-opcion:hover .boton-flotante-opcion-circulo {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+}
+
+.boton-flotante-opcion-texto {
+  padding: 3px 10px;
+  border-radius: 999px;
+
+  background: #ffffff;
+  color: #007a1a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  width: 90px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* ==============================
+   RESPONSIVE
+============================== */
+@media (max-width: 576px) {
+  .boton-flotante-contenedor {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .boton-flotante-logo {
+    width: 54px;
+    height: 54px;
+  }
+
+  .boton-flotante-opcion,
+  .boton-flotante-opcion-circulo {
+    width: 54px;
+  }
+
+  .boton-flotante-opcion-circulo {
+    height: 54px;
+  }
+
+  .boton-flotante-opcion-texto {
+    font-size: 0.7rem;
+  }
+}

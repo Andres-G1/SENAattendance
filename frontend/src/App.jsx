@@ -9,6 +9,7 @@ import {
 
 import PantallaCarga from "./components/PantallaCarga";
 import Footer from "./components/footer/Footer.jsx";
+import BotonFlotanteLogo from "./components/BotonFlotanteLogo";
 import Login from "./components/Login";
 import PasswordRecovery from "./components/PasswordRecovery";
 import RutaProtegida from "./components/RutaProtegida";
@@ -633,6 +634,7 @@ function App() {
         </div>
 
         <Footer />
+        <BotonFlotanteLogo />
       </div>
     </BrowserRouter>
   );
