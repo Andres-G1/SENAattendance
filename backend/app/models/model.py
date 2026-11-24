@@ -11,11 +11,11 @@ from sqlalchemy import (
     Index,
     CheckConstraint,
 )
-from sqlalchemy.orm import foreign
 
 # =========================================================
 # ENUMS
 # =========================================================
+
 
 class TipoIdentificacion(str, Enum):
     CC = "CC"
@@ -147,6 +147,7 @@ class Fichas(SQLModel, table=True):
 # =========================================================
 # COMPETENCIA
 # =========================================================
+
 
 class Competencia(SQLModel, table=True):
     __tablename__ = "competencia"
@@ -376,6 +377,7 @@ class Aprendiz(SQLModel, table=True):
 # FICHA_INSTRUCTOR
 # =========================================================
 
+
 class FichaInstructor(SQLModel, table=True):
     __tablename__ = "Ficha_Instructor"
 
@@ -432,6 +434,7 @@ class FichaInstructor(SQLModel, table=True):
 # RESULTADO DE APRENDIZAJE
 # =========================================================
 
+
 class ResultadoAprendizaje(SQLModel, table=True):
     __tablename__ = "ResultadoAprendizaje"
 
@@ -469,6 +472,7 @@ class ResultadoAprendizaje(SQLModel, table=True):
 # =========================================================
 # ASISTENCIA
 # =========================================================
+
 
 class Asistencia(SQLModel, table=True):
     __tablename__ = "Asistencia"
@@ -556,6 +560,7 @@ class Asistencia(SQLModel, table=True):
 # =========================================================
 # NOTIFICACION
 # =========================================================
+
 
 class Notificacion(SQLModel, table=True):
     __tablename__ = "Notificacion"

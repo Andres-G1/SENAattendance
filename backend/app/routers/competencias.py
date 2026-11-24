@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Field, Session, select 
+from sqlmodel import Field, Session, select
 from database import get_session
-from typing import List, Optional 
-from models.model import Competencia 
+from typing import List, Optional
+from models.model import Competencia
 from pydantic import BaseModel
 import io
 import pandas as pd
@@ -19,9 +19,11 @@ class CompetenciaCreateRequest(BaseModel):
     Nom_Comp: str = Field(..., max_length=150)
     Des_Comp: str
 
+
 class CompetenciaUpdateRequest(BaseModel):
     Nom_Comp: str
     Des_Comp: str
+
 
 @Router_competencia.post(
     "/",
@@ -92,7 +94,11 @@ async def cargar_competencias_planas(
             session.rollback()
             errores.append({"fila": i + 2, "error": str(e)})
 
-    return {"mensaje": f"{creadas} competencia(s) cargada(s)", "creadas": creadas, "errores": errores}
+    return {
+        "mensaje": f"{creadas} competencia(s) cargada(s)",
+        "creadas": creadas,
+        "errores": errores,
+    }
 
 
 @Router_competencia.get(
@@ -107,6 +113,7 @@ def obtener_competencias(
     ).all()
 
     return competencias
+
 
 @Router_competencia.put(
     "/{competencia_id}",
@@ -134,9 +141,10 @@ def actualizar_competencia(
 
     return competencia
 
+
 @Router_competencia.delete(
-    "/{competencia_id}",    
-status_code=status.HTTP_204_NO_CONTENT
+    "/{competencia_id}",
+    status_code=status.HTTP_204_NO_CONTENT
 )
 def eliminar_competencia(
     competencia_id: int,

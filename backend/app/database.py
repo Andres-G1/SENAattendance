@@ -14,8 +14,10 @@ if not DATABASE_URL or "TU_CONTRASEÑA" in DATABASE_URL:
 
 engine = create_engine(DATABASE_URL, echo=True)
 
+
 def crear_tablas():
     SQLModel.metadata.create_all(engine)
+
 
 def get_session():
     with Session(engine) as session:

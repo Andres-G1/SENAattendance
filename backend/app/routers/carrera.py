@@ -23,6 +23,7 @@ class CarreraUpdateRequest(BaseModel):
     Nom_Car: str
     Des_Car: str
 
+
 @Router_carrera.post(
     "/",
     status_code=status.HTTP_201_CREATED
@@ -108,6 +109,7 @@ def obtener_carreras(
 
     return carreras
 
+
 @Router_carrera.get(
     "/{carrera_id}",
     response_model=Carrera
@@ -128,6 +130,7 @@ def obtener_carrera(
         )
 
     return carrera
+
 
 @Router_carrera.put(
     "/{carrera_id}",

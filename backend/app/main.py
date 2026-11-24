@@ -1,35 +1,35 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from database import crear_tablas
-from jobs_asistencia import scheduler
+from fastapi import FastAPI, Request  # noqa: E402
+from fastapi.responses import JSONResponse  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from database import crear_tablas  # noqa: E402
+from jobs_asistencia import scheduler  # noqa: E402
 
 # Importaciones de Slowapi para el manejo de excepciones de Rate Limit
-from slowapi.errors import RateLimitExceeded
+from slowapi.errors import RateLimitExceeded  # noqa: E402
 
 # 1. INICIALIZAMOS LA APP PRIMERO
 app = FastAPI()
 
 # 2. IMPORTAMOS LOS ROUTERS (Evita que el limiter bloquee las BackgroundTasks)
-from routers.login import Router_login
-from routers.recuperarcontraseña import router_recovery, limiter  # <-- Importación segura aquí
-from routers.asistencia import Router_asistencia
-from routers.asistencia_pdf import Router_asistencia_pdf
-from routers.ficha import Router_ficha
-from routers.carrera import Router_carrera
-from routers.competencias import Router_competencia
-from routers.Usuarios import Router_usuarios
-from routers.asignaciones import Router_asignaciones
-from routers.carga_instructores import Router_carga_instructores
-from routers.carga_administradores import Router_carga_administradores
-from routers.carga_aprendices import Router_carga_aprendices
-from routers.configuracion import Router_configuracion
-from routers.asignacionaprendiz import Router_asignacionesAprendiz
-from routers.resultados_aprendizaje import Router_resultados_aprendizaje
-from routers.resultado_aprendizaje import Router_resultado
+from routers.login import Router_login  # noqa: E402
+from routers.recuperarcontraseña import router_recovery, limiter  # noqa: E402
+from routers.asistencia import Router_asistencia  # noqa: E402
+from routers.asistencia_pdf import Router_asistencia_pdf  # noqa: E402
+from routers.ficha import Router_ficha  # noqa: E402
+from routers.carrera import Router_carrera  # noqa: E402
+from routers.competencias import Router_competencia  # noqa: E402
+from routers.Usuarios import Router_usuarios  # noqa: E402
+from routers.asignaciones import Router_asignaciones  # noqa: E402
+from routers.carga_instructores import Router_carga_instructores  # noqa: E402
+from routers.carga_administradores import Router_carga_administradores  # noqa: E402
+from routers.carga_aprendices import Router_carga_aprendices  # noqa: E402
+from routers.configuracion import Router_configuracion  # noqa: E402
+from routers.asignacionaprendiz import Router_asignacionesAprendiz  # noqa: E402
+from routers.resultados_aprendizaje import Router_resultados_aprendizaje  # noqa: E402
+from routers.resultado_aprendizaje import Router_resultado  # noqa: E402
 
 # =========================================================================
 # CONFIGURACIÓN GLOBAL Y PERSONALIZADA DE RATE LIMITING
@@ -37,18 +37,20 @@ from routers.resultado_aprendizaje import Router_resultado
 app.state.limiter = limiter
 
 # Interceptamos el error 429 para calcular dinámicamente el tiempo restante
+
+
 @app.exception_handler(RateLimitExceeded)
 def manejador_rate_limit_personalizado(request: Request, exc: RateLimitExceeded):
     """Calcula los minutos y segundos restantes del bloqueo por IP de forma exacta."""
     # Slowapi almacena los segundos que faltan en la propiedad dinámica de la excepción
     segundos_totales = int(exc.clear_in) if hasattr(exc, "clear_in") else 600
-    
+
     # Si por alguna razón no lo lee directamente, intentamos extraerlo del contexto del rate limit
     if segundos_totales == 600 and hasattr(exc, "detail") and exc.detail:
         try:
             # Fallback secundario seguro
             segundos_totales = int(exc.clear_in)
-        except:
+        except Exception:
             pass
 
     minutos = segundos_totales // 60
@@ -62,7 +64,10 @@ def manejador_rate_limit_personalizado(request: Request, exc: RateLimitExceeded)
     return JSONResponse(
         status_code=429,
         content={
-            "detail": f"Demasiados intentos fallidos. Por favor, espere {tiempo_texto} antes de intentar ingresar nuevamente."
+            "detail": (
+                "Demasiados intentos fallidos. Por favor, espere "
+                f"{tiempo_texto} antes de intentar ingresar nuevamente."
+            )
         }
     )
 

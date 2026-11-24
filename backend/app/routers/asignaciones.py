@@ -46,6 +46,7 @@ class AsignarInstructorRequest(BaseModel):
 # REQUEST PARA ASIGNAR APRENDIZ
 # =========================================================
 
+
 class AsignarAprendizRequest(BaseModel):
     Id_Fic: int
     Id_Apr: int
@@ -127,7 +128,8 @@ def asignar_instructor(
     if ra_ya_asignados:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
-            f"El instructor ya tiene asignados estos resultados de aprendizaje en la ficha: {ra_ya_asignados}",
+            "El instructor ya tiene asignados estos resultados de aprendizaje "
+            f"en la ficha: {ra_ya_asignados}",
         )
 
     # 7. Validar máximo de 3 resultados por día (existentes + nuevos)

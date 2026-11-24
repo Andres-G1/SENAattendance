@@ -2,10 +2,10 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from sqlmodel import Session
-from database import engine, crear_tablas
-from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
-from security import hash_contraseña
+from sqlmodel import Session  # noqa: E402
+from database import engine, crear_tablas  # noqa: E402
+from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion  # noqa: E402
+from security import hash_contraseña  # noqa: E402
 
 
 def seed():
@@ -40,7 +40,7 @@ def seed():
             Num_ide_Adm=3001,
             Cor_Adm="admin.prueba@sena.edu.co",
             Con_Adm=hash_contraseña("admin123"),
-            Es_Adm=True ,
+            Es_Adm=True,
         )
 
         session.add(aprendiz)
@@ -53,7 +53,7 @@ def seed():
 
 if __name__ == "__main__":
     seed()
-    
+
 '''
 uv run python app/seed.py
 '''

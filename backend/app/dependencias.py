@@ -12,11 +12,7 @@ from models.model import (
 )
 
 
-
-
 security = HTTPBearer()
-
-
 
 
 def obtener_usuario_actual(
@@ -24,7 +20,6 @@ def obtener_usuario_actual(
     session: Session = Depends(get_session)
 ):
     token = credentials.credentials
-
 
     try:
         datos = verificar_token(token)
@@ -34,10 +29,8 @@ def obtener_usuario_actual(
             detail=str(e)
         )
 
-
     user_id = datos.get("sub")
     role = datos.get("role")
-
 
     if not user_id or not role:
         raise HTTPException(
@@ -45,18 +38,14 @@ def obtener_usuario_actual(
             detail="Token inválido"
         )
 
-
     user_id = int(user_id)
-
 
     # -----------------------------
     # APRENDIZ
     # -----------------------------
     if role == "Aprendiz":
 
-
         usuario = session.get(Aprendiz, user_id)
-
 
         if not usuario or not usuario.Es_Apr:
             raise HTTPException(
@@ -64,18 +53,14 @@ def obtener_usuario_actual(
                 detail="Cuenta inactiva o inexistente"
             )
 
-
         return usuario, role
-
 
     # -----------------------------
     # INSTRUCTOR
     # -----------------------------
     if role == "Instructor":
 
-
         usuario = session.get(Instructor, user_id)
-
 
         if not usuario or not usuario.Es_Ins:
             raise HTTPException(
@@ -83,18 +68,14 @@ def obtener_usuario_actual(
                 detail="Cuenta inactiva o inexistente"
             )
 
-
         return usuario, role
-
 
     # -----------------------------
     # ADMINISTRADOR
     # -----------------------------
     if role == "Coordinador":
 
-
         usuario = session.get(Administrador, user_id)
-
 
         if not usuario or not usuario.Es_Adm:
             raise HTTPException(
@@ -102,9 +83,7 @@ def obtener_usuario_actual(
                 detail="Cuenta inactiva o inexistente"
             )
 
-
         return usuario, role
-
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -112,13 +91,10 @@ def obtener_usuario_actual(
     )
 
 
-
-
 def verificar_administrador(
     usuario_actual=Depends(obtener_usuario_actual)
 ):
     usuario, role = usuario_actual
-
 
     if role != "Coordinador":
         raise HTTPException(
@@ -126,6 +102,4 @@ def verificar_administrador(
             detail="Solo los administradores pueden realizar esta acción"
         )
 
-
     return usuario
-

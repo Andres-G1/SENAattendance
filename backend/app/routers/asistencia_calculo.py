@@ -2,6 +2,7 @@ from collections import defaultdict
 from sqlmodel import Session, select
 from models.model import Asistencia, EstadoAsistencia
 
+
 def calcular_estado(session: Session, id_apr: int, id_fic: int) -> dict:
     registros = session.exec(
         select(Asistencia)

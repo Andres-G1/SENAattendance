@@ -101,6 +101,7 @@ def _verificar_periodo_ficha(ficha: Fichas, fecha: date):
             detail="La fecha es posterior al fin de la ficha"
         )
 
+
 def _verificar_periodo_ra(asignacion: FichaInstructor, fecha: date):
 
     if not (asignacion.Fec_Inicio_RA <= fecha <= asignacion.Fec_Fin_RA):
@@ -135,6 +136,7 @@ def _obtener_ra_y_competencia(session: Session, id_ra: int):
     ra = session.get(ResultadoAprendizaje, id_ra)
     competencia = session.get(Competencia, ra.Id_Comp) if ra else None
     return ra, competencia
+
 
 def _armar_registros_ficha(session: Session, ficha: Fichas):
     registros = session.exec(
@@ -376,6 +378,7 @@ def obtener_estado_aprendiz(
 # LISTAR FALLAS / NOVEDADES DE UN APRENDIZ
 # =========================================================
 
+
 @Router_asistencia.get("/aprendiz/{Id_Apr}/novedades")
 def obtener_novedades_aprendiz(
     Id_Apr: int,
@@ -436,6 +439,7 @@ def obtener_novedades_aprendiz(
 # =========================================================
 # REGISTRAR / ACTUALIZAR ASISTENCIA
 # =========================================================
+
 
 @Router_asistencia.post("", status_code=status.HTTP_201_CREATED)
 def registrar_asistencia(
@@ -544,71 +548,78 @@ def obtener_alertas_instructor(
 
 @Router_asistencia.get("/instructor/{Id_Ins}/revisar/{Id_Fic}")
 def revisar_asistencia_ficha(
-    Id_Ins: int, 
-    Id_Fic: int, 
+    Id_Ins: int,
+    Id_Fic: int,
     session: Session = Depends(get_session)
 ):
     # 1. Validar que la ficha exista
     ficha = _verificar_ficha(session, Id_Fic)
-    
+
     # 2. Validar que el instructor esté asignado a la ficha
     asignacion_instructor = session.exec(
         select(FichaInstructor)
         .where(
-            FichaInstructor.Id_Ins == Id_Ins, 
+            FichaInstructor.Id_Ins == Id_Ins,
             FichaInstructor.Id_Fic == Id_Fic
         )
     ).first()
-    
+
     if not asignacion_instructor:
         raise HTTPException(
-            status_code=403, 
+            status_code=403,
             detail="No tienes asignación en esta ficha"
         )
-    
+
     # 3. Obtener los registros de asistencia de la ficha
     registros = session.exec(
         select(Asistencia)
         .where(Asistencia.Id_Fic == Id_Fic)
         .order_by(Asistencia.Fec_Asi.desc())
     ).all()
-    
+
     resultado = []
-    
+
     # 4. Mapear y construir la respuesta
     for registro in registros:
         aprendiz = session.get(Aprendiz, registro.Id_Apr)
         ra, competencia = _obtener_ra_y_competencia(session, registro.Id_RA)
         instructor = session.get(Instructor, registro.Id_Ins)
-        
+
         resultado.append({
             "Id_Asi": registro.Id_Asi,
             "Fec_Asi": registro.Fec_Asi,
             "Id_Apr": registro.Id_Apr,
-            "Aprendiz": f"{aprendiz.Nom_Apr} {aprendiz.Ape_Apr}" if aprendiz else "Aprendiz no encontrado",
+            "Aprendiz": (
+                f"{aprendiz.Nom_Apr} {aprendiz.Ape_Apr}"
+                if aprendiz else "Aprendiz no encontrado"
+            ),
             "Num_ide_Apr": aprendiz.Num_ide_Apr if aprendiz else None,
             "Id_Fic": registro.Id_Fic,
             "Num_Fic": ficha.Num_Fic,
             "Id_Ins": registro.Id_Ins,
-            "Instructor": f"{instructor.Nom_Ins} {instructor.Ape_Ins}" if instructor else "Instructor no encontrado",
-            
+            "Instructor": (
+                f"{instructor.Nom_Ins} {instructor.Ape_Ins}"
+                if instructor else "Instructor no encontrado"
+            ),
+
             # Resultado de aprendizaje
             "Id_RA": registro.Id_RA,
             "ResultadoAprendizaje": ra.Nom_RA if ra else "Resultado de aprendizaje no encontrado",
-            
+
             # Competencia (derivada del resultado)
             "Id_Comp": ra.Id_Comp if ra else None,
             "Competencia": competencia.Nom_Comp if competencia else "Competencia no encontrada",
-            
+
             "Dia": registro.Dia.value if registro.Dia else None,
             "Estado": registro.Es_Asi.value if registro.Es_Asi else None,
         })
-        
+
     return resultado
 
 # =========================================================
 # APRENDIZ: ASISTENCIA GENERAL DE SU FICHA
 # =========================================================
+
 
 @Router_asistencia.get("/aprendiz/{Id_Apr}/ficha")
 def revisar_asistencia_aprendiz(
@@ -642,6 +653,7 @@ def revisar_asistencia_aprendiz(
 # =========================================================
 # COORDINADOR: TODAS LAS FICHAS
 # =========================================================
+
 
 @Router_asistencia.get("/coordinador/fichas")
 def listar_fichas_coordinador(

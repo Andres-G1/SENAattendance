@@ -1,7 +1,7 @@
 import os
 import smtplib
 import time  # <-- Añadido para el control de tiempo
-from datetime import date, datetime
+from datetime import date
 from email.mime.text import MIMEText
 from fastapi import BackgroundTasks
 from sqlmodel import Session, select
@@ -29,15 +29,15 @@ def enviar_correo(destinatario: str, asunto: str, cuerpo: str):
     if not SMTP_HOST or not destinatario:
         return
     try:
-        # CAMBIO CLAVE: Esperamos 2 segundos antes de conectar. 
+        # CAMBIO CLAVE: Esperamos 2 segundos antes de conectar.
         # Como corre en BackgroundTasks, el usuario no sentirá lentitud en la app.
-        time.sleep(2) 
-        
+        time.sleep(2)
+
         mensaje = MIMEText(cuerpo)
         mensaje["Subject"] = asunto
         mensaje["From"] = SMTP_USER
         mensaje["To"] = destinatario
-        
+
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as servidor:
             servidor.starttls()
             servidor.login(SMTP_USER, SMTP_PASSWORD)
@@ -47,9 +47,9 @@ def enviar_correo(destinatario: str, asunto: str, cuerpo: str):
 
 
 def _ultima_notificacion_hoy(
-    session: Session, 
-    id_apr: int, 
-    id_fic: int, 
+    session: Session,
+    id_apr: int,
+    id_fic: int,
     tipo: TipoNotificacion
 ) -> bool:
     """Verifica de forma estricta si ya se generó una alerta idéntica HOY."""
@@ -60,7 +60,7 @@ def _ultima_notificacion_hoy(
             Notificacion.Id_Apr == id_apr,
             Notificacion.Id_Fic == id_fic,
             Notificacion.Tip_Not == tipo,
-            Notificacion.Fec_Not == hoy, 
+            Notificacion.Fec_Not == hoy,
         )
     ).first()
     return alerta_hoy is not None
@@ -81,7 +81,7 @@ def evaluar_y_notificar(
     # =========================================================================
     if estado["racha_dias"] == 3:
         tipo = TipoNotificacion.desercion
-        
+
         if not _ultima_notificacion_hoy(session, aprendiz.Id_Apr, ficha.Id_Fic, tipo):
             registros_racha = session.exec(
                 select(Asistencia.Fec_Asi)
@@ -93,9 +93,9 @@ def evaluar_y_notificar(
                 .order_by(Asistencia.Fec_Asi.desc())
                 .limit(3)
             ).all()
-            
+
             fechas_texto = ", ".join([str(fec) for fec in sorted(registros_racha)])
-            
+
             asunto = "Alerta: posible deserción por inasistencia consecutiva"
             cuerpo = (
                 f"El aprendiz {aprendiz.Nom_Apr} {aprendiz.Ape_Apr} "
@@ -103,7 +103,7 @@ def evaluar_y_notificar(
                 f"lleva exactamente {estado['racha_dias']} días seguidos sin asistir (Fallas).\n\n"
                 f"Fechas de las fallas consecutivas: {fechas_texto}."
             )
-            
+
             session.add(Notificacion(
                 Asu_Not=asunto, Men_Not=cuerpo, Fec_Not=date.today(),
                 Id_Apr=aprendiz.Id_Apr, Id_Fic=ficha.Id_Fic, Tip_Not=tipo,
@@ -116,7 +116,7 @@ def evaluar_y_notificar(
     # =========================================================================
     if estado["acumulado"] == 5:
         tipo = TipoNotificacion.advertencia
-        
+
         if not _ultima_notificacion_hoy(session, aprendiz.Id_Apr, ficha.Id_Fic, tipo):
             registros_acumulado = session.exec(
                 select(Asistencia.Fec_Asi)
@@ -127,9 +127,9 @@ def evaluar_y_notificar(
                 )
                 .order_by(Asistencia.Fec_Asi.asc())
             ).all()
-            
+
             fechas_texto = ", ".join([str(fec) for fec in registros_acumulado])
-            
+
             asunto = "Alerta: posible deserción por fallas acumuladas"
             cuerpo = (
                 f"El aprendiz {aprendiz.Nom_Apr} {aprendiz.Ape_Apr} "
@@ -137,7 +137,7 @@ def evaluar_y_notificar(
                 f"presenta un acumulado actual de {estado['acumulado']} fallas en el semestre.\n\n"
                 f"Fechas de las fallas registradas: {fechas_texto}."
             )
-            
+
             session.add(Notificacion(
                 Asu_Not=asunto, Men_Not=cuerpo, Fec_Not=date.today(),
                 Id_Apr=aprendiz.Id_Apr, Id_Fic=ficha.Id_Fic, Tip_Not=tipo,
@@ -157,7 +157,7 @@ def notificar_lista_no_llamada(
 ):
     """Notifica individualmente a los coordinadores espaciando los correos."""
     coordinadores = session.exec(
-        select(Administrador).where(Administrador.Es_Adm == True)
+        select(Administrador).where(Administrador.Es_Adm.is_(True))
     ).all()
 
     asunto = f"Instructor no registró asistencia — Ficha {ficha.Num_Fic}"

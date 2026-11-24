@@ -6,12 +6,14 @@ from pydantic import BaseModel
 from security import crear_token, verificar_contraseña
 
 # Importamos la misma instancia del limiter global
-from limiter import limiter 
+from limiter import limiter
+
 
 class LoginRequest(BaseModel):
     typeid: TipoIdentificacion
     id: int
     password: str
+
 
 class LoginResponse(BaseModel):
     access_token: str
@@ -29,8 +31,8 @@ Router_login = APIRouter(prefix="/users", tags=["Inicio sesion"])
 # BLINDAJE POR IP: Cuenta CUALQUIER intento (exista o no el dato en la BD)
 @limiter.limit("8/10 minutes")
 def login(
-    request: Request, 
-    data: LoginRequest, 
+    request: Request,
+    data: LoginRequest,
     session: Session = Depends(get_session)
 ):
     # Mensaje unificado y genérico que no da pistas sobre qué falló exactamente
@@ -63,7 +65,7 @@ def login(
                     user_id=aprendiz.Id_Apr,
                     redirect="/aprendiz",
                 )
-            raise error_credenciales # Se oculta estado inactivo para evitar enumeración externa
+            raise error_credenciales  # Se oculta estado inactivo para evitar enumeración externa
         else:
             raise error_credenciales
 

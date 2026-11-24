@@ -16,6 +16,7 @@ Router_ficha = APIRouter(
     tags=["Fichas SENAattendance"]
 )
 
+
 class FichaCreateRequest(BaseModel):
     Id_Car: int
     Num_Fic: int
@@ -118,6 +119,7 @@ def obtener_fichas(
     ).all()
 
     return fichas
+
 
 @Router_ficha.get(
     "/{ficha_id}",

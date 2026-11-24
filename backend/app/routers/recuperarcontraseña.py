@@ -12,14 +12,13 @@ from pydantic import BaseModel, EmailStr
 from database import get_session
 from models.model import Aprendiz, Instructor, Administrador
 
-from security import hash_contraseña 
+from security import hash_contraseña
 
 # =========================================================================
 # CONFIGURACIÓN DE RATE LIMITING (SLOWAPI)
 # =========================================================================
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
 
 # Inicializamos el limitador basado en la IP del cliente
 limiter = Limiter(key_func=get_remote_address)
@@ -28,6 +27,7 @@ router_recovery = APIRouter(
     prefix="/users",
     tags=["Recuperar contraseña"]
 )
+
 
 class RecuperarPasswordRequest(BaseModel):
     email: EmailStr
@@ -76,7 +76,7 @@ Equipo de SENA Attendance
             servidor.starttls()
             servidor.login(smtp_user, smtp_password)
             servidor.send_message(mensaje)
-            
+
     except Exception as e:
         print(f"Error crítico asíncrono enviando correo de recuperación a {email_destino}: {e}")
 
@@ -84,10 +84,11 @@ Equipo de SENA Attendance
 @router_recovery.post("/password")
 # DECORADOR DE LÍMITE: Máximo 3 peticiones cada 15 minutos por dirección IP
 @limiter.limit("3/15 minutes")
-# CAMBIO DEFINITIVO: Cambiado a "def" (sincrónico) para que slowapi no rompa las BackgroundTasks de FastAPI
+# CAMBIO DEFINITIVO: Cambiado a "def" (sincrónico) para que slowapi
+# no rompa las BackgroundTasks de FastAPI
 def recuperar_password(
     request: Request,  # <-- OBLIGATORIO para que Slowapi capture la IP
-    data: RecuperarPasswordRequest, 
+    data: RecuperarPasswordRequest,
     background_tasks: BackgroundTasks,
     session: Session = Depends(get_session)
 ):
@@ -113,10 +114,12 @@ def recuperar_password(
         instructor = session.exec(
             select(Instructor).where(Instructor.Cor_Ins == data.email)
         ).first()
-        
+
         if instructor:
             if not instructor.Es_Ins:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cuenta inactiva")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Cuenta inactiva"
+                )
             usuario = instructor
             nombre_usuario = instructor.Nom_Ins
             campo_password = "Con_Ins"
@@ -126,10 +129,12 @@ def recuperar_password(
         administrador = session.exec(
             select(Administrador).where(Administrador.Cor_Adm == data.email)
         ).first()
-        
+
         if administrador:
             if not administrador.Es_Adm:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cuenta inactiva")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Cuenta inactiva"
+                )
             usuario = administrador
             nombre_usuario = administrador.Nom_Adm
             campo_password = "Con_Adm"
@@ -142,7 +147,7 @@ def recuperar_password(
 
     # 4. GENERAR NUEVA CONTRASEÑA Y APLICAR HASH
     nueva_password = generar_password_temporal()
-    password_hasheada = hash_contraseña(nueva_password) 
+    password_hasheada = hash_contraseña(nueva_password)
 
     if campo_password == "Con_Apr":
         usuario.Con_Apr = password_hasheada
@@ -157,7 +162,9 @@ def recuperar_password(
     session.refresh(usuario)
 
     # 6. ENVIAR EL CORREO EN SEGUNDO PLANO
-    background_tasks.add_task(enviar_correo_recovery_bg, email_destino, nueva_password, nombre_usuario)
+    background_tasks.add_task(
+        enviar_correo_recovery_bg, email_destino, nueva_password, nombre_usuario
+    )
 
     return {
         "message": "Se ha enviado una nueva contraseña temporal al correo registrado."

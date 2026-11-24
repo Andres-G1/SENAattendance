@@ -67,8 +67,13 @@ def _generar_pdf(
 ) -> bytes:
     estilos = getSampleStyleSheet()
     titulo = ParagraphStyle("titulo", parent=estilos["Title"], fontSize=16, textColor=VERDE_SENA)
-    h_comp = ParagraphStyle("comp", parent=estilos["Heading3"], fontSize=10.5, spaceBefore=10, spaceAfter=2)
-    h_ra = ParagraphStyle("ra", parent=estilos["Normal"], fontSize=9, textColor=colors.HexColor("#444444"), spaceAfter=4)
+    h_comp = ParagraphStyle(
+        "comp", parent=estilos["Heading3"], fontSize=10.5, spaceBefore=10, spaceAfter=2
+    )
+    h_ra = ParagraphStyle(
+        "ra", parent=estilos["Normal"], fontSize=9,
+        textColor=colors.HexColor("#444444"), spaceAfter=4,
+    )
     normal = ParagraphStyle("normal", parent=estilos["Normal"], fontSize=9)
     chica = ParagraphStyle("chica", parent=estilos["Normal"], fontSize=8, textColor=colors.grey)
 
@@ -103,7 +108,11 @@ def _generar_pdf(
     ras_ordenados = sorted(
         periodo_ra.keys(),
         key=lambda i: (
-            (competencias.get(ras[i].Id_Comp).Nom_Comp if ras[i] and competencias.get(ras[i].Id_Comp) else ""),
+            (
+                competencias.get(ras[i].Id_Comp).Nom_Comp
+                if ras[i] and competencias.get(ras[i].Id_Comp)
+                else ""
+            ),
             periodo_ra[i][0],
         ),
     )
@@ -149,8 +158,15 @@ def _generar_pdf(
         info = Table(
             [
                 ["Ficha:", str(ficha.Num_Fic), "Documento:", str(apr.Num_ide_Apr)],
-                ["Programa de formación:", Paragraph(escape(programa), normal), "Nombres:", Paragraph(escape(apr.Nom_Apr), normal)],
-                ["Periodo de la ficha:", f"{_fmt(ficha.Fec_inicio_Fic)} - {_fmt(ficha.Fec_Fin_Fic)}", "Apellidos:", Paragraph(escape(apr.Ape_Apr), normal)],
+                [
+                    "Programa de formación:", Paragraph(escape(programa), normal),
+                    "Nombres:", Paragraph(escape(apr.Nom_Apr), normal),
+                ],
+                [
+                    "Periodo de la ficha:",
+                    f"{_fmt(ficha.Fec_inicio_Fic)} - {_fmt(ficha.Fec_Fin_Fic)}",
+                    "Apellidos:", Paragraph(escape(apr.Ape_Apr), normal),
+                ],
             ],
             colWidths=[3.6 * cm, 5.4 * cm, 2.4 * cm, 5.6 * cm],
         )
@@ -176,7 +192,9 @@ def _generar_pdf(
 
         if not ras_ordenados:
             story.append(Spacer(1, 10))
-            story.append(Paragraph("Esta ficha no tiene resultados de aprendizaje asignados.", normal))
+            story.append(Paragraph(
+                "Esta ficha no tiene resultados de aprendizaje asignados.", normal
+            ))
             continue
 
         ultima_comp = None

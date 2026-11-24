@@ -7,10 +7,9 @@ from sqlmodel import Session, select
 
 
 from database import get_session
-from models.model import  Aprendiz, Instructor, Administrador, TipoIdentificacion, Fichas, Carrera
+from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion, Fichas, Carrera
 
 from security import hash_contraseña
-from dependencias import verificar_administrador
 
 
 Router_usuarios = APIRouter(
@@ -21,6 +20,7 @@ Router_usuarios = APIRouter(
 # =========================================================
 # CREAR USUARIO
 # =========================================================
+
 
 class UsuarioCrear(BaseModel):
     rol: Literal["Aprendiz", "Instructor", "Administrador"]
@@ -40,6 +40,7 @@ class UsuarioCrear(BaseModel):
 # ACTUALIZAR USUARIO
 # =========================================================
 
+
 class UsuarioActualizar(BaseModel):
     nombre: Optional[str] = None
     apellido: Optional[str] = None
@@ -52,6 +53,7 @@ class UsuarioActualizar(BaseModel):
 # =========================================================
 # CREAR USUARIO
 # =========================================================
+
 
 @Router_usuarios.post("/crear")
 def crear_usuario(
@@ -167,6 +169,7 @@ def crear_usuario(
 # LISTAR APRENDICES
 # =========================================================
 
+
 @Router_usuarios.get("/aprendices")
 def listar_aprendices(
     session: Session = Depends(get_session)
@@ -199,12 +202,12 @@ def listar_aprendices(
             )
         })
 
-
     return resultado
 
 # =========================================================
 # OBTENER APRENDIZ
 # =========================================================
+
 
 @Router_usuarios.get("/aprendiz/{id_aprendiz}")
 def obtener_aprendiz(
@@ -212,7 +215,6 @@ def obtener_aprendiz(
     session: Session = Depends(get_session)
 ):
     aprendiz = session.get(Aprendiz, id_aprendiz)
-
 
     if not aprendiz:
         raise HTTPException(
@@ -245,6 +247,7 @@ def obtener_aprendiz(
 # LISTAR CARRERAS
 # =========================================================
 
+
 @Router_usuarios.get("/carreras")
 def listar_carreras(
     session: Session = Depends(get_session)
@@ -265,6 +268,7 @@ def listar_carreras(
 # =========================================================
 # LISTAR FICHAS
 # =========================================================
+
 
 @Router_usuarios.get("/fichas")
 def listar_fichas(
@@ -297,6 +301,7 @@ def listar_fichas(
 # =========================================================
 # ACTUALIZAR APRENDIZ
 # =========================================================
+
 
 @Router_usuarios.put("/aprendiz/{id_aprendiz}")
 def actualizar_aprendiz(
@@ -345,6 +350,7 @@ def actualizar_aprendiz(
 # DESACTIVAR APRENDIZ
 # =========================================================
 
+
 @Router_usuarios.patch("/aprendiz/{id_aprendiz}/desactivar")
 def desactivar_aprendiz(
     id_aprendiz: int,
@@ -363,7 +369,6 @@ def desactivar_aprendiz(
 
     session.add(usuario)
     session.commit()
-
 
     return {
         "mensaje": "Aprendiz desactivado correctamente"
@@ -398,38 +403,9 @@ def activar_aprendiz(
     }
 
 # =========================================================
-# OBTENER APRENDIZ POR ID
-# =========================================================
-
-@Router_usuarios.get("/aprendiz/{id_aprendiz}")
-def obtener_aprendiz(
-    id_aprendiz: int,
-    administrador=Depends(verificar_administrador),
-    session: Session = Depends(get_session)
-):
-    usuario = session.get(Aprendiz, id_aprendiz)
-
-
-    if not usuario:
-        raise HTTPException(
-            status_code=404,
-            detail="Aprendiz no encontrado"
-        )
-
-
-    return {
-        "Id_Apr": usuario.Id_Apr,
-        "Nom_Apr": usuario.Nom_Apr,
-        "Ape_Apr": usuario.Ape_Apr,
-        "Tip_ide_Apr": usuario.Tip_ide_Apr,
-        "Num_ide_Apr": usuario.Num_ide_Apr,
-        "Cor_Apr": usuario.Cor_Apr,
-        "Es_Apr": usuario.Es_Apr,
-        "Id_Fic": usuario.Id_Fic
-    }
-    # =========================================================
 # LISTAR INSTRUCTORES
 # =========================================================
+
 
 @Router_usuarios.get("/instructores")
 def listar_instructores(
@@ -455,6 +431,7 @@ def listar_instructores(
 # =========================================================
 # OBTENER INSTRUCTOR
 # =========================================================
+
 
 @Router_usuarios.get("/instructor/{id_instructor}")
 def obtener_instructor(
@@ -482,6 +459,7 @@ def obtener_instructor(
 # =========================================================
 # ACTUALIZAR INSTRUCTOR
 # =========================================================
+
 
 @Router_usuarios.put("/instructor/{id_instructor}")
 def actualizar_instructor(
@@ -526,6 +504,7 @@ def actualizar_instructor(
 # DESACTIVAR INSTRUCTOR
 # =========================================================
 
+
 @Router_usuarios.patch("/instructor/{id_instructor}/desactivar")
 def desactivar_instructor(
     id_instructor: int,
@@ -551,6 +530,7 @@ def desactivar_instructor(
 # ACTIVAR INSTRUCTOR
 # =========================================================
 
+
 @Router_usuarios.patch("/instructor/{id_instructor}/activar")
 def activar_instructor(
     id_instructor: int,
@@ -574,6 +554,7 @@ def activar_instructor(
 # =========================================================
 # LISTAR ADMINISTRADORES
 # =========================================================
+
 
 @Router_usuarios.get("/administradores")
 def listar_administradores(
@@ -599,6 +580,7 @@ def listar_administradores(
 # =========================================================
 # OBTENER ADMINISTRADOR
 # =========================================================
+
 
 @Router_usuarios.get("/administrador/{id_administrador}")
 def obtener_administrador(
@@ -626,6 +608,7 @@ def obtener_administrador(
 # =========================================================
 # ACTUALIZAR ADMINISTRADOR
 # =========================================================
+
 
 @Router_usuarios.put("/administrador/{id_administrador}")
 def actualizar_administrador(
@@ -670,6 +653,7 @@ def actualizar_administrador(
 # DESACTIVAR ADMINISTRADOR
 # =========================================================
 
+
 @Router_usuarios.patch("/administrador/{id_administrador}/desactivar")
 def desactivar_administrador(
     id_administrador: int,
@@ -694,6 +678,7 @@ def desactivar_administrador(
 # =========================================================
 # ACTIVAR ADMINISTRADOR
 # =========================================================
+
 
 @Router_usuarios.patch("/administrador/{id_administrador}/activar")
 def activar_administrador(
