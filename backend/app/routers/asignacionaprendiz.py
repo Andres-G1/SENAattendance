@@ -41,8 +41,9 @@ def obtener_datos_carga(
         select(Aprendiz)
     ).all()
 
+    # Solo fichas activas para asignar aprendices
     fichas = session.exec(
-        select(Fichas)
+        select(Fichas).where(Fichas.Es_Fic == True)  # noqa: E712
     ).all()
 
     return {
@@ -108,6 +109,12 @@ def asignar_aprendiz(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Ficha no encontrada"
+        )
+
+    if not ficha.Es_Fic:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La ficha está desactivada; no se pueden asignar aprendices"
         )
 
     # ----------------------------------------------

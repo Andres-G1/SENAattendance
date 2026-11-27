@@ -69,17 +69,17 @@ export default function Delete() {
     <main className="container my-5">
       <div className="page-card card shadow-sm text-dark">
         <div className="card-header bg-danger text-white py-3">
-          <h1 className="h5 mb-0">Desactivar Token</h1>
+          <h1 className="h5 mb-0">Eliminar Ficha</h1>
           <small className="text-light">
             {carrera?.Nom_Car} · {ficha?.Num_Fic}
           </small>
         </div>
         <div className="card-body p-4">
-          <p className="lead">¿Estás seguro de que deseas eliminar este token?</p>
+          <p className="lead">¿Estás seguro de que deseas eliminar esta ficha? Esta acción no se puede deshacer. Si solo quieres que deje de usarse, mejor desactívala.</p>
           <div className="mb-4">
             <strong>Programa de formación:</strong> {carrera?.Nom_Car}
             <br />
-            <strong>Token:</strong> {ficha?.Num_Fic}
+            <strong>Ficha:</strong> {ficha?.Num_Fic}
           </div>
 
           {error && (
@@ -91,7 +91,7 @@ export default function Delete() {
           <form onSubmit={handleDelete}>
             <div className="d-flex gap-2 flex-wrap">
               <button className="btn btn-danger" type="submit">
-                Desactivar Definitivamente
+                Eliminar definitivamente
               </button>
               <button
                 type="button"

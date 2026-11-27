@@ -55,6 +55,20 @@ class UsuarioActualizar(BaseModel):
 # =========================================================
 
 
+def _validar_ficha_activa(session: Session, id_fic: Optional[int]):
+    """Impide vincular aprendices a una ficha desactivada."""
+    if id_fic is None:
+        return
+    ficha = session.get(Fichas, id_fic)
+    if not ficha:
+        raise HTTPException(status_code=404, detail="Ficha no encontrada")
+    if not ficha.Es_Fic:
+        raise HTTPException(
+            status_code=400,
+            detail="La ficha está desactivada; no se pueden vincular aprendices"
+        )
+
+
 @Router_usuarios.post("/crear")
 def crear_usuario(
     datos: UsuarioCrear,
@@ -82,6 +96,8 @@ def crear_usuario(
                 status_code=400,
                 detail="El documento o correo ya está registrado"
             )
+
+        _validar_ficha_activa(session, datos.Id_Fic)
 
         usuario = Aprendiz(
             Nom_Apr=datos.nombre,
@@ -293,7 +309,8 @@ def listar_fichas(
             "Num_Fic": ficha.Num_Fic,
             "Jor_Fic": ficha.Jor_Fic,
             "Fec_inicio_Fic": ficha.Fec_inicio_Fic,
-            "Fec_Fin_Fic": ficha.Fec_Fin_Fic
+            "Fec_Fin_Fic": ficha.Fec_Fin_Fic,
+            "Es_Fic": ficha.Es_Fic
         }
         for ficha in fichas
     ]
@@ -336,7 +353,8 @@ def actualizar_aprendiz(
     if datos.contraseña is not None:
         usuario.Con_Apr = hash_contraseña(datos.contraseña)
 
-    if datos.Id_Fic is not None:
+    if datos.Id_Fic is not None and datos.Id_Fic != usuario.Id_Fic:
+        _validar_ficha_activa(session, datos.Id_Fic)
         usuario.Id_Fic = datos.Id_Fic
 
     session.add(usuario)

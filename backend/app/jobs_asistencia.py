@@ -36,7 +36,7 @@ def revisar_listas_no_llamadas():
 
             ficha = session.get(Fichas, asignacion.Id_Fic)
 
-            if not ficha:
+            if not ficha or not ficha.Es_Fic:
                 continue
 
             if not (ficha.Fec_inicio_Fic <= hoy <= ficha.Fec_Fin_Fic):

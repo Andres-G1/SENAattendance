@@ -117,6 +117,13 @@ class Fichas(SQLModel, table=True):
     # Ya no se usa: la jornada se dejó de pedir (se mantiene opcional por compatibilidad)
     Jor_Fic: Optional[Jornada] = Field(default=None)
 
+    # Estado de la ficha: True = activa, False = desactivada
+    Es_Fic: bool = Field(
+        default=True,
+        nullable=False,
+        sa_column_kwargs={"server_default": "1"}
+    )
+
     Fec_Cre: datetime = Field(
         default_factory=datetime.utcnow
     )

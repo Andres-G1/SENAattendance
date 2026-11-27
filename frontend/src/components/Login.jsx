@@ -3,8 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { login } from "../services/api";
 import Dropdown from "./Dropdown";
 import "../styles/Login.css";
+import "../styles/login-roles.css";
+
+const ROLES = [
+  { valor: "Aprendiz", etiqueta: "Aprendiz" },
+  { valor: "Instructor", etiqueta: "Instructor" },
+  { valor: "Coordinador", etiqueta: "Coordinador" },
+];
 
 export default function Login({ onLoginSuccess }) {
+  // Recuerda el último rol con el que se ingresó en este navegador
+  const [rol, setRol] = useState(() => localStorage.getItem("ultimo_rol") || "");
   const [typeid, setTypeid] = useState("");
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
@@ -39,8 +48,14 @@ export default function Login({ onLoginSuccess }) {
     e.preventDefault();
     setError("");
 
+    if (!rol) {
+      setError("Selecciona cómo quieres ingresar: Aprendiz, Instructor o Coordinador.");
+      return;
+    }
+
     try {
-      const data = await login(typeid, Number(id), password);
+      const data = await login(typeid, Number(id), password, rol);
+      localStorage.setItem("ultimo_rol", rol);
 
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("role", data.role);
@@ -80,6 +95,30 @@ export default function Login({ onLoginSuccess }) {
       </nav>
 
       <form className="formulario_login" onSubmit={handleSubmit}>
+        <fieldset className="login-roles">
+          <legend className="login-roles-titulo">¿Cómo quieres ingresar?</legend>
+          <div className="login-roles-opciones" role="radiogroup">
+            {ROLES.map((r) => (
+              <label
+                key={r.valor}
+                className={`login-rol ${rol === r.valor ? "activo" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="rol"
+                  value={r.valor}
+                  checked={rol === r.valor}
+                  onChange={(e) => {
+                    setRol(e.target.value);
+                    setError("");
+                  }}
+                />
+                {r.etiqueta}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
         <Dropdown
           className="login-dropdown"
           name="typeid"

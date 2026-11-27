@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlmodel import Session, select
 from database import get_session
 from models.model import Aprendiz, Instructor, Administrador, TipoIdentificacion
+from typing import Literal, Optional
 from pydantic import BaseModel
 from security import crear_token, verificar_contraseña
 
@@ -13,6 +14,9 @@ class LoginRequest(BaseModel):
     typeid: TipoIdentificacion
     id: int
     password: str
+    # Rol con el que la persona quiere ingresar. Si no se envía, se
+    # conserva el comportamiento anterior (busca en los tres roles).
+    rol: Optional[Literal["Aprendiz", "Instructor", "Coordinador"]] = None
 
 
 class LoginResponse(BaseModel):
@@ -25,6 +29,26 @@ class LoginResponse(BaseModel):
 
 
 Router_login = APIRouter(prefix="/users", tags=["Inicio sesion"])
+
+
+# Configuración de cada rol: tabla, campos y panel al que se redirige
+ROLES = {
+    "Aprendiz": {
+        "modelo": Aprendiz, "tipo": "Tip_ide_Apr", "numero": "Num_ide_Apr",
+        "clave": "Con_Apr", "estado": "Es_Apr", "id": "Id_Apr",
+        "nombre": "Nom_Apr", "redirect": "/aprendiz",
+    },
+    "Instructor": {
+        "modelo": Instructor, "tipo": "Tip_ide_Ins", "numero": "Num_ide_Ins",
+        "clave": "Con_Ins", "estado": "Es_Ins", "id": "Id_Ins",
+        "nombre": "Nom_Ins", "redirect": "/instructor",
+    },
+    "Coordinador": {
+        "modelo": Administrador, "tipo": "Tip_ide_Adm", "numero": "Num_ide_Adm",
+        "clave": "Con_Adm", "estado": "Es_Adm", "id": "Id_Adm",
+        "nombre": "Nom_Adm", "redirect": "/administrador",
+    },
+}
 
 
 @Router_login.post("/login", response_model=LoginResponse)
@@ -41,83 +65,40 @@ def login(
         detail="Credenciales inválidas",
     )
 
-    # =========================================================================
-    # 1. PROCESAMIENTO - APRENDIZ
-    # =========================================================================
-    aprendiz = session.exec(
-        select(Aprendiz).where(
-            Aprendiz.Tip_ide_Apr == data.typeid,
-            # Corregido typo menor de sintaxis := anterior para limpieza limpia
-            # del query.
-            # Se quitó "Modern_Aprendiz" que generaba un walrus operator innecesario.
-            Aprendiz.Num_ide_Apr == data.id,
+    # Si la persona eligió un rol, solo se busca en esa tabla.
+    # Si no, se revisa en el orden de siempre: Aprendiz, Instructor, Coordinador.
+    roles_a_revisar = [data.rol] if data.rol else list(ROLES)
+
+    for rol in roles_a_revisar:
+        cfg = ROLES[rol]
+        modelo = cfg["modelo"]
+
+        usuario = session.exec(
+            select(modelo).where(
+                getattr(modelo, cfg["tipo"]) == data.typeid,
+                getattr(modelo, cfg["numero"]) == data.id,
+            )
+        ).first()
+
+        if not usuario:
+            continue
+
+        # Contraseña incorrecta o cuenta inactiva: mismo mensaje genérico
+        # para no revelar si la cuenta existe o está desactivada.
+        if not verificar_contraseña(data.password, getattr(usuario, cfg["clave"])):
+            raise error_credenciales
+        if not getattr(usuario, cfg["estado"]):
+            raise error_credenciales
+
+        user_id = getattr(usuario, cfg["id"])
+        token = crear_token({"sub": str(user_id), "role": rol})
+        return LoginResponse(
+            firstName=getattr(usuario, cfg["nombre"]),
+            access_token=token,
+            role=rol,
+            user_id=user_id,
+            redirect=cfg["redirect"],
         )
-    ).first()
-
-    if aprendiz:
-        if verificar_contraseña(data.password, aprendiz.Con_Apr):
-            if aprendiz.Es_Apr:
-                token = crear_token({"sub": str(aprendiz.Id_Apr), "role": "Aprendiz"})
-                return LoginResponse(
-                    firstName=aprendiz.Nom_Apr,
-                    access_token=token,
-                    role="Aprendiz",
-                    user_id=aprendiz.Id_Apr,
-                    redirect="/aprendiz",
-                )
-            raise error_credenciales  # Se oculta estado inactivo para evitar enumeración externa
-        else:
-            raise error_credenciales
-
-    # =========================================================================
-    # 2. PROCESAMIENTO - INSTRUCTOR
-    # =========================================================================
-    instructor = session.exec(
-        select(Instructor).where(
-            Instructor.Tip_ide_Ins == data.typeid,
-            Instructor.Num_ide_Ins == data.id,
-        )
-    ).first()
-
-    if instructor:
-        if verificar_contraseña(data.password, instructor.Con_Ins):
-            if instructor.Es_Ins:
-                token = crear_token({"sub": str(instructor.Id_Ins), "role": "Instructor"})
-                return LoginResponse(
-                    firstName=instructor.Nom_Ins,
-                    access_token=token,
-                    role="Instructor",
-                    user_id=instructor.Id_Ins,
-                    redirect="/instructor",
-                )
-            raise error_credenciales
-        else:
-            raise error_credenciales
-
-    # =========================================================================
-    # 3. PROCESAMIENTO - ADMINISTRADOR / COORDINADOR
-    # =========================================================================
-    administrador = session.exec(
-        select(Administrador).where(
-            Administrador.Tip_ide_Adm == data.typeid,
-            Administrador.Num_ide_Adm == data.id,
-        )
-    ).first()
-
-    if administrador:
-        if verificar_contraseña(data.password, administrador.Con_Adm):
-            if administrador.Es_Adm:
-                token = crear_token({"sub": str(administrador.Id_Adm), "role": "Coordinador"})
-                return LoginResponse(
-                    firstName=administrador.Nom_Adm,
-                    access_token=token,
-                    role="Coordinador",
-                    user_id=administrador.Id_Adm,
-                    redirect="/administrador",
-                )
-            raise error_credenciales
-        else:
-            raise error_credenciales
 
     # Si no se encontró en ninguna tabla, lanzamos exactamente el mismo error
     raise error_credenciales

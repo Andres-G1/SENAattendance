@@ -37,6 +37,7 @@ const ConfigFicha = lazy(() => import("./pages/Ficha/ConfigFicha"));
 const CreateF = lazy(() => import("./pages/Ficha/Create"));
 const EditF = lazy(() => import("./pages/Ficha/Edit"));
 const DeleteF = lazy(() => import("./pages/Ficha/Delete"));
+const EstadoF = lazy(() => import("./pages/Ficha/Estado"));
 const AsignarFicha = lazy(() => import("./pages/Ficha/AsignarFicha"));
 
 const CargaUsuarios = lazy(() => import("./pages/Coordinador/CargaUsuarios"));
@@ -345,6 +346,15 @@ function App() {
                   element={
                     <RutaProtegida rolPermitido="Coordinador">
                       <EditF />
+                    </RutaProtegida>
+                  }
+                />
+
+                <Route
+                  path="/fichas/estado/:id"
+                  element={
+                    <RutaProtegida rolPermitido="Coordinador">
+                      <EstadoF />
                     </RutaProtegida>
                   }
                 />

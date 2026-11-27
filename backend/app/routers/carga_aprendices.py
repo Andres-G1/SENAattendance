@@ -465,6 +465,12 @@ async def cargar_aprendices_por_ficha(
     if not ficha:
         raise HTTPException(status_code=404, detail="La ficha no existe")
 
+    if not ficha.Es_Fic:
+        raise HTTPException(
+            status_code=400,
+            detail="La ficha está desactivada; no se pueden cargar aprendices"
+        )
+
     if not file.filename:
         raise HTTPException(
             status_code=400, detail="No se recibió ningún archivo"

@@ -18,8 +18,8 @@ api.interceptors.request.use((config) => {
 // =====================================================
 // AUTH
 // =====================================================
-export const login = async (typeid, id, password) => {
-  const response = await api.post("/users/login", { typeid, id, password });
+export const login = async (typeid, id, password, rol) => {
+  const response = await api.post("/users/login", { typeid, id, password, rol });
   return response.data;
 };
 

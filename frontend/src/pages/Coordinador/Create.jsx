@@ -56,7 +56,7 @@ export default function CrearAprendiz() {
         console.log("Fichas cargadas:", fichasData);
 
         setCarreras(carrerasData);
-        setFichas(fichasData);
+        setFichas(fichasData.filter((f) => f.Es_Fic !== false));
 
       } catch (err) {
         console.error("Error cargando carreras y fichas:", err);

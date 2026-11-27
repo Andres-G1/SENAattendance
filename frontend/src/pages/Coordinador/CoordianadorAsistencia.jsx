@@ -377,6 +377,7 @@ export default function CoordinadorAsistencia() {
                     {fichas.map((ficha) => (
                       <option key={ficha.Id_Fic} value={ficha.Id_Fic}>
                         {ficha.Num_Fic || ficha.Id_Fic}
+                        {ficha.Es_Fic === false ? " (desactivada)" : ""}
                       </option>
                     ))}
                   </Dropdown>

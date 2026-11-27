@@ -8,6 +8,8 @@ export default function FichaList() {
   const [carreras, setCarreras] = useState([]);
   const [fichas, setFichas] = useState([]);
   const [busqueda, setBusqueda] = useState("");
+  // "activas" | "desactivadas" | "todas"
+  const [filtroEstado, setFiltroEstado] = useState("activas");
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -44,6 +46,14 @@ export default function FichaList() {
     }
   }
 
+  const esActiva = (ficha) => ficha.Es_Fic !== false;
+  const totalActivas = fichas.filter(esActiva).length;
+  const totalDesactivadas = fichas.length - totalActivas;
+
+  const cumpleFiltro = (ficha) =>
+    filtroEstado === "todas" ||
+    (filtroEstado === "activas" ? esActiva(ficha) : !esActiva(ficha));
+
   const consulta = busqueda.trim().toLowerCase();
   const fichasPorCarrera = carreras
     .map((carrera) => {
@@ -56,6 +66,7 @@ export default function FichaList() {
         fichas: fichas.filter(
           (ficha) =>
             ficha.Id_Car === carrera.Id_Car &&
+            cumpleFiltro(ficha) &&
             (coincideCarrera ||
               String(ficha.Num_Fic || "").toLowerCase().includes(consulta))
         ),
@@ -94,6 +105,34 @@ export default function FichaList() {
             <h3 className="h5 mb-0 text-secondary">Lista de Fichas por programa de formación</h3>
           </div>
 
+          <div
+            className="btn-group mb-3 flex-wrap"
+            role="group"
+            aria-label="Filtrar fichas por estado"
+          >
+            <button
+              type="button"
+              className={`btn btn-sm ${filtroEstado === "activas" ? "btn-success" : "btn-outline-success"}`}
+              onClick={() => setFiltroEstado("activas")}
+            >
+              Activas <span className="badge bg-light text-dark ms-1">{totalActivas}</span>
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm ${filtroEstado === "desactivadas" ? "btn-secondary" : "btn-outline-secondary"}`}
+              onClick={() => setFiltroEstado("desactivadas")}
+            >
+              Desactivadas <span className="badge bg-light text-dark ms-1">{totalDesactivadas}</span>
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm ${filtroEstado === "todas" ? "btn-dark" : "btn-outline-dark"}`}
+              onClick={() => setFiltroEstado("todas")}
+            >
+              Todas <span className="badge bg-light text-dark ms-1">{fichas.length}</span>
+            </button>
+          </div>
+
           <input
             type="search"
             className="form-control mb-4"
@@ -120,6 +159,11 @@ export default function FichaList() {
                         >
                           <div>
                             <strong>Ficha: {ficha.Num_Fic}</strong>
+                            {esActiva(ficha) ? (
+                              <span className="badge bg-success ms-2">Activa</span>
+                            ) : (
+                              <span className="badge bg-secondary ms-2">Desactivada</span>
+                            )}
                           </div>
 
                           <div>
@@ -128,6 +172,12 @@ export default function FichaList() {
                               className="btn btn-warning btn-sm me-2"
                             >
                               Editar
+                            </Link>
+                            <Link
+                              to={`/fichas/estado/${ficha.Id_Fic}`}
+                              className={`btn btn-sm me-2 ${esActiva(ficha) ? "btn-outline-secondary" : "btn-outline-success"}`}
+                            >
+                              {esActiva(ficha) ? "Desactivar" : "Activar"}
                             </Link>
                             <Link
                               to={`/fichas/eliminar/${ficha.Id_Fic}`}
@@ -151,7 +201,11 @@ export default function FichaList() {
             <div className="alert alert-info" role="alert">
               {busqueda
                 ? "No se encontraron fichas para esa búsqueda."
-                : "No hay programas de formación registrados."}
+                : filtroEstado === "desactivadas"
+                  ? "No hay fichas desactivadas."
+                  : filtroEstado === "activas"
+                    ? "No hay fichas activas."
+                    : "No hay programas de formación registrados."}
             </div>
           )}
         </div>

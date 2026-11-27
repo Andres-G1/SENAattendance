@@ -42,3 +42,19 @@ export async function eliminarFicha(fichaId) {
   });
   return manejarRespuesta(res, "No se pudo eliminar la ficha");
 }
+
+export async function desactivarFicha(fichaId, incluirAprendices = false) {
+  const res = await fetch(
+    `${API_URL}/fichas/${fichaId}/desactivar?incluir_aprendices=${incluirAprendices}`,
+    { method: "PATCH" }
+  );
+  return manejarRespuesta(res, "No se pudo desactivar la ficha");
+}
+
+export async function activarFicha(fichaId, incluirAprendices = false) {
+  const res = await fetch(
+    `${API_URL}/fichas/${fichaId}/activar?incluir_aprendices=${incluirAprendices}`,
+    { method: "PATCH" }
+  );
+  return manejarRespuesta(res, "No se pudo activar la ficha");
+}

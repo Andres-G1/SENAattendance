@@ -1,0 +1,83 @@
+/* =========================================================
+   Selector de rol del login ("¿Cómo quieres ingresar?")
+   Archivo propio para no depender de Login.css / login.css
+   ========================================================= */
+
+/* El recuadro del login antes tenía height: 450px fijo;
+   con el selector de rol necesita crecer según el contenido. */
+.Login_container {
+  height: auto !important;
+  min-height: 450px;
+}
+
+.login-roles {
+  border: none;
+  padding: 0;
+  margin: 0 0 15px;
+  min-width: 0;
+}
+
+.formulario_login .login-roles-titulo {
+  font-size: 0.9rem !important;
+  line-height: 1.4;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  float: none;
+  width: auto;
+}
+
+.login-roles-opciones {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.login-rol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 6px;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  user-select: none;
+}
+
+.login-rol input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.login-rol:hover {
+  border-color: #008f0c;
+}
+
+.login-rol.activo {
+  background-color: #e8f5e9;
+  border-color: #00851d;
+  color: #00651a;
+  font-weight: 600;
+}
+
+.login-rol:focus-within {
+  outline: 2px solid #00b51e;
+  outline-offset: 2px;
+}
+
+@media (max-width: 380px) {
+  .login-roles-opciones {
+    grid-template-columns: 1fr;
+  }
+}
+

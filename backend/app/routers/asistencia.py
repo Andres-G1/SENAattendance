@@ -78,6 +78,14 @@ def _verificar_aprendiz(session: Session, id_apr: int) -> Aprendiz:
     return aprendiz
 
 
+def _verificar_ficha_activa(ficha: Fichas):
+    if not ficha.Es_Fic:
+        raise HTTPException(
+            status_code=400,
+            detail="La ficha está desactivada; no se puede registrar asistencia"
+        )
+
+
 def _verificar_pertenencia(aprendiz: Aprendiz, id_fic: int):
 
     if aprendiz.Id_Fic != id_fic:
@@ -251,7 +259,8 @@ def obtener_asignaciones_instructor(
         ficha = session.get(Fichas, relacion.Id_Fic)
         ra, competencia = _obtener_ra_y_competencia(session, relacion.Id_RA)
 
-        if not ficha:
+        # Las fichas desactivadas no aparecen para tomar asistencia
+        if not ficha or not ficha.Es_Fic:
             continue
 
         resultado.append({
@@ -449,6 +458,7 @@ def registrar_asistencia(
 ):
 
     ficha = _verificar_ficha(session, data.Id_Fic)
+    _verificar_ficha_activa(ficha)
     aprendiz = _verificar_aprendiz(session, data.Id_Apr)
 
     _verificar_pertenencia(aprendiz, data.Id_Fic)
@@ -668,6 +678,7 @@ def listar_fichas_coordinador(
             "Id_Fic": ficha.Id_Fic,
             "Num_Fic": ficha.Num_Fic,
             "Jor_Fic": ficha.Jor_Fic.value if ficha.Jor_Fic else None,
+            "Es_Fic": ficha.Es_Fic,
         }
         for ficha in fichas
     ]

@@ -121,7 +121,7 @@ export default function AsignarFicha() {
           resResultados.json(),
         ]);
 
-        setFichas(dataFichas);
+        setFichas(dataFichas.filter((f) => f.Es_Fic !== false));
         setInstructores(dataInstructores);
         setCompetencias(dataCompetencias);
         setResultados(dataResultados);

@@ -67,6 +67,11 @@ def asignar_instructor(
     ficha = session.get(Fichas, data.Id_Fic)
     if not ficha:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Ficha no encontrada")
+    if not ficha.Es_Fic:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "La ficha está desactivada; no se pueden asignar instructores",
+        )
 
     # 2. Instructor
     instructor = session.get(Instructor, data.Id_Ins)
@@ -225,7 +230,8 @@ def obtener_fichas_instructor(
             rel.Id_RA,
         )
 
-        if not ficha or not resultado_ra:
+        # Las fichas desactivadas no se muestran al instructor
+        if not ficha or not resultado_ra or not ficha.Es_Fic:
             continue
 
         competencia = session.get(

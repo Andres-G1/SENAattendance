@@ -1,0 +1,215 @@
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import CoordinadorNavbar from "../../components/navbars/CoordinadorNavbar.jsx"; // ajusta la ruta según dónde esté este archivo
+
+const API_URL = "http://localhost:8000"; // ajusta según tu configuración
+
+export default function FichaList() {
+  const [carreras, setCarreras] = useState([]);
+  const [fichas, setFichas] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
+  // "activas" | "desactivadas" | "todas"
+  const [filtroEstado, setFiltroEstado] = useState("activas");
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const nombreCompleto = localStorage.getItem("firstName") || "";
+  const firstName = nombreCompleto.split(" ")[0];
+
+  useEffect(() => {
+    cargarDatos();
+  }, []);
+
+  async function cargarDatos() {
+    setCargando(true);
+    setError(null);
+    try {
+      const [resCarreras, resFichas] = await Promise.all([
+        fetch(`${API_URL}/carreras/`),
+        fetch(`${API_URL}/fichas/`),
+      ]);
+
+      if (!resCarreras.ok || !resFichas.ok) {
+        throw new Error("No se pudo cargar la información");
+      }
+
+      const dataCarreras = await resCarreras.json();
+      const dataFichas = await resFichas.json();
+
+      setCarreras(dataCarreras);
+      setFichas(dataFichas);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  const esActiva = (ficha) => ficha.Es_Fic !== false;
+  const totalActivas = fichas.filter(esActiva).length;
+  const totalDesactivadas = fichas.length - totalActivas;
+
+  const cumpleFiltro = (ficha) =>
+    filtroEstado === "todas" ||
+    (filtroEstado === "activas" ? esActiva(ficha) : !esActiva(ficha));
+
+  const consulta = busqueda.trim().toLowerCase();
+  const fichasPorCarrera = carreras
+    .map((carrera) => {
+      const coincideCarrera = String(carrera.Nom_Car || "")
+        .toLowerCase()
+        .includes(consulta);
+
+      return {
+        ...carrera,
+        fichas: fichas.filter(
+          (ficha) =>
+            ficha.Id_Car === carrera.Id_Car &&
+            cumpleFiltro(ficha) &&
+            (coincideCarrera ||
+              String(ficha.Num_Fic || "").toLowerCase().includes(consulta))
+        ),
+      };
+    })
+    .filter((carrera) => carrera.fichas.length > 0);
+
+  if (cargando) return <p className="text-center my-4">Cargando fichas...</p>;
+  if (error) return <div className="alert alert-danger m-4">{error}</div>;
+
+  return (
+    <>
+      <CoordinadorNavbar user={{ Nom_Adm: firstName }} />
+
+      <main className="container my-4">
+        <div className="card p-4 shadow-sm mb-4 bg-white">
+          <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+            <div>
+              <h2 className="h4 mb-1">Configuración General de Fichas</h2>
+              <p className="text-muted small mb-0">Gestiona los grupos y carga la información masiva del sistema.</p>
+            </div>
+
+            <div className="d-flex gap-2">
+              <button
+                className="btn btn-success btn-sm action-create"
+                onClick={() => navigate("/fichas/nueva")}
+              >
+                Agregar Ficha
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="card p-4 shadow-sm">
+          <div className="mb-4">
+            <h3 className="h5 mb-0 text-secondary">Lista de Fichas por programa de formación</h3>
+          </div>
+
+          <div
+            className="btn-group mb-3 flex-wrap"
+            role="group"
+            aria-label="Filtrar fichas por estado"
+          >
+            <button
+              type="button"
+              className={`btn btn-sm ${filtroEstado === "activas" ? "btn-success" : "btn-outline-success"}`}
+              onClick={() => setFiltroEstado("activas")}
+            >
+              Activas <span className="badge bg-light text-dark ms-1">{totalActivas}</span>
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm ${filtroEstado === "desactivadas" ? "btn-secondary" : "btn-outline-secondary"}`}
+              onClick={() => setFiltroEstado("desactivadas")}
+            >
+              Desactivadas <span className="badge bg-light text-dark ms-1">{totalDesactivadas}</span>
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm ${filtroEstado === "todas" ? "btn-dark" : "btn-outline-dark"}`}
+              onClick={() => setFiltroEstado("todas")}
+            >
+              Todas <span className="badge bg-light text-dark ms-1">{fichas.length}</span>
+            </button>
+          </div>
+
+          <input
+            type="search"
+            className="form-control mb-4"
+            placeholder="Buscar por programa o número de ficha..."
+            aria-label="Buscar ficha por programa o número"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: "400px" }}
+          />
+
+          {fichasPorCarrera.length > 0 ? (
+            fichasPorCarrera.map((carrera) => (
+              <div className="card mb-3" key={carrera.Id_Car}>
+                <div className="card-header bg-light">
+                  <h5 className="mb-0">{carrera.Nom_Car}</h5>
+                </div>
+                <div className="card-body">
+                  {carrera.fichas.length > 0 ? (
+                    <ul className="list-group">
+                      {carrera.fichas.map((ficha) => (
+                        <li
+                          key={ficha.Id_Fic}
+                          className="list-group-item d-flex justify-content-between align-items-center py-2"
+                        >
+                          <div>
+                            <strong>Ficha: {ficha.Num_Fic}</strong>
+                            {esActiva(ficha) ? (
+                              <span className="badge bg-success ms-2">Activa</span>
+                            ) : (
+                              <span className="badge bg-secondary ms-2">Desactivada</span>
+                            )}
+                          </div>
+
+                          <div>
+                            <Link
+                              to={`/fichas/editar/${ficha.Id_Fic}`}
+                              className="btn btn-warning btn-sm me-2"
+                            >
+                              Editar
+                            </Link>
+                            <Link
+                              to={`/fichas/estado/${ficha.Id_Fic}`}
+                              className={`btn btn-sm me-2 ${esActiva(ficha) ? "btn-outline-secondary" : "btn-outline-success"}`}
+                            >
+                              {esActiva(ficha) ? "Desactivar" : "Activar"}
+                            </Link>
+                            <Link
+                              to={`/fichas/eliminar/${ficha.Id_Fic}`}
+                              className="btn btn-danger btn-sm"
+                            >
+                              Eliminar
+                            </Link>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted mb-0">
+                      No hay fichas en este programa de formación
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="alert alert-info" role="alert">
+              {busqueda
+                ? "No se encontraron fichas para esa búsqueda."
+                : filtroEstado === "desactivadas"
+                  ? "No hay fichas desactivadas."
+                  : filtroEstado === "activas"
+                    ? "No hay fichas activas."
+                    : "No hay programas de formación registrados."}
+            </div>
+          )}
+        </div>
+      </main>
+    </>
+  );
+}

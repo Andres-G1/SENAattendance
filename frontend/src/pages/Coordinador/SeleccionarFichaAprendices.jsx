@@ -24,7 +24,7 @@ export default function SeleccionarFichaAprendices() {
           throw new Error("No se pudo cargar la información");
         }
         setCarreras(await resCarreras.json());
-        setFichas(await resFichas.json());
+        setFichas((await resFichas.json()).filter((f) => f.Es_Fic !== false));
       } catch (err) {
         setError(err.message);
       } finally {
